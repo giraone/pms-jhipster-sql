@@ -1,0 +1,56 @@
+// --- --- --- ENUMERATIONS --- --- ---
+
+enum GenderType {
+    MALE, FEMALE
+}
+
+// --- --- --- ENITIES --- --- ---
+
+/**
+ * The Company entity.
+ */
+entity Company {
+	name String,
+    departmentId String,
+    postalCode String,
+	city String,
+	streetAddress String
+}
+
+/**
+ * The Employee entity.
+ */
+entity Employee {
+	surname String,
+	givenName String,
+	dateOfBirth LocalDate,
+	gender GenderType,
+    postalCode String,
+	city String,
+	streetAddress String
+}
+
+// --- --- --- RELATIONSHIPS --- --- ---
+
+relationship ManyToOne {
+	Employee{company} to Company
+}
+
+// relationship OneToMany {
+//	Company{employees} to Employee{}
+// }
+
+// --- --- --- MISC --- --- ---
+
+// Set pagination options
+paginate Employee with infinite-scroll
+paginate Company with pagination
+
+// Use Data Transfert Objects (DTO)
+// dto * with mapstruct
+
+// Set service options to all except few
+// service all with serviceImpl except Employee
+
+// Set an angular suffix
+// angularSuffix * with mySuffix
