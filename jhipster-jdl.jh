@@ -1,7 +1,7 @@
 // --- --- --- ENUMERATIONS --- --- ---
 
 enum GenderType {
-    MALE, FEMALE
+    UNKNOWN, MALE, FEMALE
 }
 
 // --- --- --- ENITIES --- --- ---
@@ -11,7 +11,6 @@ enum GenderType {
  */
 entity Company {
 	name String,
-    departmentId String,
     postalCode String,
 	city String,
 	streetAddress String
@@ -46,8 +45,8 @@ relationship ManyToOne {
 paginate Employee with infinite-scroll
 paginate Company with pagination
 
-// Use Data Transfert Objects (DTO)
-// dto * with mapstruct
+// Use Data Transfer Objects (DTO)
+dto * with mapstruct
 
 // Set service options to all except few
 // service all with serviceImpl except Employee
