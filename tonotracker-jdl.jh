@@ -1,0 +1,101 @@
+// --- --- --- ENUMERATIONS --- --- ---
+
+enum GenderType {
+    M, F
+}
+
+enum ReportRequestType {
+    PERIOD_MONTHLY, PATIENT_MANUAL
+}
+
+enum ReportRequestState {
+    OPEN, REPORTED, SEEN, DELETED
+}
+
+// --- --- --- ENITIES --- --- ---
+
+/**
+ * A physician looking on program
+*/
+entity Physician {
+    talkingEyesCn String,
+    talkingEyesProjectId String,
+    talkingEyesLocationId String
+}
+
+/**
+ * A person delivering medical data
+*/
+entity Person {
+    talkingEyesId String,
+    dateOfBirth LocalDate required,
+    gender GenderType required
+}
+
+/**
+ * A monitoring program for which a person is delivering data
+*/
+entity Program {
+    startDate LocalDate,
+    programName String
+}
+
+entity MeasureGroup {
+    measureDate ZonedDateTime
+}
+
+entity MeasureValue {
+    code String,
+    numericValue Integer
+}
+
+entity ReportRequest {
+    creationType ReportRequestType required,
+    creationDateTime ZonedDateTime required,
+    state ReportRequestState required,
+    examinationKey String,
+    talkingEyesId String,
+    reportDateTime ZonedDateTime,
+    seenDateTime ZonedDateTime,
+    reportUrl String,
+    chartBlob Blob,
+    reportBlob Blob
+}
+
+// --- --- --- RELATIONSHIPS --- --- ---
+
+relationship OneToMany {
+    MeasureGroup{value} to MeasureValue{group},
+    Program{groupOfValues} to MeasureGroup{measureProgram},
+    Person{program} to Program{person}
+}
+
+relationship OneToOne{
+    Physician{user} to User
+}
+
+relationship OneToOne{
+    Person{user} to User
+}
+
+relationship ManyToOne{
+    ReportRequest{patient} to Person
+}
+
+relationship OneToMany {
+    MeasureGroup{value} to MeasureValue{group},
+    Program{groupOfValues} to MeasureGroup{measureProgram},
+    Person{program} to Program{person},
+    Physician{patients} to Person{attendingPhysician}
+}
+
+// --- --- --- MISC --- --- ---
+
+// Set pagination options
+paginate Person with pagination
+paginate Program with pagination
+paginate MeasureValue with infinite-scroll
+paginate ReportRequest with pagination
+
+// Set service options to all
+service all with serviceImpl
