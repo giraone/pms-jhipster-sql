@@ -54,8 +54,8 @@ curl 'http://localhost:8080/api/employee-list' -H 'Accept: application/json' -H 
 
 curl 'http://localhost:8080/domain-api/employees?companyId=s-00005422-00000009&surnamePrefix=A&page=0&size=20&sort=id,asc' \
  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
- curl 'http://localhost:8080/domain-api/employees?companyId=s-00005422-00000009&surnamePrefix=Ar&page=0&size=20&sort=id,asc' \
-  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+curl 'http://localhost:8080/domain-api/employees?companyId=s-00005422-00000009&surnamePrefix=Ar&page=0&size=20&sort=id,asc' \
+ -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 
 ```
 
