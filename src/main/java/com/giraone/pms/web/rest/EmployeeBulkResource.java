@@ -40,7 +40,7 @@ public class EmployeeBulkResource {
     @Timed
     public ResponseEntity<Integer> insert(@RequestBody List<EmployeeBulkDTO> employees)  {
 
-        log.info("EmployeeBulkResource.insert employees.size=", employees.size());
+        log.info("EmployeeBulkResource.insert employees.size={}", employees.size());
         int count = employeeBulkService.save(employees);
         return ResponseEntity.ok()
             .body(count);

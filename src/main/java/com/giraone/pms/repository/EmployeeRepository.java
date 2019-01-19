@@ -21,5 +21,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Page<Employee> findAllByCompany(Company company, Pageable pageable);
 
     @Query("SELECT v from Employee v WHERE v.company = ?1 AND v.surname LIKE ?2 ORDER BY v.id ASC")
-    Stream<Employee> findAllByCompanyAndSurname(Company company, String surname);
+    Page<Employee> findAllByCompanyAndSurname(Company company, String surname, Pageable pageable);
+    //Stream<Employee> findAllByCompanyAndSurname(Company company, String surname, Pageable pageable);
 }
