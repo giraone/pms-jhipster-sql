@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { PmssqlSharedModule } from 'app/shared';
+import { PmssqlAdminModule } from 'app/admin/admin.module';
 import {
     CompanyComponent,
     CompanyDetailComponent,
@@ -15,7 +16,7 @@ import {
 const ENTITY_STATES = [...companyRoute, ...companyPopupRoute];
 
 @NgModule({
-    imports: [PmssqlSharedModule, RouterModule.forChild(ENTITY_STATES)],
+    imports: [PmssqlSharedModule, PmssqlAdminModule, RouterModule.forChild(ENTITY_STATES)],
     declarations: [
         CompanyComponent,
         CompanyDetailComponent,

@@ -7,13 +7,13 @@ public class EmployeeMappingHelper {
 
     @MapCompanyIdToCompany
     public static Company mapCompanyIdToCompany(String companyId) {
-        Company ret = new Company();
-        ret.setName(companyId);
+        final Company ret = new Company();
+        ret.setExternalId(companyId);
         return ret;
     }
 
     @MapCompanyToCompanyId
     public String mapCompanyToCompanyId(Company company) {
-        return company.getName();
+        return company.getExternalId();
     }
 }

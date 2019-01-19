@@ -21,7 +21,7 @@ describe('Service Tests', () => {
             service = injector.get(CompanyService);
             httpMock = injector.get(HttpTestingController);
 
-            elemDefault = new Company(0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA');
+            elemDefault = new Company(0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', 'AAAAAAA');
         });
 
         describe('Service methods', async () => {
@@ -55,6 +55,7 @@ describe('Service Tests', () => {
             it('should update a Company', async () => {
                 const returnedFromService = Object.assign(
                     {
+                        externalId: 'BBBBBB',
                         name: 'BBBBBB',
                         postalCode: 'BBBBBB',
                         city: 'BBBBBB',
@@ -75,6 +76,7 @@ describe('Service Tests', () => {
             it('should return a list of Company', async () => {
                 const returnedFromService = Object.assign(
                     {
+                        externalId: 'BBBBBB',
                         name: 'BBBBBB',
                         postalCode: 'BBBBBB',
                         city: 'BBBBBB',

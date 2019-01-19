@@ -15,10 +15,12 @@
             "detail": {
                 "title": "Company"
             },
+            "externalId": "External Id",
             "name": "Name",
             "postalCode": "Postal Code",
             "city": "City",
-            "streetAddress": "Street Address"
+            "streetAddress": "Street Address",
+            "user": "User"
         }
     }
 }

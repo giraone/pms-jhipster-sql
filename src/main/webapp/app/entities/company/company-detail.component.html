@@ -5,6 +5,10 @@
             <hr>
             <jhi-alert-error></jhi-alert-error>
             <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="pmssqlApp.company.externalId">External Id</span></dt>
+                <dd>
+                    <span>{{company.externalId}}</span>
+                </dd>
                 <dt><span jhiTranslate="pmssqlApp.company.name">Name</span></dt>
                 <dd>
                     <span>{{company.name}}</span>
@@ -20,6 +24,12 @@
                 <dt><span jhiTranslate="pmssqlApp.company.streetAddress">Street Address</span></dt>
                 <dd>
                     <span>{{company.streetAddress}}</span>
+                </dd>
+                <dt><span jhiTranslate="pmssqlApp.company.user">User</span></dt>
+                <dd>
+                    <span *ngFor="let user of company.users; let last = last">
+                        {{user.id}}{{last ? '' : ', '}}
+                    </span>
                 </dd>
             </dl>
 

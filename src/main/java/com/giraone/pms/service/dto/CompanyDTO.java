@@ -1,6 +1,9 @@
 package com.giraone.pms.service.dto;
 
+import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Objects;
 
 /**
@@ -10,6 +13,9 @@ public class CompanyDTO implements Serializable {
 
     private Long id;
 
+    @NotNull
+    private String externalId;
+
     private String name;
 
     private String postalCode;
@@ -18,12 +24,22 @@ public class CompanyDTO implements Serializable {
 
     private String streetAddress;
 
+    private Set<UserDTO> users = new HashSet<>();
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public String getName() {
@@ -58,6 +74,14 @@ public class CompanyDTO implements Serializable {
         this.streetAddress = streetAddress;
     }
 
+    public Set<UserDTO> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<UserDTO> users) {
+        this.users = users;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -83,6 +107,7 @@ public class CompanyDTO implements Serializable {
     public String toString() {
         return "CompanyDTO{" +
             "id=" + getId() +
+            ", externalId='" + getExternalId() + "'" +
             ", name='" + getName() + "'" +
             ", postalCode='" + getPostalCode() + "'" +
             ", city='" + getCity() + "'" +

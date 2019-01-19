@@ -10,6 +10,7 @@ enum GenderType {
  * The Company entity.
  */
 entity Company {
+    externalId String required unique,
 	name String,
     postalCode String,
 	city String,
@@ -20,7 +21,7 @@ entity Company {
  * The Employee entity.
  */
 entity Employee {
-	surname String,
+	surname String required,
 	givenName String,
 	dateOfBirth LocalDate,
 	gender GenderType,
@@ -38,6 +39,10 @@ relationship ManyToOne {
 // relationship OneToMany {
 //	Company{employees} to Employee{}
 // }
+
+relationship ManyToMany {
+  Company{user} to User{company}
+}
 
 // --- --- --- MISC --- --- ---
 

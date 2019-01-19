@@ -1,6 +1,5 @@
 package com.giraone.pms.service.impl;
 
-import com.giraone.pms.repository.UserRepository;
 import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.repository.CompanyRepository;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +25,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final Logger log = LoggerFactory.getLogger(CompanyServiceImpl.class);
 
     private final CompanyRepository companyRepository;
+
     private final CompanyMapper companyMapper;
 
     public CompanyServiceImpl(CompanyRepository companyRepository, CompanyMapper companyMapper) {
@@ -63,6 +62,15 @@ public class CompanyServiceImpl implements CompanyService {
             .map(companyMapper::toDto);
     }
 
+    /**
+     * Get all the Company with eager load of many-to-many relationships.
+     *
+     * @return the list of entities
+     */
+    public Page<CompanyDTO> findAllWithEagerRelationships(Pageable pageable) {
+        return companyRepository.findAllWithEagerRelationships(pageable).map(companyMapper::toDto);
+    }
+    
 
     /**
      * Get one company by id.
@@ -74,20 +82,21 @@ public class CompanyServiceImpl implements CompanyService {
     @Transactional(readOnly = true)
     public Optional<CompanyDTO> findOne(Long id) {
         log.debug("Request to get Company : {}", id);
-        return companyRepository.findById(id)
+        return companyRepository.findOneWithEagerRelationships(id)
             .map(companyMapper::toDto);
     }
 
     /**
-     * Get the company by name.
+     * Get the "externalId" company.
      *
-     * @param name the name of the entity
+     * @param externalId the externalId of the entity
      * @return the entity
      */
     @Override
-    public Optional<CompanyDTO> findOneByName(String name) {
-        log.debug("Request to get company by name : {}", name);
-        return companyRepository.findOneByName(name)
+    @Transactional(readOnly = true)
+    public Optional<CompanyDTO> findOneByExternalId(String externalId) {
+        log.debug("Request to get company by externalId : {}", externalId);
+        return companyRepository.findOneByExternalId(externalId)
             .map(companyMapper::toDto);
     }
 

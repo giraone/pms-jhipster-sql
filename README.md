@@ -22,7 +22,7 @@ production PostgreSQL database. It will use a docker volume in `~/volumes/jhipst
 You can also run a _pgAdmin4_ using `docker-compose -f src/main/docker/pgadmin4.yml up -d`.
 Both docker compose files share a common network
 
-## Re-create model
+## Re-create data model
 
 ```
 jhipster import-jdl ./jhipster-jdl.jh --force
@@ -52,9 +52,9 @@ curl 'http://localhost:8080/api/employee-list' -H 'Accept: application/json' -H 
 
 ```
 
-curl 'http://localhost:8080/domain-api/employees?companyId=s-00005422-00000009&surnamePrefix=A&page=0&size=20&sort=id,asc' \
+curl 'http://localhost:8080/domain-api/employees?companyExternalId=s-00005422-00000009&surnamePrefix=A&page=0&size=20&sort=id,asc' \
  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
-curl 'http://localhost:8080/domain-api/employees?companyId=s-00005422-00000009&surnamePrefix=Ar&page=0&size=20&sort=id,asc' \
+curl 'http://localhost:8080/domain-api/employees?companyExternalId=s-00005422-00000009&surnamePrefix=Ar&page=0&size=20&sort=id,asc' \
  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 
 ```

@@ -2,6 +2,14 @@
     "name": "Company",
     "fields": [
         {
+            "fieldName": "externalId",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required",
+                "unique"
+            ]
+        },
+        {
             "fieldName": "name",
             "fieldType": "String"
         },
@@ -18,7 +26,16 @@
             "fieldType": "String"
         }
     ],
-    "relationships": [],
+    "relationships": [
+        {
+            "relationshipType": "many-to-many",
+            "otherEntityRelationshipName": "company",
+            "relationshipName": "user",
+            "otherEntityName": "user",
+            "otherEntityField": "id",
+            "ownerSide": true
+        }
+    ],
     "changelogDate": "20190118080002",
     "javadoc": "The Company entity.",
     "entityTableName": "company",

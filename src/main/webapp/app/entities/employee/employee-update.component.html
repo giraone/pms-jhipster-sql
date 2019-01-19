@@ -12,7 +12,13 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="pmssqlApp.employee.surname" for="field_surname">Surname</label>
                     <input type="text" class="form-control" name="surname" id="field_surname"
-                        [(ngModel)]="employee.surname" />
+                        [(ngModel)]="employee.surname" required/>
+                    <div [hidden]="!(editForm.controls.surname?.dirty && editForm.controls.surname?.invalid)">
+                        <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.surname?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="pmssqlApp.employee.givenName" for="field_givenName">Given Name</label>

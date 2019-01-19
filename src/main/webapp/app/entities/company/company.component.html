@@ -15,6 +15,7 @@
             <thead>
             <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="externalId"><span jhiTranslate="pmssqlApp.company.externalId">External Id</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="name"><span jhiTranslate="pmssqlApp.company.name">Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="postalCode"><span jhiTranslate="pmssqlApp.company.postalCode">Postal Code</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="city"><span jhiTranslate="pmssqlApp.company.city">City</span> <fa-icon [icon]="'sort'"></fa-icon></th>
@@ -25,6 +26,7 @@
             <tbody>
             <tr *ngFor="let company of companies ;trackBy: trackId">
                 <td><a [routerLink]="['/company', company.id, 'view' ]">{{company.id}}</a></td>
+                <td>{{company.externalId}}</td>
                 <td>{{company.name}}</td>
                 <td>{{company.postalCode}}</td>
                 <td>{{company.city}}</td>

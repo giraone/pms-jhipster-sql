@@ -10,6 +10,17 @@
                         [(ngModel)]="company.id" readonly />
                 </div>
                 <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.company.externalId" for="field_externalId">External Id</label>
+                    <input type="text" class="form-control" name="externalId" id="field_externalId"
+                        [(ngModel)]="company.externalId" required/>
+                    <div [hidden]="!(editForm.controls.externalId?.dirty && editForm.controls.externalId?.invalid)">
+                        <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.externalId?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="form-control-label" jhiTranslate="pmssqlApp.company.name" for="field_name">Name</label>
                     <input type="text" class="form-control" name="name" id="field_name"
                         [(ngModel)]="company.name" />
@@ -30,6 +41,12 @@
                         [(ngModel)]="company.streetAddress" />
                 </div>
 
+                <div class="form-group">
+                    <label jhiTranslate="pmssqlApp.company.user" for="field_user">User</label>
+                    <select class="form-control" id="field_user" multiple name="user" [(ngModel)]="company.users">
+                        <option [ngValue]="getSelected(company.users, userOption)" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.id}}</option>
+                    </select>
+                </div>
             </div>
             <div>
                 <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">

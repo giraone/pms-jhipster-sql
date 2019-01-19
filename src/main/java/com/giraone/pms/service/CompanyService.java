@@ -28,7 +28,13 @@ public interface CompanyService {
      */
     Page<CompanyDTO> findAll(Pageable pageable);
 
-
+    /**
+     * Get all the Company with eager load of many-to-many relationships.
+     *
+     * @return the list of entities
+     */
+    Page<CompanyDTO> findAllWithEagerRelationships(Pageable pageable);
+    
     /**
      * Get the "id" company.
      *
@@ -38,12 +44,12 @@ public interface CompanyService {
     Optional<CompanyDTO> findOne(Long id);
 
     /**
-     * Get the company by Id.
+     * Get the "externalId" company.
      *
-     * @param name the name of the entity
+     * @param externalId the externalId of the entity
      * @return the entity
      */
-    Optional<CompanyDTO> findOneByName(String name);
+    Optional<CompanyDTO> findOneByExternalId(String externalId);
 
     /**
      * Delete the "id" company.

@@ -2,6 +2,7 @@ package com.giraone.pms.service.impl;
 
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.User;
 import com.giraone.pms.repository.EmployeeBulkRepository;
 import com.giraone.pms.security.AuthoritiesConstants;
 import com.giraone.pms.service.CompanyService;
@@ -12,9 +13,9 @@ import com.giraone.pms.service.dto.EmployeeBulkDTO;
 import com.giraone.pms.service.dto.UserDTO;
 import com.giraone.pms.service.mapper.CompanyMapper;
 import com.giraone.pms.service.mapper.EmployeeBulkMapper;
+import com.giraone.pms.service.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,22 +41,21 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private final CompanyService companyService;
     private final CompanyMapper companyMapper;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
+    private final UserMapper userMapper;
 
     public EmployeesBulkServiceImpl(EmployeeBulkRepository employeeBulkRepository,
                                     EmployeeBulkMapper employeeBulkMapper,
                                     CompanyService companyService,
                                     CompanyMapper companyMapper,
                                     UserService userService,
-                                    PasswordEncoder passwordEncoder
+                                    UserMapper userMapper
     ) {
         this.employeeBulkRepository = employeeBulkRepository;
         this.employeeBulkMapper = employeeBulkMapper;
         this.companyService = companyService;
         this.companyMapper = companyMapper;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -69,8 +69,8 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         final List<Employee> employees = this.employeeBulkMapper.toEntity(employeeDTOList);
         employees.stream().forEach(employee -> {
             // Store the company, if it doesn't yet exist
-            final String companyName = employee.getCompany().getName();
-            Optional<CompanyDTO> optionalCompany = this.companyService.findOneByName(companyName);
+            final String externalId = employee.getCompany().getExternalId();
+            Optional<CompanyDTO> optionalCompany = this.companyService.findOneByExternalId(externalId);
             if (optionalCompany.isPresent()) {
                 final Company company = this.companyMapper.toEntity(optionalCompany.get());
                 employee.setCompany(company);
@@ -78,20 +78,27 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                 // company does not yet exist, so insert company.
                 // TODO: currently we use address of first employee as company address
                 CompanyDTO companyDTO = new CompanyDTO();
-                companyDTO.setName(companyName);
+                companyDTO.setExternalId(externalId);
+                companyDTO.setName(employee.getSurname() + " GmbH");
                 companyDTO.setPostalCode(employee.getPostalCode());
                 companyDTO.setCity(employee.getCity());
                 companyDTO.setStreetAddress(employee.getStreetAddress());
                 companyDTO = this.companyService.save(companyDTO);
                 employee.setCompany(this.companyMapper.toEntity(companyDTO));
-                // and create an initial user for this company
-                final UserDTO userDTO = new UserDTO();
+                // ... and create an initial user for this company
+                UserDTO userDTO = new UserDTO();
                 final String userId = String.format("user-%08d", companyDTO.getId());
                 userDTO.setFirstName("Admin");
-                userDTO.setLastName(companyName);
+                userDTO.setLastName(externalId);
                 userDTO.setLogin(userId);
                 userDTO.setAuthorities(LOCAL_ADMIN_AUTHORITIES);
-                this.userService.createUserWithPresetPassword(userDTO, userId);
+                User user = this.userService.createUserWithPresetPassword(userDTO, userId);
+                userDTO = this.userMapper.userToUserDTO(user);
+                // ... and add this initial users to the companies user list
+                final HashSet<UserDTO> users = new HashSet<>();
+                users.add(userDTO);
+                companyDTO.setUsers(users);
+                this.companyService.save(companyDTO);
             }
         });
         List<Employee> result = this.employeeBulkRepository.saveAll(employees);

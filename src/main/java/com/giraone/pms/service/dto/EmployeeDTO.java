@@ -1,6 +1,7 @@
 package com.giraone.pms.service.dto;
 
 import java.time.LocalDate;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
 import com.giraone.pms.domain.enumeration.GenderType;
@@ -12,6 +13,7 @@ public class EmployeeDTO implements Serializable {
 
     private Long id;
 
+    @NotNull
     private String surname;
 
     private String givenName;

@@ -3,7 +3,10 @@
     "fields": [
         {
             "fieldName": "surname",
-            "fieldType": "String"
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
         },
         {
             "fieldName": "givenName",
