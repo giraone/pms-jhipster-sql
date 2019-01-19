@@ -2,8 +2,8 @@ version: '2'
 services:
     pmssql-postgresql:
         image: postgres:10.4
-        # volumes:
-        #     - ~/volumes/jhipster/pmssql/postgresql/:/var/lib/postgresql/data/
+        volumes:
+            - ~/volumes/postgresql/pmssql/:/var/lib/postgresql/data/
         environment:
             - POSTGRES_USER=pmssql
             - POSTGRES_PASSWORD=

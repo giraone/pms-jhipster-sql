@@ -17,9 +17,9 @@ while (( d < 1 )); do
   while (( f < 1000 )); do
     file=$(printf "%s/%s/f-%08d.json" "${ROOT_DATA_DIR}" "${dir}" $f)
     echo "${file}"
-    curl "${BASE_URL}/employee-list" -H 'Accept: application/json' -H 'Content-Type: application/json' \
-     -H "Authorization: Bearer ${token}" -X PUT  --data "@${file}"
-    if [[ $? != 0 ]]; then
+    count=$(curl "${BASE_URL}/employee-list" -s -H 'Accept: application/json' -H 'Content-Type: application/json' \
+     -H "Authorization: Bearer ${token}" -X PUT  --data "@${file}")
+    if [[ $? != 0 || $count != 1000 ]]; then
       exit 1
     fi
     let f+=1
