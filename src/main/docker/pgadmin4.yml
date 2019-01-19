@@ -1,0 +1,17 @@
+version: '3.5'
+networks:
+    pmssql:
+services:
+    pmssql-pgadmin4:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin4
+        volumes:
+            - ~/volumes/pgadmin/:/var/lib/pgadmin/
+#            - servers.json:/pgadmin4/servers.json
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=pgadmin
+            - PGADMIN_DEFAULT_PASSWORD=pgadmin
+        ports:
+            - 80:80
+        networks:
+            - pmssql

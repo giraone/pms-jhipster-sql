@@ -1,7 +1,10 @@
-version: '2'
+version: '3.5'
+networks:
+    pmssql:
 services:
     pmssql-postgresql:
         image: postgres:10.4
+        container_name: postgresql
         volumes:
             - ~/volumes/postgresql/pmssql/:/var/lib/postgresql/data/
         environment:
@@ -9,3 +12,5 @@ services:
             - POSTGRES_PASSWORD=
         ports:
             - 5432:5432
+        networks:
+            - pmssql
