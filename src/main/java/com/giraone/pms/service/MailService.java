@@ -75,6 +75,10 @@ public class MailService {
 
     @Async
     public void sendEmailFromTemplate(User user, String templateName, String titleKey) {
+        // (hs) : allow user without email address
+        if (user.getEmail() == null || user.getEmail().trim().length() == 0) {
+            return;
+        }
         Locale locale = Locale.forLanguageTag(user.getLangKey());
         Context context = new Context(locale);
         context.setVariable(USER, user);

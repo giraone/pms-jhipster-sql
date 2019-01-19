@@ -107,7 +107,8 @@ public class UserService {
         newUser.setPassword(encryptedPassword);
         newUser.setFirstName(userDTO.getFirstName());
         newUser.setLastName(userDTO.getLastName());
-        newUser.setEmail(userDTO.getEmail().toLowerCase());
+        // (hs) : allow user without email address
+        newUser.setEmail(userDTO.getEmail() == null ? null : userDTO.getEmail().toLowerCase());
         newUser.setImageUrl(userDTO.getImageUrl());
         newUser.setLangKey(userDTO.getLangKey());
         // new user is not active
@@ -133,19 +134,30 @@ public class UserService {
         return true;
     }
 
+    // (hs) - Changed start
     public User createUser(UserDTO userDTO) {
+        String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
+        return this.createUser(userDTO, encryptedPassword);
+    }
+
+    public User createUserWithPresetPassword(UserDTO userDTO, String password) {
+        String encryptedPassword = passwordEncoder.encode(password);
+        return this.createUser(userDTO, encryptedPassword);
+    }
+
+    public User createUser(UserDTO userDTO, String encryptedPassword) {
         User user = new User();
         user.setLogin(userDTO.getLogin().toLowerCase());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
-        user.setEmail(userDTO.getEmail().toLowerCase());
+        // (hs) : allow user without email address
+        user.setEmail(userDTO.getEmail() == null ? null : userDTO.getEmail().toLowerCase());
         user.setImageUrl(userDTO.getImageUrl());
         if (userDTO.getLangKey() == null) {
             user.setLangKey(Constants.DEFAULT_LANGUAGE); // default language
         } else {
             user.setLangKey(userDTO.getLangKey());
         }
-        String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
@@ -163,6 +175,8 @@ public class UserService {
         log.debug("Created Information for User: {}", user);
         return user;
     }
+
+    // (hs) - Changed end
 
     /**
      * Update basic information (first name, last name, email, language) for the current user.
@@ -289,6 +303,9 @@ public class UserService {
 
     private void clearUserCaches(User user) {
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
-        Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+        if (user.getEmail() != null) {
+            // (hs) : allow user without email address
+            Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+        }
     }
 }

@@ -38,6 +38,14 @@ public interface CompanyService {
     Optional<CompanyDTO> findOne(Long id);
 
     /**
+     * Get the company by Id.
+     *
+     * @param name the name of the entity
+     * @return the entity
+     */
+    Optional<CompanyDTO> findOneByName(String name);
+
+    /**
      * Delete the "id" company.
      *
      * @param id the id of the entity
