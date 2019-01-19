@@ -1,7 +1,7 @@
 import { Moment } from 'moment';
-import { ICompany } from 'app/shared/model//company.model';
 
 export const enum GenderType {
+    UNKNOWN = 'UNKNOWN',
     MALE = 'MALE',
     FEMALE = 'FEMALE'
 }
@@ -15,7 +15,7 @@ export interface IEmployee {
     postalCode?: string;
     city?: string;
     streetAddress?: string;
-    company?: ICompany;
+    companyId?: number;
 }
 
 export class Employee implements IEmployee {
@@ -28,6 +28,6 @@ export class Employee implements IEmployee {
         public postalCode?: string,
         public city?: string,
         public streetAddress?: string,
-        public company?: ICompany
+        public companyId?: number
     ) {}
 }

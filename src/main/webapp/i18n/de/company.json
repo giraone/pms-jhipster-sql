@@ -16,7 +16,6 @@
                 "title": "Company"
             },
             "name": "Name",
-            "departmentId": "Department Id",
             "postalCode": "Postal Code",
             "city": "City",
             "streetAddress": "Street Address"

@@ -32,6 +32,7 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="pmssqlApp.employee.gender" for="field_gender">Gender</label>
                     <select class="form-control" name="gender" [(ngModel)]="employee.gender" id="field_gender" >
+                        <option value="UNKNOWN">{{'pmssqlApp.GenderType.UNKNOWN' | translate}}</option>
                         <option value="MALE">{{'pmssqlApp.GenderType.MALE' | translate}}</option>
                         <option value="FEMALE">{{'pmssqlApp.GenderType.FEMALE' | translate}}</option>
                     </select>
@@ -54,9 +55,9 @@
 
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="pmssqlApp.employee.company" for="field_company">Company</label>
-                    <select class="form-control" id="field_company" name="company" [(ngModel)]="employee.company" >
+                    <select class="form-control" id="field_company" name="company" [(ngModel)]="employee.companyId" >
                         <option [ngValue]="null"></option>
-                        <option [ngValue]="companyOption.id === employee.company?.id ? employee.company : companyOption" *ngFor="let companyOption of companies; trackBy: trackCompanyById">{{companyOption.id}}</option>
+                        <option [ngValue]="companyOption.id" *ngFor="let companyOption of companies; trackBy: trackCompanyById">{{companyOption.id}}</option>
                     </select>
                 </div>
             </div>

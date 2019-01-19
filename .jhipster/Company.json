@@ -6,10 +6,6 @@
             "fieldType": "String"
         },
         {
-            "fieldName": "departmentId",
-            "fieldType": "String"
-        },
-        {
             "fieldName": "postalCode",
             "fieldType": "String"
         },
@@ -26,9 +22,9 @@
     "changelogDate": "20190118080002",
     "javadoc": "The Company entity.",
     "entityTableName": "company",
-    "dto": "no",
+    "dto": "mapstruct",
     "pagination": "pagination",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

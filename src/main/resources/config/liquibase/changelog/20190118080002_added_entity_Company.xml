@@ -25,10 +25,6 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="department_id" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
             <column name="postal_code" type="varchar(255)">
                 <constraints nullable="true" />
             </column>

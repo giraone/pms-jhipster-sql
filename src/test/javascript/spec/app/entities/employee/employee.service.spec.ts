@@ -25,7 +25,7 @@ describe('Service Tests', () => {
             httpMock = injector.get(HttpTestingController);
             currentDate = moment();
 
-            elemDefault = new Employee(0, 'AAAAAAA', 'AAAAAAA', currentDate, GenderType.MALE, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA');
+            elemDefault = new Employee(0, 'AAAAAAA', 'AAAAAAA', currentDate, GenderType.UNKNOWN, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA');
         });
 
         describe('Service methods', async () => {

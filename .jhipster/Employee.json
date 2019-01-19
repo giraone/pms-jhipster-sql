@@ -16,7 +16,7 @@
         {
             "fieldName": "gender",
             "fieldType": "GenderType",
-            "fieldValues": "MALE,FEMALE"
+            "fieldValues": "UNKNOWN,MALE,FEMALE"
         },
         {
             "fieldName": "postalCode",
@@ -42,9 +42,9 @@
     "changelogDate": "20190118080003",
     "javadoc": "The Employee entity.",
     "entityTableName": "employee",
-    "dto": "no",
+    "dto": "mapstruct",
     "pagination": "infinite-scroll",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

@@ -4,7 +4,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giraone.pms.domain.Employee;
-import com.giraone.pms.repository.EmployeeBulkImportRepository;
+import com.giraone.pms.service.dto.EmployeeBulkDTO;
+import com.giraone.pms.service.EmployeeBulkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -29,18 +30,18 @@ public class EmployeeBulkResource {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static TypeReference<List<Employee>> typeRef = new TypeReference<List<Employee>>(){};
 
-    private final EmployeeBulkImportRepository employeeBulkImportRepository;
+    private final EmployeeBulkService employeeBulkService;
 
-    public EmployeeBulkResource(EmployeeBulkImportRepository employeeBulkImportRepository) {
-        this.employeeBulkImportRepository = employeeBulkImportRepository;
+    public EmployeeBulkResource(EmployeeBulkService employeeBulkImportRepository) {
+        this.employeeBulkService = employeeBulkImportRepository;
     }
 
     @PutMapping("/employee-list")
     @Timed
-    public ResponseEntity<Integer> insert(@RequestBody List<Employee> employees)  {
+    public ResponseEntity<Integer> insert(@RequestBody List<EmployeeBulkDTO> employees)  {
 
         log.info("EmployeeBulkResource.insert employees.size=", employees.size());
-        int count = employeeBulkImportRepository.save(employees);
+        int count = employeeBulkService.save(employees);
         return ResponseEntity.ok()
             .body(count);
     }

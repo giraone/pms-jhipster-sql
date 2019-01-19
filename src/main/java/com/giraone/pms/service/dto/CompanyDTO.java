@@ -1,43 +1,23 @@
-package com.giraone.pms.domain;
-
-import io.swagger.annotations.ApiModel;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
+package com.giraone.pms.service.dto;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * The Company entity.
+ * A DTO for the Company entity.
  */
-@ApiModel(description = "The Company entity.")
-@Entity
-@Table(name = "company")
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Company implements Serializable {
+public class CompanyDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
     private Long id;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "postal_code")
     private String postalCode;
 
-    @Column(name = "city")
     private String city;
 
-    @Column(name = "street_address")
     private String streetAddress;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
     }
@@ -50,22 +30,12 @@ public class Company implements Serializable {
         return name;
     }
 
-    public Company name(String name) {
-        this.name = name;
-        return this;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
     public String getPostalCode() {
         return postalCode;
-    }
-
-    public Company postalCode(String postalCode) {
-        this.postalCode = postalCode;
-        return this;
     }
 
     public void setPostalCode(String postalCode) {
@@ -76,11 +46,6 @@ public class Company implements Serializable {
         return city;
     }
 
-    public Company city(String city) {
-        this.city = city;
-        return this;
-    }
-
     public void setCity(String city) {
         this.city = city;
     }
@@ -89,15 +54,9 @@ public class Company implements Serializable {
         return streetAddress;
     }
 
-    public Company streetAddress(String streetAddress) {
-        this.streetAddress = streetAddress;
-        return this;
-    }
-
     public void setStreetAddress(String streetAddress) {
         this.streetAddress = streetAddress;
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
     public boolean equals(Object o) {
@@ -107,11 +66,12 @@ public class Company implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Company company = (Company) o;
-        if (company.getId() == null || getId() == null) {
+
+        CompanyDTO companyDTO = (CompanyDTO) o;
+        if (companyDTO.getId() == null || getId() == null) {
             return false;
         }
-        return Objects.equals(getId(), company.getId());
+        return Objects.equals(getId(), companyDTO.getId());
     }
 
     @Override
@@ -121,7 +81,7 @@ public class Company implements Serializable {
 
     @Override
     public String toString() {
-        return "Company{" +
+        return "CompanyDTO{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
             ", postalCode='" + getPostalCode() + "'" +

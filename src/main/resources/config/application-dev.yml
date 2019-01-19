@@ -15,9 +15,9 @@
 
 logging:
     level:
-        ROOT: DEBUG
-        io.github.jhipster: DEBUG
-        com.giraone.pms: DEBUG
+        ROOT: WARN
+        io.github.jhipster: WARN
+        com.giraone.pms: WARN
 
 spring:
     profiles:

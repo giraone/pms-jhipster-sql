@@ -22,7 +22,7 @@
             <th jhiSortBy="postalCode"><span jhiTranslate="pmssqlApp.employee.postalCode">Postal Code</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="city"><span jhiTranslate="pmssqlApp.employee.city">City</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="streetAddress"><span jhiTranslate="pmssqlApp.employee.streetAddress">Street Address</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="company.id"><span jhiTranslate="pmssqlApp.employee.company">Company</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="companyId"><span jhiTranslate="pmssqlApp.employee.company">Company</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th></th>
             </tr>
             </thead>
@@ -37,8 +37,8 @@
                 <td>{{employee.city}}</td>
                 <td>{{employee.streetAddress}}</td>
                 <td>
-                    <div *ngIf="employee.company">
-                        <a [routerLink]="['../company', employee.company?.id, 'view' ]" >{{employee.company?.id}}</a>
+                    <div *ngIf="employee.companyId">
+                        <a [routerLink]="['../company', employee.companyId , 'view' ]" >{{employee.companyId}}</a>
                     </div>
                 </td>
                 <td class="text-right">

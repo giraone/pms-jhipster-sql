@@ -4,6 +4,9 @@ import com.giraone.pms.PmssqlApp;
 
 import com.giraone.pms.domain.Employee;
 import com.giraone.pms.repository.EmployeeRepository;
+import com.giraone.pms.service.EmployeeService;
+import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.service.mapper.EmployeeMapper;
 import com.giraone.pms.web.rest.errors.ExceptionTranslator;
 
 import org.junit.Before;
@@ -52,8 +55,8 @@ public class EmployeeResourceIntTest {
     private static final LocalDate DEFAULT_DATE_OF_BIRTH = LocalDate.ofEpochDay(0L);
     private static final LocalDate UPDATED_DATE_OF_BIRTH = LocalDate.now(ZoneId.systemDefault());
 
-    private static final GenderType DEFAULT_GENDER = GenderType.MALE;
-    private static final GenderType UPDATED_GENDER = GenderType.FEMALE;
+    private static final GenderType DEFAULT_GENDER = GenderType.UNKNOWN;
+    private static final GenderType UPDATED_GENDER = GenderType.MALE;
 
     private static final String DEFAULT_POSTAL_CODE = "AAAAAAAAAA";
     private static final String UPDATED_POSTAL_CODE = "BBBBBBBBBB";
@@ -66,6 +69,12 @@ public class EmployeeResourceIntTest {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -89,7 +98,7 @@ public class EmployeeResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final EmployeeResource employeeResource = new EmployeeResource(employeeRepository);
+        final EmployeeResource employeeResource = new EmployeeResource(employeeService);
         this.restEmployeeMockMvc = MockMvcBuilders.standaloneSetup(employeeResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -127,9 +136,10 @@ public class EmployeeResourceIntTest {
         int databaseSizeBeforeCreate = employeeRepository.findAll().size();
 
         // Create the Employee
+        EmployeeDTO employeeDTO = employeeMapper.toDto(employee);
         restEmployeeMockMvc.perform(post("/api/employees")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(employee)))
+            .content(TestUtil.convertObjectToJsonBytes(employeeDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Employee in the database
@@ -152,11 +162,12 @@ public class EmployeeResourceIntTest {
 
         // Create the Employee with an existing ID
         employee.setId(1L);
+        EmployeeDTO employeeDTO = employeeMapper.toDto(employee);
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restEmployeeMockMvc.perform(post("/api/employees")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(employee)))
+            .content(TestUtil.convertObjectToJsonBytes(employeeDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Employee in the database
@@ -232,10 +243,11 @@ public class EmployeeResourceIntTest {
             .postalCode(UPDATED_POSTAL_CODE)
             .city(UPDATED_CITY)
             .streetAddress(UPDATED_STREET_ADDRESS);
+        EmployeeDTO employeeDTO = employeeMapper.toDto(updatedEmployee);
 
         restEmployeeMockMvc.perform(put("/api/employees")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(updatedEmployee)))
+            .content(TestUtil.convertObjectToJsonBytes(employeeDTO)))
             .andExpect(status().isOk());
 
         // Validate the Employee in the database
@@ -257,11 +269,12 @@ public class EmployeeResourceIntTest {
         int databaseSizeBeforeUpdate = employeeRepository.findAll().size();
 
         // Create the Employee
+        EmployeeDTO employeeDTO = employeeMapper.toDto(employee);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restEmployeeMockMvc.perform(put("/api/employees")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(employee)))
+            .content(TestUtil.convertObjectToJsonBytes(employeeDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Employee in the database
@@ -300,5 +313,28 @@ public class EmployeeResourceIntTest {
         assertThat(employee1).isNotEqualTo(employee2);
         employee1.setId(null);
         assertThat(employee1).isNotEqualTo(employee2);
+    }
+
+    @Test
+    @Transactional
+    public void dtoEqualsVerifier() throws Exception {
+        TestUtil.equalsVerifier(EmployeeDTO.class);
+        EmployeeDTO employeeDTO1 = new EmployeeDTO();
+        employeeDTO1.setId(1L);
+        EmployeeDTO employeeDTO2 = new EmployeeDTO();
+        assertThat(employeeDTO1).isNotEqualTo(employeeDTO2);
+        employeeDTO2.setId(employeeDTO1.getId());
+        assertThat(employeeDTO1).isEqualTo(employeeDTO2);
+        employeeDTO2.setId(2L);
+        assertThat(employeeDTO1).isNotEqualTo(employeeDTO2);
+        employeeDTO1.setId(null);
+        assertThat(employeeDTO1).isNotEqualTo(employeeDTO2);
+    }
+
+    @Test
+    @Transactional
+    public void testEntityFromId() {
+        assertThat(employeeMapper.fromId(42L).getId()).isEqualTo(42);
+        assertThat(employeeMapper.fromId(null)).isNull();
     }
 }
