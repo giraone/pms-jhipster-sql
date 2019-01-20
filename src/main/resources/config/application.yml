@@ -44,7 +44,7 @@ spring:
         open-in-view: false
         properties:
             hibernate.jdbc.time_zone: UTC
-            hibernate.jdbc.batch_size: 50 # (hs) increased batch size
+            hibernate.jdbc.batch_size: 200 # (hs) increased batch size
             hibernate.jdbc.order_inserts: true # (hs)
             hibernate.jdbc.order_updates: true # (hs)
             hibernate.jdbc.batch_versioned_data: true # (hs)
