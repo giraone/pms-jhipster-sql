@@ -28,6 +28,19 @@ Both docker compose files share a common network
 jhipster import-jdl ./jhipster-jdl.jh --force
 ```
 
+## Security
+
+In constrast to the standard JHipster generated projects, only users with the role ADMIN can access the
+generated CRUD REST services under the `/api` URL. All REST interfaces for "normal" users are placed
+under the URL `api-domain` and are authorized to reflect \*multi-tenancy` (a user of a company can see
+only employees of his/her company).
+
+TODO:
+
+-   Use @Secured()
+-   Use @Preauthorize
+-   Load "companies" on login to "session"
+
 ## CURL samples (admin API)
 
 The last PUT call uses data from [the testdata-generator project on GitHub](https://github.com/giraone/testdata-generator).
@@ -77,22 +90,25 @@ from employee
 group by company_id
 order by count desc
 
-select count(*)
-from employee
-where company_id = 3570
-> 1127
+> "39714"	"1727"
+> "39688"	"1534"
+> "39544"	"2314"
 
-select count(*)
+select count(company_id) as count, company_id
 from employee
-where company_id = 11445
-> 862
+group by company_id
+order by count asc
+
+> "303"	"76917"
+> "303"	"46415"
+> "307"	"36421"
 
 select count(surname) as count, surname
 from employee
-where company_id = 3570
+where company_id = 1727
 group by surname
 order by count desc
-> 31 Müller
-> 16 Schmidt
-> 13 Schneider
+> "935"	"Müller"
+> "674"	"Schmidt"
+> "440"	"Schneider"
 ```
