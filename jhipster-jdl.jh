@@ -47,7 +47,8 @@ relationship ManyToMany {
 // --- --- --- MISC --- --- ---
 
 // Set pagination options
-paginate Employee with infinite-scroll
+//paginate Employee with infinite-scroll
+paginate Employee with pagination
 paginate Company with pagination
 
 // Use Data Transfer Objects (DTO)

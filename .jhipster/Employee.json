@@ -46,7 +46,7 @@
     "javadoc": "The Employee entity.",
     "entityTableName": "employee",
     "dto": "mapstruct",
-    "pagination": "infinite-scroll",
+    "pagination": "pagination",
     "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
