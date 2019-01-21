@@ -1,0 +1,52 @@
+<div>
+    <h3 id="page-heading">
+        <span jhiTranslate="pmssqlApp.employee.home.title">Employees</span>      
+    </h3>
+    <input type="text" [(ngModel)]="surnamePrefix" (ngModelChange)="filterChanged($event)" placeholder="Type name of employee" size="60" />
+    <button (click)="load()">Query</button>
+    <jhi-alert></jhi-alert>
+    <br/>
+    <div class="table-responsive" *ngIf="employees">
+        <table class="table table-striped">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="reset.bind(this)">
+            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="surname"><span jhiTranslate="pmssqlApp.employee.surname">Surname</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="givenName"><span jhiTranslate="pmssqlApp.employee.givenName">Given Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="dateOfBirth"><span jhiTranslate="pmssqlApp.employee.dateOfBirth">Date Of Birth</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="postalCode"><span jhiTranslate="pmssqlApp.employee.postalCode">Postal Code</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="city"><span jhiTranslate="pmssqlApp.employee.city">City</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="streetAddress"><span jhiTranslate="pmssqlApp.employee.streetAddress">Street Address</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="companyId"><span jhiTranslate="pmssqlApp.employee.company">Company</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody infinite-scroll (scrolled)="loadPage(page + 1)" [infiniteScrollDisabled]="page >= links['last']" [infiniteScrollDistance]="0">
+            <tr *ngFor="let employee of employees ;trackBy: trackId">
+                <td><a [routerLink]="['/employee', employee.id, 'view' ]">{{employee.id}}</a></td>
+                <td>{{employee.surname}}</td>
+                <td>{{employee.givenName}}</td>
+                <td>{{employee.dateOfBirth | date:'mediumDate'}}</td>
+                <td>{{employee.postalCode}}</td>
+                <td>{{employee.city}}</td>
+                <td>{{employee.streetAddress}}</td>
+                <td>
+                    <div *ngIf="employee.companyId">
+                        <a [routerLink]="['../company', employee.companyId , 'view' ]" >{{employee.companyId}}</a>
+                    </div>
+                </td>
+                <td class="text-right">
+                    <div class="btn-group flex-btn-group-container">
+                        <button type="submit"
+                                [routerLink]="['/employee-query', employee.id, 'view' ]"
+                                class="btn btn-info btn-sm">
+                            <fa-icon [icon]="'eye'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

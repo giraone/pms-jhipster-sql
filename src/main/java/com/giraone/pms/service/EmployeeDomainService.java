@@ -14,12 +14,12 @@ public interface EmployeeDomainService {
     /**
      * Query the employees of a company.
      *
-     * @param companyId
-     * @param surnamePrefix
+     * @param companyExternalId restrict the query to employees of this company
+     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
      * @param pageable the pagination information
-     * @return the list of entities
+     * @return the list of entities or an empty optional, if the company was invalid
      */
-    Page<EmployeeDTO> findAll(String companyId, String surnamePrefix, Pageable pageable);
+    Optional<Page<EmployeeDTO>> findAll(String companyExternalId, String surnamePrefix, Pageable pageable);
 
 
     /**

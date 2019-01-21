@@ -52,7 +52,7 @@
                 "authenticated": {
                     "prefix": "Wenn Sie sich ",
                     "link": "anmelden",
-                    "suffix": " möchten, versuchen Sie es mit <br/>- Administrator (Name=\"admin\" und Passwort=\"admin\")<br/>- Benutzer (Name=\"user\" und Passwort=\"user\")."
+                    "suffix": " möchten, versuchen Sie es mit <br/>- Administrator (Name=\"admin\")."
                 },
                 "register": {
                     "noaccount": "Sie haben noch keinen Zugang?",
@@ -133,5 +133,5 @@
         "idexists": "Ein neuer {{entityName}} kann noch keine ID haben",
         "idnull": "Ungültige ID"
     },
-    "footer": "Dies ist Ihre Fußzeile"
+    "footer": "Made by Hans"
 }

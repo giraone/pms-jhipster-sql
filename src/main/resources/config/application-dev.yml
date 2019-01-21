@@ -17,6 +17,8 @@ logging:
     level:
         ROOT: WARN
         io.github.jhipster: WARN
+        # Log the JDBC parameters passed to a query also (jpa.show-sql=true logs only the statement!)
+        # org.hibernate.type: TRACE
         com.giraone.pms: DEBUG
 
 spring:

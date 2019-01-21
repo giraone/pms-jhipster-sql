@@ -30,10 +30,12 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
 
     private final Logger log = LoggerFactory.getLogger(EmployeesBulkServiceImpl.class);
 
-    private static final Set<String> LOCAL_ADMIN_AUTHORITIES = new HashSet<>();
+    private static final boolean CREATE_INITIAL_USER_FOR_COMPANY = true;
+
+    private static final Set<String> INITIAL_USER_AUTHORITIES = new HashSet<>();
 
     static {
-        LOCAL_ADMIN_AUTHORITIES.add(AuthoritiesConstants.USER); // TODO: Add LOCAL_ADMIN role
+        INITIAL_USER_AUTHORITIES.add(AuthoritiesConstants.USER);
     }
 
     private final EmployeeBulkRepository employeeBulkRepository;
@@ -86,19 +88,21 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                 companyDTO = this.companyService.save(companyDTO);
                 employee.setCompany(this.companyMapper.toEntity(companyDTO));
                 // ... and create an initial user for this company
-                UserDTO userDTO = new UserDTO();
-                final String userId = String.format("user-%08d", companyDTO.getId());
-                userDTO.setFirstName("Admin");
-                userDTO.setLastName(externalId);
-                userDTO.setLogin(userId);
-                userDTO.setAuthorities(LOCAL_ADMIN_AUTHORITIES);
-                User user = this.userService.createUserWithPresetPassword(userDTO, userId);
-                userDTO = this.userMapper.userToUserDTO(user);
-                // ... and add this initial users to the companies user list
-                final HashSet<UserDTO> users = new HashSet<>();
-                users.add(userDTO);
-                companyDTO.setUsers(users);
-                this.companyService.save(companyDTO);
+                if (CREATE_INITIAL_USER_FOR_COMPANY) {
+                    UserDTO userDTO = new UserDTO();
+                    final String userId = String.format("user-%08d", companyDTO.getId());
+                    userDTO.setFirstName("Admin");
+                    userDTO.setLastName(externalId);
+                    userDTO.setLogin(userId);
+                    userDTO.setAuthorities(INITIAL_USER_AUTHORITIES);
+                    User user = this.userService.createUserWithPresetPassword(userDTO, userId);
+                    userDTO = this.userMapper.userToUserDTO(user);
+                    // ... and add this initial users to the companies user list
+                    final HashSet<UserDTO> users = new HashSet<>();
+                    users.add(userDTO);
+                    companyDTO.setUsers(users);
+                    this.companyService.save(companyDTO);
+                }
             }
         });
         List<Employee> result = this.employeeBulkRepository.saveAll(employees);

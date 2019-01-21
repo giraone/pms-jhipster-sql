@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "description": "Description for pmssql",
     "private": true,
-    "license": "UNLICENSED",
+    "license": "Apache 2.0",
     "cacheDirectories": [
         "node_modules"
     ],
