@@ -48,6 +48,7 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
      * @return the list of entities or an empty optional, if the company was invalid
      */
     public Optional<Page<EmployeeDTO>> findAll(String companyExternalId, String surnamePrefix, Pageable pageable) {
+
         log.debug("Service request to query employees companyExternalId={}, surnamePrefix={}", companyExternalId, surnamePrefix);
         Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
         if (!company.isPresent()) {
@@ -58,6 +59,20 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
                 .map(employeeMapper::toDto));
     }
 
+    /**
+     * Query the employees of a company.
+     *
+     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
+     * @param pageable the pagination information
+     * @return the list of entities or an empty optional, if the company was invalid
+     */
+    public Optional<Page<EmployeeDTO>> findAll(String surnamePrefix, Pageable pageable) {
+
+        log.debug("Service request to query employees surnamePrefix={}", surnamePrefix);
+        return Optional.of(
+            employeeRepository.findAllBySurname(surnamePrefix + "%", pageable)
+                .map(employeeMapper::toDto));
+    }
 
     /**
      * Get one employee by id.

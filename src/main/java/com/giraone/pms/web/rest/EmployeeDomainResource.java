@@ -5,6 +5,7 @@ import com.giraone.pms.security.AuthoritiesConstants;
 import com.giraone.pms.security.SecurityUtils;
 import com.giraone.pms.service.AuthorizationService;
 import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import com.giraone.pms.web.rest.errors.InternalServerErrorException;
 import com.giraone.pms.web.rest.util.PaginationUtil;
@@ -35,11 +36,14 @@ public class EmployeeDomainResource {
     private static final String ENTITY_NAME = "employee";
 
     private final EmployeeDomainService employeeDomainService;
+    private final EmployeeService employeeService;
     private final AuthorizationService authorizationService;
 
     public EmployeeDomainResource(EmployeeDomainService employeeDomainService,
+                                  EmployeeService employeeService,
                                   AuthorizationService authorizationService) {
         this.employeeDomainService = employeeDomainService;
+        this.employeeService = employeeService;
         this.authorizationService = authorizationService;
     }
 
@@ -65,18 +69,27 @@ public class EmployeeDomainResource {
 
         log.debug("REST request to query employees companyExternalId={}, surnamePrefix={}", companyExternalId, surnamePrefix);
 
-        final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
-        log.debug("- by user {}", userLogin);
+        boolean admin = SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN);
 
-        if (!this.authorizationService.check(companyExternalId, userLogin)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        Optional<Page<EmployeeDTO>> result;
+        if (!admin) {
+            final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
+            log.debug("- by user {}", userLogin);
+
+            if (!this.authorizationService.check(companyExternalId, userLogin)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            result = employeeDomainService.findAll(companyExternalId, surnamePrefix, pageable);
+            if (!result.isPresent()) {
+                log.debug("- companyExternalId {} is invalid!", companyExternalId);
+                return ResponseEntity.notFound().build();
+            }
+        }
+        else {
+            result = employeeDomainService.findAll(surnamePrefix, pageable);
         }
 
-        Optional<Page<EmployeeDTO>> result = employeeDomainService.findAll(companyExternalId, surnamePrefix, pageable);
-        if (!result.isPresent()) {
-            log.debug("- companyExternalId {} is invalid!", companyExternalId);
-            return ResponseEntity.notFound().build();
-        }
+
         Page<EmployeeDTO> page = result.get();
         log.debug("- size={}, totalElements={}", page.getContent().size(), page.getTotalElements());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/domain-api/employees");
