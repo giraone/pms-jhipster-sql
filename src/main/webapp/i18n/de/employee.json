@@ -2,27 +2,27 @@
     "pmssqlApp": {
         "employee": {
             "home": {
-                "title": "Employees",
-                "createLabel": "Employee erstellen",
-                "createOrEditLabel": "Employee erstellen oder bearbeiten"
+                "title": "Mitarbeiter",
+                "createLabel": "Mitarbeiter erstellen",
+                "createOrEditLabel": "Mitarbeiter erstellen oder bearbeiten"
             },
-            "created": "Employee erstellt mit ID {{ param }}",
-            "updated": "Employee aktualisiert mit ID {{ param }}",
-            "deleted": "Employee gelöscht mit ID {{ param }}",
+            "created": "Mitarbeiter erstellt mit ID {{ param }}",
+            "updated": "Mitarbeiter aktualisiert mit ID {{ param }}",
+            "deleted": "Mitarbeiter gelöscht mit ID {{ param }}",
             "delete": {
-                "question": "Soll Employee {{ id }} wirklich dauerhaft gelöscht werden?"
+                "question": "Soll Mitarbeiter {{ id }} wirklich dauerhaft gelöscht werden?"
             },
             "detail": {
-                "title": "Employee"
+                "title": "EmpMitarbeiterloyee"
             },
-            "surname": "Surname",
-            "givenName": "Given Name",
-            "dateOfBirth": "Date Of Birth",
-            "gender": "Gender",
-            "postalCode": "Postal Code",
-            "city": "City",
-            "streetAddress": "Street Address",
-            "company": "Company"
+            "surname": "Nachname",
+            "givenName": "Vorname",
+            "dateOfBirth": "Geburtsdatum",
+            "gender": "Geschlecht",
+            "postalCode": "PLZ",
+            "city": "Ort",
+            "streetAddress": "Straße",
+            "company": "Unternehmen"
         }
     }
 }

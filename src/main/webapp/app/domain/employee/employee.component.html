@@ -2,7 +2,8 @@
     <h3 id="page-heading">
         <span jhiTranslate="pmssqlApp.employee.home.title">Employees</span>      
     </h3>
-    <input type="text" [(ngModel)]="surnamePrefix" (ngModelChange)="filterChanged($event)" placeholder="Type name of employee" size="60" />
+    <input type="text" [(ngModel)]="surnamePrefix" (ngModelChange)="filterChanged($event)"
+        placeholder="{{'pmssqlApp.query.filter.placeholder' | translate}}" size="60" />
     <button (click)="load()">Query</button>
     <jhi-alert></jhi-alert>
     <br/>
