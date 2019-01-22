@@ -4,7 +4,7 @@
             "menu": "Suche nach Mitarbeitern",
             "title": "Suche nach Mitarbeitern",
             "filter": {
-                "placeholder": "Nachnamee des Mitarbeiters"
+                "placeholder": "Nachname des Mitarbeiters"
             }
         }
     }
