@@ -30,10 +30,18 @@ entity Employee {
 	streetAddress String
 }
 
+/**
+ * Normalized names of the employee
+ */
+entity EmployeeName {
+    key String required,
+	value String required
+}
+
 // --- --- --- RELATIONSHIPS --- --- ---
 
 relationship ManyToOne {
-	Employee{company} to Company
+	Employee{company required} to Company
 }
 
 // relationship OneToMany {
@@ -42,6 +50,10 @@ relationship ManyToOne {
 
 relationship ManyToMany {
   Company{user} to User{company}
+}
+
+relationship ManyToOne {
+  EmployeeName{owner required} to Employee
 }
 
 // --- --- --- MISC --- --- ---

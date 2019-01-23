@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * REST controller for managing Employee (admin version).
+ * REST controller for managing Employee.
  */
 @RestController
 @RequestMapping("/api")

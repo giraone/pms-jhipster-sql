@@ -1,0 +1,37 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="employeeName">
+            <h2><span jhiTranslate="pmssqlApp.employeeName.detail.title">Employee Name</span> {{employeeName.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="pmssqlApp.employeeName.key">Key</span></dt>
+                <dd>
+                    <span>{{employeeName.key}}</span>
+                </dd>
+                <dt><span jhiTranslate="pmssqlApp.employeeName.value">Value</span></dt>
+                <dd>
+                    <span>{{employeeName.value}}</span>
+                </dd>
+                <dt><span jhiTranslate="pmssqlApp.employeeName.owner">Owner</span></dt>
+                <dd>
+                    <div *ngIf="employeeName.ownerId">
+                        <a [routerLink]="['/employee', employeeName.ownerId, 'view']">{{employeeName.ownerId}}</a>
+                    </div>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/employee-name', employeeName.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

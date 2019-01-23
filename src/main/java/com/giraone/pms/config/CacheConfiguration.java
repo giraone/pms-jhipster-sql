@@ -41,6 +41,7 @@ public class CacheConfiguration {
             cm.createCache(com.giraone.pms.domain.Company.class.getName(), jcacheConfiguration);
             cm.createCache(com.giraone.pms.domain.Employee.class.getName(), jcacheConfiguration);
             cm.createCache(com.giraone.pms.domain.Company.class.getName() + ".users", jcacheConfiguration);
+            cm.createCache(com.giraone.pms.domain.EmployeeName.class.getName(), jcacheConfiguration);
             // jhipster-needle-ehcache-add-entry
         };
     }
