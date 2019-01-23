@@ -35,4 +35,4 @@ public enum GenderType {
     public String toString() {
         return str;
     }
-    }
+}
