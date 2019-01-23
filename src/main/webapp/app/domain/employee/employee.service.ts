@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { SERVER_API_URL } from '../../app.constants';
 import { createRequestOption } from '../../shared';
 import { IEmployee } from '../../shared/model/employee.model';
+import { ICompany } from '../../shared/model/company.model';
 
 type EntityResponseType = HttpResponse<IEmployee>;
 type EntityArrayResponseType = HttpResponse<IEmployee[]>;
@@ -15,7 +16,7 @@ type EntityArrayResponseType = HttpResponse<IEmployee[]>;
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
     public resourceUrl = SERVER_API_URL + 'domain-api/employees';
-    // public resourceUrl = 'http://localhost:8080/' + 'domain-api/employees';
+    public resourceUrl2 = SERVER_API_URL + 'domain-api/companies-of-employee';
 
     constructor(protected http: HttpClient) {}
 
@@ -26,11 +27,15 @@ export class EmployeeService {
     }
 
     query(req?: any): Observable<EntityArrayResponseType> {
-        req.companyExternalId = 'l-00000060';
         const options = createRequestOption(req);
         return this.http
             .get<IEmployee[]>(this.resourceUrl, { params: options, observe: 'response' })
             .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
+    }
+
+    findCompanies(req?: any): Observable<EntityArrayResponseType> {
+        const options = createRequestOption(req);
+        return this.http.get<ICompany[]>(this.resourceUrl2, { params: options, observe: 'response' });
     }
 
     protected convertDateFromClient(employee: IEmployee): IEmployee {

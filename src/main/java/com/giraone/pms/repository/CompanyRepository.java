@@ -28,4 +28,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findOneWithEagerRelationships(@Param("id") Long id);
 
     Optional<Company> findOneByExternalId(String externalId);
+    
+    @Query("select distinct c from Company c join c.users u where u.login = :userLogin")
+    Page<Company> findCompaniesOfUser(@Param("userLogin") String userLogin, Pageable pageable);
 }

@@ -134,5 +134,5 @@
         "idexists": "A new {{ entityName }} cannot already have an ID",
         "idnull": "Invalid ID"
     },
-    "footer": "Made by Hans"
+    "footer": "Made with JHipster"
 }

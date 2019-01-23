@@ -1,11 +1,8 @@
 package com.giraone.pms.service.impl;
 
-import com.giraone.pms.domain.Company;
-import com.giraone.pms.repository.CompanyRepository;
-import com.giraone.pms.repository.EmployeeRepository;
-import com.giraone.pms.service.EmployeeDomainService;
-import com.giraone.pms.service.dto.EmployeeDTO;
-import com.giraone.pms.service.mapper.EmployeeMapper;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,7 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import com.giraone.pms.domain.Company;
+import com.giraone.pms.repository.CompanyRepository;
+import com.giraone.pms.repository.EmployeeRepository;
+import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.service.mapper.CompanyMapper;
+import com.giraone.pms.service.mapper.EmployeeMapper;
 
 /**
  * Service Implementation for managing Employee (domain version).
@@ -28,14 +32,17 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
     private final CompanyRepository companyRepository;
 
     private final EmployeeMapper employeeMapper;
+    private final CompanyMapper companyMapper;
 
     public EmployeeDomainServiceImpl(
         EmployeeRepository employeeRepository,
         CompanyRepository companyRepository,
-        EmployeeMapper employeeMapper) {
+        EmployeeMapper employeeMapper,
+        CompanyMapper companyMapper) {
         this.employeeRepository = employeeRepository;
         this.companyRepository = companyRepository;
         this.employeeMapper = employeeMapper;
+        this.companyMapper = companyMapper;
     }
 
 
@@ -86,5 +93,11 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         log.debug("Request to get Employee : {}", id);
         return employeeRepository.findById(id)
             .map(employeeMapper::toDto);
+    }
+    
+    public List<CompanyDTO> getAllCompaniesOfEmployee(String userLogin) {
+    	
+    	log.debug("getAllCompaniesOfEmployee userLogin={}", userLogin);
+    	return this.companyRepository.findCompaniesOfUser(userLogin, Pageable.unpaged()).map(companyMapper::toDto).getContent();
     }
 }

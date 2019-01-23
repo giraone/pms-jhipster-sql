@@ -1,0 +1,12 @@
+{
+    "pmssqlApp": {
+        "query": {
+            "title": {
+                "main": "Employees",
+                "admin": "of all companies",
+                "user": "of company"
+            },
+            "count": "Count"
+        }
+    }
+}

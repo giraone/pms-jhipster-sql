@@ -3,7 +3,8 @@ import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/ht
 import { Subscription, Subject } from 'rxjs';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 
-import { IEmployee } from '../../shared/model/employee.model';
+import { IEmployee } from 'app/shared/model/employee.model';
+import { ICompany } from '../../shared/model/company.model';
 import { AccountService } from '../../core';
 
 import { ITEMS_PER_PAGE } from '../../shared';
@@ -19,6 +20,8 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     inputSubject: Subject<String> = new Subject();
     employees: IEmployee[];
     currentAccount: any;
+    currentAccountIsAdmin: boolean;
+    currentCompanies: ICompany[];
     eventSubscriber: Subscription;
     itemsPerPage: number;
     links: any;
@@ -37,6 +40,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     ) {
         this.surnamePrefix = '';
         this.employees = [];
+        this.currentCompanies = [];
         this.itemsPerPage = ITEMS_PER_PAGE;
         this.page = 0;
         this.links = {
@@ -44,6 +48,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         };
         this.predicate = 'id';
         this.reverse = true;
+        this.totalItems = 0;
         this.inputSubject
             .pipe(
                 debounceTime(200),
@@ -57,6 +62,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     load() {
         this.employeeService
             .query({
+                companyExternalId: this.getExternalCompanyId(),
                 surnamePrefix: this.surnamePrefix,
                 page: this.page,
                 size: this.itemsPerPage,
@@ -84,10 +90,18 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.load();
         this.accountService.identity().then(account => {
             this.currentAccount = account;
+            this.currentAccountIsAdmin = this.accountService.hasAnyAuthority(['ROLE_ADMIN']);
         });
+        this.employeeService.findCompanies().subscribe(
+            (res: HttpResponse<ICompany[]>) => {
+                this.currentCompanies = res.body;
+                this.load();
+            },
+            (res: HttpErrorResponse) => this.onError(res.message)
+        );
+
         this.registerChangeInEmployees();
     }
 
@@ -111,9 +125,16 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         return result;
     }
 
+    isAdmin() {
+        return this.currentAccountIsAdmin;
+    }
+
     protected paginateEmployees(data: IEmployee[], headers: HttpHeaders) {
         this.links = this.parseLinks.parse(headers.get('link'));
         this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+        if (this.page === 0) {
+            this.employees.length = 0;
+        }
         for (let i = 0; i < data.length; i++) {
             this.employees.push(data[i]);
         }
@@ -121,5 +142,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
     protected onError(errorMessage: string) {
         this.jhiAlertService.error(errorMessage, null, null);
+    }
+
+    protected getExternalCompanyId() {
+        if (this.currentCompanies == null || this.currentCompanies.length === 0) {
+            return 'none';
+        }
+        return this.currentCompanies[0].externalId;
     }
 }

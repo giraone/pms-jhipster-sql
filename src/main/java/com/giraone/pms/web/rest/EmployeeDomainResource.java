@@ -1,15 +1,8 @@
 package com.giraone.pms.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
-import com.giraone.pms.security.AuthoritiesConstants;
-import com.giraone.pms.security.SecurityUtils;
-import com.giraone.pms.service.AuthorizationService;
-import com.giraone.pms.service.EmployeeDomainService;
-import com.giraone.pms.service.EmployeeService;
-import com.giraone.pms.service.dto.EmployeeDTO;
-import com.giraone.pms.web.rest.errors.InternalServerErrorException;
-import com.giraone.pms.web.rest.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -17,12 +10,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+import com.codahale.metrics.annotation.Timed;
+import com.giraone.pms.security.AuthoritiesConstants;
+import com.giraone.pms.security.SecurityUtils;
+import com.giraone.pms.service.AuthorizationService;
+import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.EmployeeService;
+import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.web.rest.errors.InternalServerErrorException;
+import com.giraone.pms.web.rest.util.PaginationUtil;
+
+import io.github.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing Employee (domain version).
@@ -109,14 +115,30 @@ public class EmployeeDomainResource {
     public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable Long id) {
 
         log.debug("REST request to get Employee : {}", id);
+        
+        boolean admin = SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN);
+  
+        final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
+        log.debug("- by user {}", userLogin);
+	
+	    Optional<EmployeeDTO> employeeDTO = employeeDomainService.findOne(id);
+        if (employeeDTO.isPresent() && !admin && !this.authorizationService.check(employeeDTO.get().getCompanyId(), userLogin)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        ResponseEntity<EmployeeDTO> ret = ResponseUtil.wrapOrNotFound(employeeDTO);
+        return ret;
+    }
+    
+    @GetMapping("/companies-of-employee")
+    @Timed
+    public ResponseEntity<List<CompanyDTO>> getAllCompaniesOfEmployee() {
+
+        log.debug("REST request to query companies of employee");
         final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
         log.debug("- by user {}", userLogin);
 
-        Optional<EmployeeDTO> employeeDTO = employeeDomainService.findOne(id);
-        if (employeeDTO.isPresent() && !this.authorizationService.check(employeeDTO.get().getCompanyId(), userLogin)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        ResponseEntity<EmployeeDTO> ret = ResponseUtil.wrapOrNotFound(employeeDTO);
-        return ret;
+        List<CompanyDTO> result = employeeDomainService.getAllCompaniesOfEmployee(userLogin);
+        return ResponseEntity.ok().body(result);
     }
 }
