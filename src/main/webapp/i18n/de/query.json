@@ -2,10 +2,16 @@
     "pmssqlApp": {
         "query": {
             "menu": "Suche nach Mitarbeitern",
-            "title": "Suche nach Mitarbeitern",
-            "filter": {
-                "placeholder": "Nachname des Mitarbeiters"
-            }
+            "subtitle": "Suche nach Mitarbeitern",
+            "title": {
+                "main": "Mitarbeiter",
+                "admin": "von allen Unternehmen",
+                "user": "des Unternehmens"
+            },
+            "count": "Anzahl"
+        },
+        "filter": {
+            "placeholder": "Nachname des Mitarbeiters"
         }
     }
 }

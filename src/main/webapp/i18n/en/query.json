@@ -3,6 +3,12 @@
         "query": {
             "menu": "Query for employees",
             "subtitle": "... bei der Testanwendung",
+            "title": {
+                "main": "Employees",
+                "admin": "of all companies",
+                "user": "of company"
+            },
+            "count": "Count",
             "filter": {
                 "placeholder": "Type surname of employee"
             }
