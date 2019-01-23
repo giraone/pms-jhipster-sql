@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -802,6 +804,8 @@ public class AccountResourceIntTest {
         keyAndPassword.setKey("wrong reset key");
         keyAndPassword.setNewPassword("new password");
 
+        Logger log = LoggerFactory.getLogger(AccountResourceIntTest.class);
+        log.warn("THE FOLLOWING STACKTRACE IS NOT AN ERROR !!! THE TEST MUST CREATE THIS INTERNAL SERVER ERROR");
         restMvc.perform(
             post("/api/account/reset-password/finish")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
