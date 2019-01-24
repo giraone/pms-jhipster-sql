@@ -55,8 +55,8 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
      * Query the employees of a company.
      *
      * @param companyExternalId restrict the query to employees of this company
-     * @param employeeFilter restrict the query to employees matching this filter
-     * @param pageable the pagination information
+     * @param employeeFilter    restrict the query to employees matching this filter
+     * @param pageable          the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
     @Timed
@@ -79,8 +79,13 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
             // USER with access to only one company
             if (employeeFilter.getSurname().isPresent()) {
                 final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
-                page = employeeRepository.findAllByCompanyAndKeyPairLike(
+                if (pair.getKey() == null) {
+                    page = employeeRepository.findAllByCompanyAndSurnameLike(
+                        company.get(), pair.getValue(), pageable);
+                } else {
+                    page = employeeRepository.findAllByCompanyAndKeyPairLike(
                         company.get(), pair.getKey(), pair.getValue(), pageable);
+                }
             } else {
                 page = employeeRepository.findAllByCompany(company.get(), pageable);
             }
@@ -88,8 +93,13 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
             // ADMIN with full access to all companies
             if (employeeFilter.getSurname().isPresent()) {
                 final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
-                page = employeeRepository.findAllByKeyPairLike(
-                    pair.getKey(), pair.getValue(), pageable);
+                if (pair.getKey() == null) {
+                    page = employeeRepository.findAllBySurnameLike(
+                        pair.getValue(), pageable);
+                } else {
+                    page = employeeRepository.findAllByKeyPairLike(
+                        pair.getKey(), pair.getValue(), pageable);
+                }
             } else {
                 page = employeeRepository.findAll(pageable);
             }
