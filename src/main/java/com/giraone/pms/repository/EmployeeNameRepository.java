@@ -17,11 +17,11 @@ import java.util.List;
 public interface EmployeeNameRepository extends JpaRepository<EmployeeName, Long> {
     @Modifying
     @Transactional
-    @Query("delete from EmployeeName en where en.owner = ?1")
-    void deleteByOwner(Employee owner);
+    @Query("delete from EmployeeName en where en.id.ownerId = ?1")
+    void deleteByOwner(long ownerId);
 
     @Modifying
     @Transactional
-    @Query("delete from EmployeeName en where en.owner IN ?1")
-    void deleteByOwners(List<Employee> owners);
+    @Query("delete from EmployeeName en where en.id.ownerId IN ?1")
+    void deleteByOwners(List<Long> owners);
 }

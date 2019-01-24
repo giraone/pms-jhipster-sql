@@ -25,13 +25,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Timed
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
-        " WHERE e.id = en.owner_id" +
+        " WHERE e.id = en.id.ownerId" +
         " AND e.company = :company" +
-        " AND en.key LIKE :key AND en.value LIKE :value")
+        " AND en.id.nameKey LIKE :nameKey AND en.id.nameValue LIKE :nameValue")
     Page<Employee> findAllByCompanyAndKeyPairLike(
         @Param("company") Company company,
-        @Param("key") String key,
-        @Param("value") String value,
+        @Param("nameKey") String key,
+        @Param("nameValue") String value,
         Pageable pageable);
 
     @Timed
@@ -46,17 +46,17 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Timed
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
-        " WHERE e.id = en.owner_id" +
-        " AND en.key LIKE :key AND en.value LIKE :value")
+        " WHERE e.id = en.id.ownerId" +
+        " AND en.id.nameKey LIKE :nameKey AND en.id.nameValue LIKE :nameValue")
     Page<Employee> findAllByKeyPairLike(
-        @Param("key") String key,
-        @Param("value") String value,
+        @Param("nameKey") String key,
+        @Param("nameValue") String value,
         Pageable pageable);
 
     @Timed
     @Query("SELECT e FROM Employee e" +
         " WHERE e.surname LIKE :surname")
     Page<Employee> findAllBySurnameLike(
-        @Param("company") Company company, @Param("surname") String surname, Pageable pageable);
+        @Param("surname") String surname, Pageable pageable);
 
 }

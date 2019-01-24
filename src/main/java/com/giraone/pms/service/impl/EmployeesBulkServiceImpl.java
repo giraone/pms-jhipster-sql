@@ -1,9 +1,6 @@
 package com.giraone.pms.service.impl;
 
-import com.giraone.pms.domain.Company;
-import com.giraone.pms.domain.Employee;
-import com.giraone.pms.domain.EmployeeName;
-import com.giraone.pms.domain.User;
+import com.giraone.pms.domain.*;
 import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
 import com.giraone.pms.repository.EmployeeBulkRepository;
 import com.giraone.pms.repository.EmployeeNameRepository;
@@ -149,25 +146,28 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     @Timed
     private int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
         log.debug("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
-        final List<Employee> owners = new ArrayList<>();
+        final List<Long> owners = new ArrayList<>();
         final List<EmployeeName> names = new ArrayList<>();
         employeeStream.forEach(employeeDTO -> {
             final Employee employee = employeeMapper.toEntity(employeeDTO);
-            owners.add(employee);
+            owners.add(employee.getId());
             Map<String,String> namesOfEmployee = buildName(employee);
             for (Map.Entry<String, String> name : namesOfEmployee.entrySet()) {
                 final EmployeeName employeeName = new EmployeeName();
-                employeeName.setOwnerId(employee.getId());
-                employeeName.setNameKey(name.getKey());
-                employeeName.setNameValue(name.getValue());
+                // This is a weird solution, because JPA does not handle tables without one primary key very well
+                final EmployeeNameCompoundKey employeeNameCompoundKey = new EmployeeNameCompoundKey();
+                employeeNameCompoundKey.setOwnerId(employee.getId());
+                employeeNameCompoundKey.setNameKey(name.getKey());
+                employeeNameCompoundKey.setNameValue(name.getValue());
+                employeeName.setId(employeeNameCompoundKey);
                 names.add(employeeName);
             }
         });
         if (clearFirst) {
             log.debug("EmployeesBulkServiceImpl.reIndex: clearFirst for {} owners", owners.size());
             // Split into a maximum of 100 ids for the IN statement
-            List<List<Employee>> ownerPartitions = Lists.partition(owners, 100);
-            for (List<Employee> ownerPartition : ownerPartitions) {
+            List<List<Long>> ownerPartitions = Lists.partition(owners, 100);
+            for (List<Long> ownerPartition : ownerPartitions) {
                 this.employeeNameRepository.deleteByOwners(ownerPartition);
             }
         }
