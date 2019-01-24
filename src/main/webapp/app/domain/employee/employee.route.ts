@@ -32,7 +32,7 @@ export const employeeRoute: Routes = [
         component: EmployeeComponent,
         data: {
             authorities: ['ROLE_USER'],
-            pageTitle: 'pmssqlApp.query.title'
+            pageTitle: 'pmssqlApp.query.pageTitleMain'
         },
         canActivate: [UserRouteAccessService]
     },
@@ -44,7 +44,7 @@ export const employeeRoute: Routes = [
         },
         data: {
             authorities: ['ROLE_USER'],
-            pageTitle: 'pmssqlApp.query.title'
+            pageTitle: 'pmssqlApp.query.pageTitleDetail'
         },
         canActivate: [UserRouteAccessService]
     }

@@ -1,6 +1,8 @@
 {
     "pmssqlApp": {
         "query": {
+            "pageTitleMain": "Employee Search",
+            "pageTitleDetail": "Employee Details",
             "title": {
                 "main": "Employees",
                 "admin": "of all companies",
