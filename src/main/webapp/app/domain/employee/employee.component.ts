@@ -64,26 +64,26 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         if (trimed.length < 2) {
             return;
         }
-        let surname: String;
-        let surnameSearchMode: String;
+        let surnameValue: String;
+        let surnameSearchModeValue: String;
         if (trimed.charAt(0) === '~') {
-            surname = trimed.substr(1);
-            surnameSearchMode = 'PHONETIC';
+            surnameValue = trimed.substr(1);
+            surnameSearchModeValue = 'PHONETIC';
         } else if (trimed.charAt(0) === '=') {
-            surname = trimed.substr(1);
-            surnameSearchMode = 'EXACT';
+            surnameValue = trimed.substr(1);
+            surnameSearchModeValue = 'EXACT';
         } else {
-            surname = trimed;
-            surnameSearchMode = 'PREFIX_NORMALIZED';
+            surnameValue = trimed;
+            surnameSearchModeValue = 'PREFIX_NORMALIZED';
         }
-        if (surname.length < 2) {
+        if (surnameValue.length < 2) {
             return;
         }
         this.employeeService
             .query({
                 companyExternalId: this.getExternalCompanyId(),
-                surname: surname,
-                surnameSearchMode: surnameSearchMode,
+                surname: surnameValue,
+                surnameSearchMode: surnameSearchModeValue,
                 page: this.page,
                 size: this.itemsPerPage,
                 sort: this.sort()
