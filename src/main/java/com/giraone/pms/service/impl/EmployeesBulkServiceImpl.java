@@ -4,6 +4,7 @@ import com.giraone.pms.domain.Company;
 import com.giraone.pms.domain.Employee;
 import com.giraone.pms.domain.EmployeeName;
 import com.giraone.pms.domain.User;
+import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
 import com.giraone.pms.repository.EmployeeBulkRepository;
 import com.giraone.pms.repository.EmployeeNameRepository;
 import com.giraone.pms.security.AuthoritiesConstants;
@@ -17,6 +18,7 @@ import com.giraone.pms.service.mapper.EmployeeBulkMapper;
 import com.giraone.pms.service.mapper.EmployeeMapper;
 import com.giraone.pms.service.mapper.UserMapper;
 import com.google.common.collect.Lists;
+import io.micrometer.core.annotation.Timed;
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +87,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
      * @param employeeDTOList the entity list to save
      * @return the number of saved employees
      */
+    @Timed
     public int save(List<EmployeeBulkDTO> employeeDTOList) {
 
         final List<Employee> employees = this.employeeBulkMapper.toEntity(employeeDTOList);
@@ -128,6 +131,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         return result.size();
     }
 
+    @Timed
     public int reIndex(boolean clearFirst) {
         final int pageSize = 1000;
         Pageable pageable = PageRequest.of(0, pageSize);
@@ -142,6 +146,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         return ret;
     }
 
+    @Timed
     private int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
         log.debug("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
         final List<Employee> owners = new ArrayList<>();
@@ -152,9 +157,9 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
             Map<String,String> namesOfEmployee = buildName(employee);
             for (Map.Entry<String, String> name : namesOfEmployee.entrySet()) {
                 final EmployeeName employeeName = new EmployeeName();
-                employeeName.setOwner(employee);
-                employeeName.setKey(name.getKey());
-                employeeName.setValue(name.getValue());
+                employeeName.setOwnerId(employee.getId());
+                employeeName.setNameKey(name.getKey());
+                employeeName.setNameValue(name.getValue());
                 names.add(employeeName);
             }
         });
@@ -171,12 +176,13 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         return names.size();
     }
 
+    @Timed
     private Map<String,String> buildName(Employee employee) {
         final Map<String,String> ret = new HashMap<>();
         List<String> surnames = nameNormalizeService.normalize(employee.getSurname());
         for (String surname : surnames) {
-            ret.put("SN", surname);
-            ret.put("SM", this.doubleMetaphone.doubleMetaphone(surname));
+            ret.put(EmployeeNameFilterKey.SN.toString(), surname);
+            ret.put(EmployeeNameFilterKey.SP.toString(), this.doubleMetaphone.doubleMetaphone(surname));
         }
         return ret;
     }

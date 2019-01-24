@@ -53,7 +53,8 @@ public class Employee implements Serializable {
     @Column(name = "street_address")
     private String streetAddress;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @NotNull
     @JsonIgnoreProperties("")
     private Company company;
 

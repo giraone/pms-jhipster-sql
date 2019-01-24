@@ -1,12 +1,15 @@
 package com.giraone.pms.service.impl;
 
 import com.giraone.pms.service.NameNormalizeService;
+import org.apache.commons.codec.language.DoubleMetaphone;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class NameNormalizeServiceImpl implements NameNormalizeService {
+
+    private final DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
 
     public List<String> normalize(String name) {
 
@@ -37,6 +40,12 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         name = replaceCharacterRepetitions(name);
         name = replaceUmlauts(name);
         return name;
+    }
+
+    public String normalizePhoneticSingleName(String name) {
+
+        name = replaceDigits(name);
+        return this.doubleMetaphone.doubleMetaphone(name);
     }
 
     public String replaceUmlauts(String in) {

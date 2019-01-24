@@ -31,11 +31,12 @@ entity Employee {
 }
 
 /**
- * Normalized names of the employee
+ * Normalized names of the employee (Hint: We do not generated relations for performance reasons)
  */
 entity EmployeeName {
-    key String required,
-	value String required
+    ownerId Long required,
+    nameKey String required,
+	nameValue String required
 }
 
 // --- --- --- RELATIONSHIPS --- --- ---
@@ -50,10 +51,6 @@ relationship ManyToOne {
 
 relationship ManyToMany {
   Company{user} to User{company}
-}
-
-relationship ManyToOne {
-  EmployeeName{owner required} to Employee
 }
 
 // --- --- --- MISC --- --- ---

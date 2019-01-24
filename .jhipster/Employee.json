@@ -37,6 +37,7 @@
     "relationships": [
         {
             "relationshipType": "many-to-one",
+            "relationshipValidateRules": "required",
             "relationshipName": "company",
             "otherEntityName": "company",
             "otherEntityField": "id"

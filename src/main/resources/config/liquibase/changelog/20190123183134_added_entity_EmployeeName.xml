@@ -17,17 +17,16 @@
         Added the entity EmployeeName.
     -->
     <changeSet id="20190123183134-1" author="jhipster">
+        <validCheckSum>ANY</validCheckSum>
         <createTable tableName="employee_name" remarks="Normalized names of the employee">
-            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="owner_id" type="bigint">
                 <constraints nullable="false" />
             </column>
-            <column name="jhi_key" type="varchar(255)">
+            <column name="name_key" type="char(2)">
                 <constraints nullable="false" />
             </column>
-            <column name="jhi_value" type="varchar(255)">
+
+            <column name="name_value" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->

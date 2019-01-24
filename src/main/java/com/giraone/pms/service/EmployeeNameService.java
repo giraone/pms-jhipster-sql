@@ -1,9 +1,8 @@
 package com.giraone.pms.service;
 
-import com.giraone.pms.service.dto.EmployeeNameDTO;
+import com.giraone.pms.domain.EmployeeName;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service Interface for managing EmployeeName.
@@ -11,33 +10,9 @@ import java.util.Optional;
 public interface EmployeeNameService {
 
     /**
-     * Save a employeeName.
-     *
-     * @param employeeNameDTO the entity to save
-     * @return the persisted entity
-     */
-    EmployeeNameDTO save(EmployeeNameDTO employeeNameDTO);
-
-    /**
      * Get all the employeeNames.
      *
      * @return the list of entities
      */
-    List<EmployeeNameDTO> findAll();
-
-
-    /**
-     * Get the "id" employeeName.
-     *
-     * @param id the id of the entity
-     * @return the entity
-     */
-    Optional<EmployeeNameDTO> findOne(Long id);
-
-    /**
-     * Delete the "id" employeeName.
-     *
-     * @param id the id of the entity
-     */
-    void delete(Long id);
+    List<EmployeeName> findAll();
 }

@@ -1,9 +1,18 @@
 package com.giraone.pms.service.impl;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.filter.EmployeeFilter;
+import com.giraone.pms.domain.filter.EmployeeFilterPair;
+import com.giraone.pms.repository.CompanyRepository;
+import com.giraone.pms.repository.EmployeeRepository;
+import com.giraone.pms.service.EmployeeDomainService;
 import com.giraone.pms.service.NameNormalizeService;
+import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.service.mapper.CompanyMapper;
+import com.giraone.pms.service.mapper.EmployeeMapper;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -11,14 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.giraone.pms.domain.Company;
-import com.giraone.pms.repository.CompanyRepository;
-import com.giraone.pms.repository.EmployeeRepository;
-import com.giraone.pms.service.EmployeeDomainService;
-import com.giraone.pms.service.dto.CompanyDTO;
-import com.giraone.pms.service.dto.EmployeeDTO;
-import com.giraone.pms.service.mapper.CompanyMapper;
-import com.giraone.pms.service.mapper.EmployeeMapper;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service Implementation for managing Employee (domain version).
@@ -26,8 +29,6 @@ import com.giraone.pms.service.mapper.EmployeeMapper;
 @Service
 @Transactional
 public class EmployeeDomainServiceImpl implements EmployeeDomainService {
-
-    private static final boolean USE_MAIN_TABLE_ONLY = false;
 
     private final Logger log = LoggerFactory.getLogger(EmployeeDomainServiceImpl.class);
 
@@ -50,54 +51,51 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         this.nameNormalizeService = nameNormalizeService;
     }
 
-
     /**
      * Query the employees of a company.
      *
      * @param companyExternalId restrict the query to employees of this company
-     * @param surnamePrefix     restrict the query to employees with a surname matching this prefix
-     * @param pageable          the pagination information
+     * @param employeeFilter restrict the query to employees matching this filter
+     * @param pageable the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
-    public Optional<Page<EmployeeDTO>> findAll(String companyExternalId, String surnamePrefix, Pageable pageable) {
+    @Timed
+    public Optional<Page<EmployeeDTO>> findAll(Optional<String> companyExternalId, EmployeeFilter employeeFilter, Pageable pageable) {
 
-        log.debug("Service request to query employees companyExternalId={}, surnamePrefix={}", companyExternalId, surnamePrefix);
-        Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
-        if (!company.isPresent()) {
-            return Optional.empty();
-        }
-        if (USE_MAIN_TABLE_ONLY) {
-            return Optional.of(
-                employeeRepository.findAllByCompanyAndSurname(company.get(), surnamePrefix + "%", pageable)
-                    .map(employeeMapper::toDto));
+        log.debug("Service request to query employees companyExternalId={}, employeeFilter={}", companyExternalId, employeeFilter);
+
+        Optional<Company> company;
+        if (!companyExternalId.isPresent()) {
+            company = companyRepository.findOneByExternalId(companyExternalId.get());
+            if (!company.isPresent()) {
+                return Optional.empty();
+            }
         } else {
-            final String normalizedName = surnamePrefix.toLowerCase();
-            return Optional.of(
-                employeeRepository.findAllByCompanyAndNormalizedName(company.get(), normalizedName + "%", pageable)
-                    .map(employeeMapper::toDto));
+            company = Optional.empty();
         }
-    }
 
-    /**
-     * Query the employees of a company.
-     *
-     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
-     * @param pageable      the pagination information
-     * @return the list of entities or an empty optional, if the company was invalid
-     */
-    public Optional<Page<EmployeeDTO>> findAll(String surnamePrefix, Pageable pageable) {
-
-        log.debug("Service request to query employees surnamePrefix={}", surnamePrefix);
-        if (USE_MAIN_TABLE_ONLY || surnamePrefix.trim().matches("[ \\-]")) {
-            return Optional.of(
-                employeeRepository.findAllBySurname(surnamePrefix + "%", pageable)
-                    .map(employeeMapper::toDto));
+        Page<Employee> page;
+        if (company.isPresent()) {
+            // USER with access to only one company
+            if (employeeFilter.getSurname().isPresent()) {
+                final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
+                page = employeeRepository.findAllByCompanyAndKeyPairLike(
+                        company.get(), pair.getKey(), pair.getValue(), pageable);
+            } else {
+                page = employeeRepository.findAllByCompany(company.get(), pageable);
+            }
         } else {
-            final String normalizedName = nameNormalizeService.normalizeSingleName(surnamePrefix);
-            return Optional.of(
-                employeeRepository.findAllByNormalizedName(normalizedName, pageable)
-                    .map(employeeMapper::toDto));
+            // ADMIN with full access to all companies
+            if (employeeFilter.getSurname().isPresent()) {
+                final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
+                page = employeeRepository.findAllByKeyPairLike(
+                    pair.getKey(), pair.getValue(), pageable);
+            } else {
+                page = employeeRepository.findAll(pageable);
+            }
         }
+
+        return Optional.of(page.map(employeeMapper::toDto));
     }
 
     /**
