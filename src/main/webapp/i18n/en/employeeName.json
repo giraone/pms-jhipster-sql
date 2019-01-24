@@ -15,9 +15,9 @@
             "detail": {
                 "title": "Employee Name"
             },
-            "key": "Key",
-            "value": "Value",
-            "owner": "Owner"
+            "ownerId": "Owner Id",
+            "nameKey": "Name Key",
+            "nameValue": "Name Value"
         }
     }
 }

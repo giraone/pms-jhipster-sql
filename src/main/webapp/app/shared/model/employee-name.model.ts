@@ -1,10 +1,9 @@
 export interface IEmployeeName {
-    id?: number;
-    key?: string;
-    value?: string;
     ownerId?: number;
+    nameKey?: string;
+    nameValue?: string;
 }
 
 export class EmployeeName implements IEmployeeName {
-    constructor(public id?: number, public key?: string, public value?: string, public ownerId?: number) {}
+    constructor(public ownerId?: number, public nameKey?: string, public nameValue?: string) {}
 }
