@@ -16,7 +16,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     templateUrl: './employee.component.html'
 })
 export class EmployeeComponent implements OnInit, OnDestroy {
-    surnamePrefix: String;
+    input: String;
     inputSubject: Subject<String> = new Subject();
     employees: IEmployee[];
     currentAccount: any;
@@ -38,7 +38,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         protected parseLinks: JhiParseLinks,
         protected accountService: AccountService
     ) {
-        this.surnamePrefix = '';
+        this.input = '';
         this.employees = [];
         this.currentCompanies = [];
         this.itemsPerPage = ITEMS_PER_PAGE;
@@ -60,10 +60,30 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     }
 
     load() {
+        const trimed = this.input.trim();
+        if (trimed.length < 2) {
+            return;
+        }
+        let surname: String;
+        let surnameSearchMode: String;
+        if (trimed.charAt(0) === '~') {
+            surname = trimed.substr(1);
+            surnameSearchMode = 'PHONETIC';
+        } else if (trimed.charAt(0) === '=') {
+            surname = trimed.substr(1);
+            surnameSearchMode = 'EXACT';
+        } else {
+            surname = trimed;
+            surnameSearchMode = 'PREFIX_NORMALIZED';
+        }
+        if (surname.length < 2) {
+            return;
+        }
         this.employeeService
             .query({
                 companyExternalId: this.getExternalCompanyId(),
-                surnamePrefix: this.surnamePrefix,
+                surname: surname,
+                surnameSearchMode: surnameSearchMode,
                 page: this.page,
                 size: this.itemsPerPage,
                 sort: this.sort()

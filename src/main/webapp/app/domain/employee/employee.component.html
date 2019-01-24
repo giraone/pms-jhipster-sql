@@ -13,7 +13,7 @@
         <span jhiTranslate="pmssqlApp.query.count">Count = </span>
         <span>{{totalItems}}</span>   
     </h3>
-    <input type="text" [(ngModel)]="surnamePrefix" (ngModelChange)="filterChanged($event)"
+    <input type="text" [(ngModel)]="input" (ngModelChange)="filterChanged($event)"
         placeholder="{{'pmssqlApp.query.filter.placeholder' | translate}}" size="60" />
     <jhi-alert></jhi-alert>
     <br/>
