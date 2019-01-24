@@ -1,0 +1,61 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+            <h2 id="jhi-employee-name-heading" jhiTranslate="pmssqlApp.employeeName.home.createOrEditLabel">Create or edit a Employee Name</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!employeeName.id">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id"
+                        [(ngModel)]="employeeName.id" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.employeeName.ownerId" for="field_ownerId">Owner Id</label>
+                    <input type="number" class="form-control" name="ownerId" id="field_ownerId"
+                        [(ngModel)]="employeeName.ownerId" required/>
+                    <div [hidden]="!(editForm.controls.ownerId?.dirty && editForm.controls.ownerId?.invalid)">
+                        <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.ownerId?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.controls.ownerId?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.employeeName.nameKey" for="field_nameKey">Name Key</label>
+                    <input type="text" class="form-control" name="nameKey" id="field_nameKey"
+                        [(ngModel)]="employeeName.nameKey" required/>
+                    <div [hidden]="!(editForm.controls.nameKey?.dirty && editForm.controls.nameKey?.invalid)">
+                        <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.nameKey?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.employeeName.nameValue" for="field_nameValue">Name Value</label>
+                    <input type="text" class="form-control" name="nameValue" id="field_nameValue"
+                        [(ngModel)]="employeeName.nameValue" required/>
+                    <div [hidden]="!(editForm.controls.nameValue?.dirty && editForm.controls.nameValue?.invalid)">
+                        <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.nameValue?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

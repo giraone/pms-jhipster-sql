@@ -10,7 +10,7 @@ import { PmssqlEmployeeNameModule } from './employee-name/employee-name.module';
     imports: [
         PmssqlCompanyModule,
         PmssqlEmployeeModule,
-        PmssqlEmployeeNameModule
+        PmssqlEmployeeNameModule,
         /* jhipster-needle-add-entity-module - JHipster will add entity modules here */
     ],
     declarations: [],
