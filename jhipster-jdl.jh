@@ -59,6 +59,7 @@ relationship ManyToMany {
 //paginate Employee with infinite-scroll
 paginate Employee with pagination
 paginate Company with pagination
+paginate EmployeeName with pagination
 
 // Use Data Transfer Objects (DTO)
 dto * with mapstruct
