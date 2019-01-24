@@ -1,10 +1,13 @@
 package com.giraone.pms.service.impl;
 
+import com.giraone.pms.service.EmployeeNameService;
 import com.giraone.pms.domain.EmployeeName;
 import com.giraone.pms.repository.EmployeeNameRepository;
-import com.giraone.pms.service.EmployeeNameService;
+import com.giraone.pms.service.dto.EmployeeNameDTO;
+import com.giraone.pms.service.mapper.EmployeeNameMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,21 +26,26 @@ public class EmployeeNameServiceImpl implements EmployeeNameService {
 
     private final EmployeeNameRepository employeeNameRepository;
 
-    public EmployeeNameServiceImpl(EmployeeNameRepository employeeNameRepository) {
+    private final EmployeeNameMapper employeeNameMapper;
+
+    public EmployeeNameServiceImpl(EmployeeNameRepository employeeNameRepository, EmployeeNameMapper employeeNameMapper) {
         this.employeeNameRepository = employeeNameRepository;
+        this.employeeNameMapper = employeeNameMapper;
     }
 
     /**
      * Save a employeeName.
      *
-     * @param employeeName the entity to save
+     * @param employeeNameDTO the entity to save
      * @return the persisted entity
      */
     @Override
-    public EmployeeName save(EmployeeName employeeName) {
-        log.debug("Request to save EmployeeName : {}", employeeName);
+    public EmployeeNameDTO save(EmployeeNameDTO employeeNameDTO) {
+        log.debug("Request to save EmployeeName : {}", employeeNameDTO);
 
-        return employeeNameRepository.save(employeeName);
+        EmployeeName employeeName = employeeNameMapper.toEntity(employeeNameDTO);
+        employeeName = employeeNameRepository.save(employeeName);
+        return employeeNameMapper.toDto(employeeName);
     }
 
     /**
@@ -48,9 +56,10 @@ public class EmployeeNameServiceImpl implements EmployeeNameService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<EmployeeName> findAll(Pageable pageable) {
+    public Page<EmployeeNameDTO> findAll(Pageable pageable) {
         log.debug("Request to get all EmployeeNames");
-        return employeeNameRepository.findAll(pageable);
+        return employeeNameRepository.findAll(pageable)
+            .map(employeeNameMapper::toDto);
     }
 
 
@@ -62,11 +71,11 @@ public class EmployeeNameServiceImpl implements EmployeeNameService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Optional<EmployeeName> findOne(Long id) {
+    public Optional<EmployeeNameDTO> findOne(Long id) {
         log.debug("Request to get EmployeeName : {}", id);
-        return employeeNameRepository.findById(id);
+        return employeeNameRepository.findById(id)
+            .map(employeeNameMapper::toDto);
     }
-
 
     /**
      * Delete the employeeName by id.
@@ -77,5 +86,5 @@ public class EmployeeNameServiceImpl implements EmployeeNameService {
     public void delete(Long id) {
         log.debug("Request to delete EmployeeName : {}", id);
         employeeNameRepository.deleteById(id);
-     }
+    }
 }

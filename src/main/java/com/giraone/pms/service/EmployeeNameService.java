@@ -1,6 +1,7 @@
 package com.giraone.pms.service;
 
 import com.giraone.pms.domain.EmployeeName;
+import com.giraone.pms.service.dto.EmployeeNameDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +18,7 @@ public interface EmployeeNameService {
      * @param employeeNameDTO the entity to save
      * @return the persisted entity
      */
-    EmployeeName save(EmployeeName employeeNameDTO);
+    EmployeeNameDTO save(EmployeeNameDTO employeeNameDTO);
 
     /**
      * Get all the employeeNames.
@@ -25,7 +26,7 @@ public interface EmployeeNameService {
      * @param pageable the pagination information
      * @return the list of entities
      */
-    Page<EmployeeName> findAll(Pageable pageable);
+    Page<EmployeeNameDTO> findAll(Pageable pageable);
 
 
     /**
@@ -34,7 +35,7 @@ public interface EmployeeNameService {
      * @param id the id of the entity
      * @return the entity
      */
-    Optional<EmployeeName> findOne(Long id);
+    Optional<EmployeeNameDTO> findOne(Long id);
 
     /**
      * Delete the "id" employeeName.

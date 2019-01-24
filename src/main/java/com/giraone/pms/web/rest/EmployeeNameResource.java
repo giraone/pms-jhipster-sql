@@ -1,8 +1,8 @@
 package com.giraone.pms.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.giraone.pms.domain.EmployeeName;
 import com.giraone.pms.service.EmployeeNameService;
+import com.giraone.pms.service.dto.EmployeeNameDTO;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
 import com.giraone.pms.web.rest.util.HeaderUtil;
 import com.giraone.pms.web.rest.util.PaginationUtil;
@@ -41,42 +41,42 @@ public class EmployeeNameResource {
     /**
      * POST  /employee-names : Create a new employeeName.
      *
-     * @param employeeName the employeeName to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new employeeName, or with status 400 (Bad Request) if the employeeName has already an ID
+     * @param employeeNameDTO the employeeNameDTO to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new employeeNameDTO, or with status 400 (Bad Request) if the employeeName has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/employee-names")
     @Timed
-    public ResponseEntity<EmployeeName> createEmployeeName(@Valid @RequestBody EmployeeName employeeName) throws URISyntaxException {
-        log.debug("REST request to save EmployeeName : {}", employeeName);
-        if (employeeName.getId() != null) {
+    public ResponseEntity<EmployeeNameDTO> createEmployeeName(@Valid @RequestBody EmployeeNameDTO employeeNameDTO) throws URISyntaxException {
+        log.debug("REST request to save EmployeeName : {}", employeeNameDTO);
+        if (employeeNameDTO.getOwnerId() != null) {
             throw new BadRequestAlertException("A new employeeName cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        EmployeeName result = employeeNameService.save(employeeName);
-        return ResponseEntity.created(new URI("/api/employee-names/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+        EmployeeNameDTO result = employeeNameService.save(employeeNameDTO);
+        return ResponseEntity.created(new URI("/api/employee-names/" + result.getOwnerId()))
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getOwnerId().toString()))
             .body(result);
     }
 
     /**
      * PUT  /employee-names : Updates an existing employeeName.
      *
-     * @param employeeName the employeeName to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated employeeName,
-     * or with status 400 (Bad Request) if the employeeName is not valid,
-     * or with status 500 (Internal Server Error) if the employeeName couldn't be updated
+     * @param employeeNameDTO the employeeNameDTO to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated employeeNameDTO,
+     * or with status 400 (Bad Request) if the employeeNameDTO is not valid,
+     * or with status 500 (Internal Server Error) if the employeeNameDTO couldn't be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/employee-names")
     @Timed
-    public ResponseEntity<EmployeeName> updateEmployeeName(@Valid @RequestBody EmployeeName employeeName) throws URISyntaxException {
-        log.debug("REST request to update EmployeeName : {}", employeeName);
-        if (employeeName.getId() == null) {
+    public ResponseEntity<EmployeeNameDTO> updateEmployeeName(@Valid @RequestBody EmployeeNameDTO employeeNameDTO) throws URISyntaxException {
+        log.debug("REST request to update EmployeeName : {}", employeeNameDTO);
+        if (employeeNameDTO.getOwnerId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        EmployeeName result = employeeNameService.save(employeeName);
+        EmployeeNameDTO result = employeeNameService.save(employeeNameDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, employeeName.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, employeeNameDTO.getOwnerId().toString()))
             .body(result);
     }
 
@@ -88,9 +88,9 @@ public class EmployeeNameResource {
      */
     @GetMapping("/employee-names")
     @Timed
-    public ResponseEntity<List<EmployeeName>> getAllEmployeeNames(Pageable pageable) {
+    public ResponseEntity<List<EmployeeNameDTO>> getAllEmployeeNames(Pageable pageable) {
         log.debug("REST request to get a page of EmployeeNames");
-        Page<EmployeeName> page = employeeNameService.findAll(pageable);
+        Page<EmployeeNameDTO> page = employeeNameService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employee-names");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -98,21 +98,21 @@ public class EmployeeNameResource {
     /**
      * GET  /employee-names/:id : get the "id" employeeName.
      *
-     * @param id the id of the employeeName to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the employeeName, or with status 404 (Not Found)
+     * @param id the id of the employeeNameDTO to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the employeeNameDTO, or with status 404 (Not Found)
      */
     @GetMapping("/employee-names/{id}")
     @Timed
-    public ResponseEntity<EmployeeName> getEmployeeName(@PathVariable Long id) {
+    public ResponseEntity<EmployeeNameDTO> getEmployeeName(@PathVariable Long id) {
         log.debug("REST request to get EmployeeName : {}", id);
-        Optional<EmployeeName> employeeName = employeeNameService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(employeeName);
+        Optional<EmployeeNameDTO> employeeNameDTO = employeeNameService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(employeeNameDTO);
     }
 
     /**
      * DELETE  /employee-names/:id : delete the "id" employeeName.
      *
-     * @param id the id of the employeeName to delete
+     * @param id the id of the employeeNameDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/employee-names/{id}")
