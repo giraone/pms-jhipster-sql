@@ -2,33 +2,33 @@
     "name": "EmployeeName",
     "fields": [
         {
-            "fieldName": "key",
+            "fieldName": "ownerId",
+            "fieldType": "Long",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "nameKey",
             "fieldType": "String",
             "fieldValidateRules": [
                 "required"
             ]
         },
         {
-            "fieldName": "value",
+            "fieldName": "nameValue",
             "fieldType": "String",
             "fieldValidateRules": [
                 "required"
             ]
         }
     ],
-    "relationships": [
-        {
-            "relationshipType": "many-to-one",
-            "relationshipName": "owner",
-            "otherEntityName": "employee",
-            "otherEntityField": "id"
-        }
-    ],
+    "relationships": [],
     "changelogDate": "20190123183134",
-    "javadoc": "Normalized names of the employee",
+    "javadoc": "Normalized names of the employee (Hint: We do not generated relations for performance reasons)",
     "entityTableName": "employee_name",
     "dto": "mapstruct",
-    "pagination": "no",
+    "pagination": "pagination",
     "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
