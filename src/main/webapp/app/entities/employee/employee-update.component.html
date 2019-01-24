@@ -61,10 +61,16 @@
 
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="pmssqlApp.employee.company" for="field_company">Company</label>
-                    <select class="form-control" id="field_company" name="company" [(ngModel)]="employee.companyId" >
-                        <option [ngValue]="null"></option>
+                    <select class="form-control" id="field_company" name="company" [(ngModel)]="employee.companyId"  required>
+                        <option *ngIf="!editForm.value.company" [ngValue]="null" selected></option>
                         <option [ngValue]="companyOption.id" *ngFor="let companyOption of companies; trackBy: trackCompanyById">{{companyOption.id}}</option>
                     </select>
+                </div>
+                <div [hidden]="!(editForm.controls.company?.dirty && editForm.controls.company?.invalid)">
+                    <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.company?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                    </small>
                 </div>
             </div>
             <div>

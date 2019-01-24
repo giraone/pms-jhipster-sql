@@ -20,4 +20,6 @@ public interface EmployeeBulkService {
      * @return the number of saved employees
      */
     int save(List<EmployeeBulkDTO> employeeDTOList);
+
+    int reIndex(boolean clearFirst);
 }

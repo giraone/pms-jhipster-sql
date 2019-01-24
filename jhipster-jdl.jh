@@ -30,10 +30,19 @@ entity Employee {
 	streetAddress String
 }
 
+/**
+ * Normalized names of the employee (Hint: We do not generated relations for performance reasons)
+ */
+entity EmployeeName {
+    ownerId Long required,
+    nameKey String required,
+	nameValue String required
+}
+
 // --- --- --- RELATIONSHIPS --- --- ---
 
 relationship ManyToOne {
-	Employee{company} to Company
+	Employee{company required} to Company
 }
 
 // relationship OneToMany {
@@ -50,6 +59,7 @@ relationship ManyToMany {
 //paginate Employee with infinite-scroll
 paginate Employee with pagination
 paginate Company with pagination
+paginate EmployeeName with pagination
 
 // Use Data Transfer Objects (DTO)
 dto * with mapstruct

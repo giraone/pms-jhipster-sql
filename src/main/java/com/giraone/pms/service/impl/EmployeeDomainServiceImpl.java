@@ -1,8 +1,18 @@
 package com.giraone.pms.service.impl;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.filter.EmployeeFilter;
+import com.giraone.pms.domain.filter.EmployeeFilterPair;
+import com.giraone.pms.repository.CompanyRepository;
+import com.giraone.pms.repository.EmployeeRepository;
+import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.NameNormalizeService;
+import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.service.mapper.CompanyMapper;
+import com.giraone.pms.service.mapper.EmployeeMapper;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -10,14 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.giraone.pms.domain.Company;
-import com.giraone.pms.repository.CompanyRepository;
-import com.giraone.pms.repository.EmployeeRepository;
-import com.giraone.pms.service.EmployeeDomainService;
-import com.giraone.pms.service.dto.CompanyDTO;
-import com.giraone.pms.service.dto.EmployeeDTO;
-import com.giraone.pms.service.mapper.CompanyMapper;
-import com.giraone.pms.service.mapper.EmployeeMapper;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service Implementation for managing Employee (domain version).
@@ -30,55 +34,78 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
 
     private final EmployeeRepository employeeRepository;
     private final CompanyRepository companyRepository;
-
     private final EmployeeMapper employeeMapper;
     private final CompanyMapper companyMapper;
+    private final NameNormalizeService nameNormalizeService;
 
     public EmployeeDomainServiceImpl(
         EmployeeRepository employeeRepository,
         CompanyRepository companyRepository,
         EmployeeMapper employeeMapper,
-        CompanyMapper companyMapper) {
+        CompanyMapper companyMapper,
+        NameNormalizeService nameNormalizeService) {
         this.employeeRepository = employeeRepository;
         this.companyRepository = companyRepository;
         this.employeeMapper = employeeMapper;
         this.companyMapper = companyMapper;
+        this.nameNormalizeService = nameNormalizeService;
     }
-
 
     /**
      * Query the employees of a company.
      *
      * @param companyExternalId restrict the query to employees of this company
-     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
-     * @param pageable the pagination information
+     * @param employeeFilter    restrict the query to employees matching this filter
+     * @param pageable          the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
-    public Optional<Page<EmployeeDTO>> findAll(String companyExternalId, String surnamePrefix, Pageable pageable) {
+    @Timed
+    public Optional<Page<EmployeeDTO>> findAll(Optional<String> companyExternalId, EmployeeFilter employeeFilter, Pageable pageable) {
 
-        log.debug("Service request to query employees companyExternalId={}, surnamePrefix={}", companyExternalId, surnamePrefix);
-        Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
-        if (!company.isPresent()) {
-            return Optional.empty();
+        log.debug("Service request to query employees companyExternalId={}, employeeFilter={}", companyExternalId, employeeFilter);
+
+        Optional<Company> company;
+        if (!companyExternalId.isPresent()) {
+            company = companyRepository.findOneByExternalId(companyExternalId.get());
+            if (!company.isPresent()) {
+                return Optional.empty();
+            }
+        } else {
+            company = Optional.empty();
         }
-        return Optional.of(
-            employeeRepository.findAllByCompanyAndSurname(company.get(),surnamePrefix + "%", pageable)
-                .map(employeeMapper::toDto));
-    }
 
-    /**
-     * Query the employees of a company.
-     *
-     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
-     * @param pageable the pagination information
-     * @return the list of entities or an empty optional, if the company was invalid
-     */
-    public Optional<Page<EmployeeDTO>> findAll(String surnamePrefix, Pageable pageable) {
+        Page<Employee> page;
+        if (company.isPresent()) {
+            // USER with access to only one company
+            if (employeeFilter.getSurname().isPresent()) {
+                final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
+                if (pair.getKey() == null) {
+                    page = employeeRepository.findAllByCompanyAndSurnameLike(
+                        company.get(), pair.getValue(), pageable);
+                } else {
+                    page = employeeRepository.findAllByCompanyAndKeyPairLike(
+                        company.get(), pair.getKey(), pair.getValue(), pageable);
+                }
+            } else {
+                page = employeeRepository.findAllByCompany(company.get(), pageable);
+            }
+        } else {
+            // ADMIN with full access to all companies
+            if (employeeFilter.getSurname().isPresent()) {
+                final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
+                if (pair.getKey() == null) {
+                    page = employeeRepository.findAllBySurnameLike(
+                        pair.getValue(), pageable);
+                } else {
+                    page = employeeRepository.findAllByKeyPairLike(
+                        pair.getKey(), pair.getValue(), pageable);
+                }
+            } else {
+                page = employeeRepository.findAll(pageable);
+            }
+        }
 
-        log.debug("Service request to query employees surnamePrefix={}", surnamePrefix);
-        return Optional.of(
-            employeeRepository.findAllBySurname(surnamePrefix + "%", pageable)
-                .map(employeeMapper::toDto));
+        return Optional.of(page.map(employeeMapper::toDto));
     }
 
     /**
@@ -94,10 +121,10 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         return employeeRepository.findById(id)
             .map(employeeMapper::toDto);
     }
-    
+
     public List<CompanyDTO> getAllCompaniesOfEmployee(String userLogin) {
-    	
-    	log.debug("getAllCompaniesOfEmployee userLogin={}", userLogin);
-    	return this.companyRepository.findCompaniesOfUser(userLogin, Pageable.unpaged()).map(companyMapper::toDto).getContent();
+
+        log.debug("getAllCompaniesOfEmployee userLogin={}", userLogin);
+        return this.companyRepository.findCompaniesOfUser(userLogin, Pageable.unpaged()).map(companyMapper::toDto).getContent();
     }
 }

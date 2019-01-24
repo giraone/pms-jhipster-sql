@@ -1,5 +1,6 @@
 package com.giraone.pms.service;
 
+import com.giraone.pms.domain.filter.EmployeeFilter;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import org.springframework.data.domain.Page;
@@ -17,22 +18,13 @@ public interface EmployeeDomainService {
      * Query the employees of a company.
      *
      * @param companyExternalId restrict the query to employees of this company
-     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
+     * @param employeeFilter restrict the query to employees matching this filter
      * @param pageable the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
-    Optional<Page<EmployeeDTO>> findAll(String companyExternalId, String surnamePrefix, Pageable pageable);
+    public Optional<Page<EmployeeDTO>> findAll(Optional<String> companyExternalId, EmployeeFilter employeeFilter, Pageable pageable);
 
-    /**
-     * Query the employees of a company.
-     *
-     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
-     * @param pageable the pagination information
-     * @return the list of entities or an empty optional, if the company was invalid
-     */
-    Optional<Page<EmployeeDTO>> findAll(String surnamePrefix, Pageable pageable);
-
-    /**
+   /**
      * Get the "id" employee.
      *
      * @param id the id of the entity

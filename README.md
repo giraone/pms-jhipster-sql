@@ -59,6 +59,8 @@ curl "${BASE_URL}/api/companies?page=0&size=20&sort=id,asc" -H 'Accept: applicat
 curl "${BASE_URL}/api/employees?page=0&size=20&sort=id,asc" -H 'Accept: application/json' \
  -H "Authorization: Bearer ${token}"
 
+curl "${BASE_URL}/api/employee-names?page=0&size=20&sort=id,asc" -H 'Accept: application/json' \
+ -H "Authorization: Bearer ${token}"
 ```
 
 ## CURL samples (domain API)
@@ -68,14 +70,17 @@ The first PUT call uses data from [the testdata-generator project on GitHub](htt
 ```
 
 curl "${BASE_URL}/domain-api/employee-list" -H 'Accept: application/json' -H 'Content-Type: application/json' \
- -H "Authorization: Bearer ${token}" -X PUT  --data @../data-5M/d-00000000/f-00000000.json
+ -H "Authorization: Bearer ${token}" -X PUT  --data @../data-10M/d-00000000/f-00000000.json
 
 curl "${BASE_URL}/domain-api/employees?companyExternalId=l-00000060&surnamePrefix=A&page=0&size=20&sort=id,asc" \
  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 curl "${BASE_URL}/domain-api/employees?companyExternalId=l-00000060&surnamePrefix=Ar&page=0&size=20&sort=id,asc" \
  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 
-http://localhost:8080/domain-api/employees?surnamePrefix=X&page=0&size=20&externalCompanyId=l-00000060&sort=id,asc
+curl "${BASE_URL}/domain-api/employees?surnamePrefix=X&page=0&size=20&externalCompanyId=l-00000060&sort=id,asc \
+  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+
+curl "${BASE_URL}/domain-api/re-index?clear=false" -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 ```
 
 ## Performance of bulk load

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="20190123200000-1" author="hs">
+        <validCheckSum>ANY</validCheckSum>
+
+        <preConditions onFail="MARK_RAN">
+            <indexExists indexName="emname_name_index" />
+        </preConditions>
+        <dropIndex indexName="emname_name_index" tableName="employee_name" />
+
+    </changeSet>
+
+    <changeSet id="20190123200000-2" author="hs">
+        <validCheckSum>ANY</validCheckSum>
+
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="emname_name_index" /></not>
+        </preConditions>
+        <createIndex tableName="employee_name" indexName="emname_name_index">
+            <column name="name_key" />
+            <column name="name_value" />
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

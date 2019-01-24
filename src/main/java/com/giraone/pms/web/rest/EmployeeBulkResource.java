@@ -4,15 +4,15 @@ import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giraone.pms.domain.Employee;
+import com.giraone.pms.security.AuthoritiesConstants;
+import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.EmployeeBulkDTO;
 import com.giraone.pms.service.EmployeeBulkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,12 +36,25 @@ public class EmployeeBulkResource {
         this.employeeBulkService = employeeBulkImportRepository;
     }
 
+
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     @PutMapping("/employee-list")
     @Timed
     public ResponseEntity<Integer> insert(@RequestBody List<EmployeeBulkDTO> employees)  {
 
         log.info("EmployeeBulkResource.insert employees.size={}", employees.size());
         int count = employeeBulkService.save(employees);
+        return ResponseEntity.ok()
+            .body(count);
+    }
+
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
+    @GetMapping("/re-index")
+    @Timed
+    public ResponseEntity<Integer> reIndex(@RequestParam(required = false, defaultValue = "false") boolean clear)  {
+
+        log.info("EmployeeBulkResource.reIndex");
+        int count = employeeBulkService.reIndex(clear);
         return ResponseEntity.ok()
             .body(count);
     }

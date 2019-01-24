@@ -1,8 +1,17 @@
 package com.giraone.pms.web.rest;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.codahale.metrics.annotation.Timed;
+import com.giraone.pms.domain.filter.EmployeeFilter;
+import com.giraone.pms.domain.enumeration.StringSearchMode;
+import com.giraone.pms.security.AuthoritiesConstants;
+import com.giraone.pms.security.SecurityUtils;
+import com.giraone.pms.service.AuthorizationService;
+import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.web.rest.errors.InternalServerErrorException;
+import com.giraone.pms.web.rest.util.PaginationUtil;
+import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -11,24 +20,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.codahale.metrics.annotation.Timed;
-import com.giraone.pms.security.AuthoritiesConstants;
-import com.giraone.pms.security.SecurityUtils;
-import com.giraone.pms.service.AuthorizationService;
-import com.giraone.pms.service.EmployeeDomainService;
-import com.giraone.pms.service.EmployeeService;
-import com.giraone.pms.service.dto.CompanyDTO;
-import com.giraone.pms.service.dto.EmployeeDTO;
-import com.giraone.pms.web.rest.errors.InternalServerErrorException;
-import com.giraone.pms.web.rest.util.PaginationUtil;
-
-import io.github.jhipster.web.util.ResponseUtil;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * REST controller for managing Employee (domain version).
@@ -39,17 +35,12 @@ public class EmployeeDomainResource {
 
     private final Logger log = LoggerFactory.getLogger(EmployeeDomainResource.class);
 
-    private static final String ENTITY_NAME = "employee";
-
     private final EmployeeDomainService employeeDomainService;
-    private final EmployeeService employeeService;
     private final AuthorizationService authorizationService;
 
     public EmployeeDomainResource(EmployeeDomainService employeeDomainService,
-                                  EmployeeService employeeService,
                                   AuthorizationService authorizationService) {
         this.employeeDomainService = employeeDomainService;
-        this.employeeService = employeeService;
         this.authorizationService = authorizationService;
     }
 
@@ -57,7 +48,9 @@ public class EmployeeDomainResource {
      * GET  /employees : get all the employees.
      *
      * @param companyExternalId restrict the query to employees of this company
-     * @param surnamePrefix restrict the query to employees with a surname matching this prefix
+     * @param surname restrict the query to employees with a given surname
+     * @param surnameSearchMode indicator, how the query filter for surname is performed
+     * @param dateOfBirth restrict the query to employees with a date of birth
      * @param pageable the pagination information
      * @return the ResponseEntity with status 200 (OK) and the list of employees in body
      * or status 404 (NOT FOUND), if the companyExternalId is invalid.
@@ -71,10 +64,15 @@ public class EmployeeDomainResource {
     @GetMapping("/employees")
     @Timed
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
-        @RequestParam String companyExternalId, @RequestParam String surnamePrefix, Pageable pageable) {
+        @RequestParam(required = false) Optional<String> companyExternalId,
+        @RequestParam(required = false) Optional<String> surname,
+        @RequestParam(required = false, defaultValue = "PREFIX_NORMALIZED") StringSearchMode surnameSearchMode,
+        @RequestParam(required = false) Optional<LocalDate> dateOfBirth,
+        Pageable pageable) {
 
-        log.debug("REST request to query employees companyExternalId={}, surnamePrefix={}", companyExternalId, surnamePrefix);
+        log.debug("REST request to query employees companyExternalId={}, surname={}", companyExternalId, surname, dateOfBirth);
 
+        EmployeeFilter employeeFilter = new EmployeeFilter(surname, surnameSearchMode, dateOfBirth);
         boolean admin = SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN);
 
         Optional<Page<EmployeeDTO>> result;
@@ -82,19 +80,20 @@ public class EmployeeDomainResource {
             final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
             log.debug("- by user {}", userLogin);
 
-            if (!this.authorizationService.check(companyExternalId, userLogin)) {
+            if (!companyExternalId.isPresent()) {
+                log.warn("Attempt by user to query without companyExternalId! {}", userLogin);
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (!this.authorizationService.check(companyExternalId.get(), userLogin)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            result = employeeDomainService.findAll(companyExternalId, surnamePrefix, pageable);
-            if (!result.isPresent()) {
-                log.debug("- companyExternalId {} is invalid!", companyExternalId);
-                return ResponseEntity.notFound().build();
-            }
         }
-        else {
-            result = employeeDomainService.findAll(surnamePrefix, pageable);
+        result = employeeDomainService.findAll(companyExternalId, employeeFilter, pageable);
+        if (!result.isPresent()) {
+            log.debug("- companyExternalId {} is invalid!", companyExternalId);
+            return ResponseEntity.notFound().build();
         }
-
 
         Page<EmployeeDTO> page = result.get();
         log.debug("- size={}, totalElements={}", page.getContent().size(), page.getTotalElements());

@@ -2,6 +2,7 @@
 # Project Specific
 ######################
 /src/main/webapp/content/css/main.css
+/src/main/resources/.h2.server.properties
 /target/www/**
 /src/test/javascript/coverage/
 
