@@ -24,8 +24,8 @@ export class EmployeeNameDeleteDialogComponent {
         this.activeModal.dismiss('cancel');
     }
 
-    confirmDelete(id: number) {
-        this.employeeNameService.delete(id).subscribe(response => {
+    confirmDelete(compoundId: String) {
+        this.employeeNameService.delete(compoundId).subscribe(response => {
             this.eventManager.broadcast({
                 name: 'employeeNameListModification',
                 content: 'Deleted an employeeName'

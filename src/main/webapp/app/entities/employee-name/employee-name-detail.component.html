@@ -1,7 +1,7 @@
 <div class="row justify-content-center">
     <div class="col-8">
         <div *ngIf="employeeName">
-            <h2><span jhiTranslate="pmssqlApp.employeeName.detail.title">Employee Name</span> {{employeeName.id}}</h2>
+            <h2><span jhiTranslate="pmssqlApp.employeeName.detail.title">Employee Name</span> {{employeeName.compoundId()}}</h2>
             <hr>
             <jhi-alert-error></jhi-alert-error>
             <dl class="row-md jh-entity-details">
@@ -26,7 +26,7 @@
             </button>
 
             <button type="button"
-                    [routerLink]="['/employee-name', employeeName.id, 'edit']"
+                    [routerLink]="['/employee-name', employeeName.compoundId(), 'edit']"
                     class="btn btn-primary">
                 <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
             </button>

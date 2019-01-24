@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 
-import { IEmployeeName } from 'app/shared/model/employee-name.model';
+import { IEmployeeName, EmployeeName } from 'app/shared/model/employee-name.model';
 import { AccountService } from 'app/core';
 
 import { ITEMS_PER_PAGE } from 'app/shared';
@@ -103,8 +103,8 @@ export class EmployeeNameComponent implements OnInit, OnDestroy {
         this.eventManager.destroy(this.eventSubscriber);
     }
 
-    trackId(index: number, item: IEmployeeName) {
-        return item.id;
+    trackId(index: number, item: EmployeeName) {
+        return item.compoundId();
     }
 
     registerChangeInEmployeeNames() {

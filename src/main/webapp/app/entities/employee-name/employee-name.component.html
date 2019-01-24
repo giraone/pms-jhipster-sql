@@ -22,7 +22,7 @@
             </thead>
             <tbody>
             <tr *ngFor="let employeeName of employeeNames ;trackBy: trackId">
-                <td><a [routerLink]="['/employee-name', employeeName.ownerId, 'view' ]">{{employeeName.ownerId}}</a></td>
+                <td><a [routerLink]="['/employee', employeeName.ownerId, 'view' ]">{{employeeName.ownerId}}</a></td>
                 <td>{{employeeName.nameKey}}</td>
                 <td>{{employeeName.nameValue}}</td>
                 <td class="text-right">
