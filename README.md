@@ -32,6 +32,10 @@ production PostgreSQL database. It will use a docker volume in `~/volumes/jhipst
 You can also run a _pgAdmin4_ using `docker-compose -f src/main/docker/pgadmin4.yml up -d`.
 Both docker compose files share a common network
 
+## Database model
+
+![Data Model](jhipster-jdl.png 'Data Model')
+
 ## Re-create data model
 
 ```
@@ -98,6 +102,10 @@ select count(*) from company
 select count(*) from employee
 > 10000000
 
+# lookup names for employees
+select count(*) from employee_name
+> 20000000
+
 # largest companies
 select count(company_id) as count, company_id
 from employee
@@ -134,4 +142,9 @@ select u.login from company_user cu, jhi_user u
 where cu.users_id = u.id
 and cu.companies_id = 1001
 
+# distribution of employee lookup names
+select count(owner_id) as count, owner_id
+from employee_name
+group by owner_id
+order by count desc
 ```

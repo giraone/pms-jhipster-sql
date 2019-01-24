@@ -1,7 +1,12 @@
+// --- --- --- LAYOUT --- --- ---
+
+#arrowSize: 2
+#lineWidth: 5
+
 // --- --- --- ENUMERATIONS --- --- ---
 
 enum GenderType {
-    UNKNOWN, MALE, FEMALE
+ UNKNOWN, MALE, FEMALE
 }
 
 // --- --- --- ENITIES --- --- ---
@@ -10,48 +15,50 @@ enum GenderType {
  * The Company entity.
  */
 entity Company {
-    externalId String required unique,
-	name String,
-    postalCode String,
-	city String,
-	streetAddress String
+ externalId String required,
+ name String,
+ postalCode String,
+ city String,
+ streetAddress String
 }
 
 /**
  * The Employee entity.
  */
 entity Employee {
-	surname String required,
-	givenName String,
-	dateOfBirth LocalDate,
-	gender GenderType,
-    postalCode String,
-	city String,
-	streetAddress String
+ surname String required,
+ givenName String,
+ dateOfBirth LocalDate,
+ gender GenderType,
+ postalCode String,
+ city String,
+ streetAddress String
 }
 
 /**
- * Normalized names of the employee (Hint: We do not generated relations for performance reasons)
+ * Normalized names of the employee
  */
 entity EmployeeName {
-    ownerId Long required,
-    nameKey String required,
-	nameValue String required
+ ownerId Long required,
+ nameKey String required,
+ nameValue String required
 }
 
 // --- --- --- RELATIONSHIPS --- --- ---
 
 relationship ManyToOne {
-	Employee{company required} to Company
+ Employee{company required} to Company
 }
-
-// relationship OneToMany {
-//	Company{employees} to Employee{}
-// }
 
 relationship ManyToMany {
   Company{user} to User{company}
 }
+
+// Only for the diagram
+// entity User {
+//  login String required unique,
+//  email String  required unique
+//}
 
 // --- --- --- MISC --- --- ---
 
