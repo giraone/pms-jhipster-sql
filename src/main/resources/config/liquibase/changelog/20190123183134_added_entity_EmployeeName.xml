@@ -22,7 +22,7 @@
             <column name="owner_id" type="bigint">
                 <constraints nullable="false" />
             </column>
-            <column name="name_key" type="char(2)">
+            <column name="name_key" type="varchar(2)">
                 <constraints nullable="false" />
             </column>
 
