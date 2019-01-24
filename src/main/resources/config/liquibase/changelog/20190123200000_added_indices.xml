@@ -11,7 +11,6 @@
             <indexExists indexName="emname_name_index" />
         </preConditions>
         <dropIndex indexName="emname_name_index" tableName="employee_name" />
-
     </changeSet>
 
     <changeSet id="20190123200000-2" author="hs">
@@ -24,7 +23,26 @@
             <column name="name_key" />
             <column name="name_value" />
         </createIndex>
+    </changeSet>
 
+    <changeSet id="20190123200000-3" author="hs">
+        <validCheckSum>ANY</validCheckSum>
+
+        <preConditions onFail="MARK_RAN">
+            <indexExists indexName="emname_owner_index" />
+        </preConditions>
+        <dropIndex indexName="emname_owner_index" tableName="employee_name" />
+    </changeSet>
+
+    <changeSet id="20190123200000-4" author="hs">
+        <validCheckSum>ANY</validCheckSum>
+
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="emname_owner_index" /></not>
+        </preConditions>
+        <createIndex tableName="employee_name" indexName="emname_owner_index">
+            <column name="owner_id" />
+        </createIndex>
     </changeSet>
 
 </databaseChangeLog>

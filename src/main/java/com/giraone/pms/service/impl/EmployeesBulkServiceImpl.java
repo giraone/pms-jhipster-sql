@@ -4,6 +4,7 @@ import com.giraone.pms.domain.*;
 import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
 import com.giraone.pms.repository.EmployeeBulkRepository;
 import com.giraone.pms.repository.EmployeeNameRepository;
+import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.security.AuthoritiesConstants;
 import com.giraone.pms.service.*;
 import com.giraone.pms.service.dto.CompanyDTO;
@@ -29,7 +30,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @Service
-@Transactional
+// Hint: @Transactional is done on the repository level!
+@SuppressWarnings("unused")
 public class EmployeesBulkServiceImpl implements EmployeeBulkService {
 
     private final Logger log = LoggerFactory.getLogger(EmployeesBulkServiceImpl.class);
@@ -44,7 +46,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
 
     private final DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
 
-    private final EmployeeBulkRepository employeeBulkRepository;
+    private final EmployeeRepository employeeRepository;
     private final EmployeeBulkMapper employeeBulkMapper;
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
@@ -55,7 +57,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private final UserMapper userMapper;
     private final NameNormalizeService nameNormalizeService;
 
-    public EmployeesBulkServiceImpl(EmployeeBulkRepository employeeBulkRepository,
+    public EmployeesBulkServiceImpl(EmployeeRepository employeeRepository,
                                     EmployeeBulkMapper employeeBulkMapper,
                                     EmployeeMapper employeeMapper,
                                     EmployeeService employeeService,
@@ -66,7 +68,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                                     UserMapper userMapper,
                                     NameNormalizeService nameNormalizeService
     ) {
-        this.employeeBulkRepository = employeeBulkRepository;
+        this.employeeRepository = employeeRepository;
         this.employeeBulkMapper = employeeBulkMapper;
         this.employeeMapper = employeeMapper;
         this.employeeService = employeeService;
@@ -85,6 +87,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
      * @return the number of saved employees
      */
     @Timed
+    @Transactional
     public int save(List<EmployeeBulkDTO> employeeDTOList) {
 
         final List<Employee> employees = this.employeeBulkMapper.toEntity(employeeDTOList);
@@ -124,34 +127,37 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                 }
             }
         });
-        List<Employee> result = this.employeeBulkRepository.saveAll(employees);
-        return result.size();
+        return this.employeeRepository.saveAll(employees).size();
     }
 
     @Timed
+    // NO @Transactional !!!
     public int reIndex(boolean clearFirst) {
         final int pageSize = 1000;
         Pageable pageable = PageRequest.of(0, pageSize);
-        Page<EmployeeDTO> pages = this.employeeService.findAll(pageable);
+        Page<EmployeeDTO> pages;
         int ret = 0;
-        while (pages.hasNext()) {
-            log.debug("Page {} of {}", pages.getNumber(), pages.getTotalPages());
+        do {
+            pages = this.employeeService.findAll(pageable);
+            log.info("Page {} of {}", pages.getNumber(), pages.getTotalPages());
             ret += reIndex(pages.getNumber(), pages.getContent().stream(), clearFirst);
             pageable = pageable.next();
             pages = this.employeeService.findAll(pageable);
-        }
+        } while (pages.hasNext());
         return ret;
     }
 
     @Timed
+    @Transactional
+    // Attention: Method must be public! Otherwise @Transactional does not work!
     private int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
-        log.debug("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
+        log.info("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
         final List<Long> owners = new ArrayList<>();
         final List<EmployeeName> names = new ArrayList<>();
         employeeStream.forEach(employeeDTO -> {
             final Employee employee = employeeMapper.toEntity(employeeDTO);
             owners.add(employee.getId());
-            Map<String,String> namesOfEmployee = buildName(employee);
+            Map<String, String> namesOfEmployee = buildName(employee);
             for (Map.Entry<String, String> name : namesOfEmployee.entrySet()) {
                 final EmployeeName employeeName = new EmployeeName();
                 // This is a weird solution, because JPA does not handle tables without one primary key very well
@@ -164,21 +170,20 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
             }
         });
         if (clearFirst) {
-            log.debug("EmployeesBulkServiceImpl.reIndex: clearFirst for {} owners", owners.size());
+            log.info("EmployeesBulkServiceImpl.reIndex: clearFirst for {} owners", owners.size());
             // Split into a maximum of 100 ids for the IN statement
             List<List<Long>> ownerPartitions = Lists.partition(owners, 100);
             for (List<Long> ownerPartition : ownerPartitions) {
                 this.employeeNameRepository.deleteByOwners(ownerPartition);
             }
         }
-        log.debug("EmployeesBulkServiceImpl.reIndex: insert for {} names", names.size());
-        this.employeeNameRepository.saveAll(names);
-        return names.size();
+        log.info("EmployeesBulkServiceImpl.reIndex: insert for {} names", names.size());
+        return this.employeeNameRepository.saveAll(names).size();
     }
 
     @Timed
-    private Map<String,String> buildName(Employee employee) {
-        final Map<String,String> ret = new HashMap<>();
+    private Map<String, String> buildName(Employee employee) {
+        final Map<String, String> ret = new HashMap<>();
         List<String> surnames = nameNormalizeService.normalize(employee.getSurname());
         for (String surname : surnames) {
             ret.put(EmployeeNameFilterKey.SN.toString(), surname);

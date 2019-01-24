@@ -13,11 +13,19 @@
     <property name="floatType" value="float4" dbms="postgresql, h2"/>
     <property name="floatType" value="float" dbms="mysql, oracle, mssql"/>
 
-    <!--
-        Added the entity EmployeeName.
-    -->
-    <changeSet id="20190123183134-1" author="jhipster">
+    <changeSet id="20190123183134-1" author="hs">
         <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="employee_name" />
+        </preConditions>
+        <dropTable tableName="employee_name" />
+    </changeSet>
+
+    <changeSet id="20190123183134-2" author="jhipster">
+        <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="employee_name" /></not>
+        </preConditions>
         <createTable tableName="employee_name" remarks="Normalized names of the employee">
             <column name="owner_id" type="bigint">
                 <constraints nullable="false" />

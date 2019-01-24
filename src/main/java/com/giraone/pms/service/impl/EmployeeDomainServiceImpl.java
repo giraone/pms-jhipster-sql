@@ -28,6 +28,7 @@ import java.util.Optional;
  */
 @Service
 @Transactional
+@SuppressWarnings("unused")
 public class EmployeeDomainServiceImpl implements EmployeeDomainService {
 
     private final Logger log = LoggerFactory.getLogger(EmployeeDomainServiceImpl.class);
