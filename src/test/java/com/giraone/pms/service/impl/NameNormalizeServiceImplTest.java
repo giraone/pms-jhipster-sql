@@ -36,14 +36,13 @@ public class NameNormalizeServiceImplTest {
         assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.normalize("Karl- Heinz"));
         assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.normalize("Karl - Heinz"));
         assertEquals(Arrays.asList("dr", "wegner"), nameNormalizeService.normalize("Dr. Wegner"));
-
-        assertEquals(Arrays.asList("virer", "zwei"), nameNormalizeService.normalize("Ein Zwei Li Vierer"));
+        assertEquals(Arrays.asList("vierer", "zwei"), nameNormalizeService.normalize("Ein Zwei Li Vierer"));
     }
 
     @Test
     public void normalizeSingleName() {
 
-        assertEquals("aeter", nameNormalizeService.normalizeSingleName("Ätheer"));
+        assertEquals("aether", nameNormalizeService.normalizeSingleName("Äther"));
         assertEquals("tuer", nameNormalizeService.normalizeSingleName(" Tür "));
     }
 
