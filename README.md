@@ -54,16 +54,16 @@ only employees of his/her company).
 ```
 BASE_URL="http://localhost:8080"
 
-token=$(curl "${BASE_URL}/api/authenticate" -s -H 'Accept: application/json' -H 'Content-Type: application/json' \
+token=$(curl "${BASE_URL}/api/authenticate" -s -k -H 'Accept: application/json' -H 'Content-Type: application/json' \
   --data '{"username":"admin","password":"admin"}' | jq -r ".id_token")
 
-curl "${BASE_URL}/api/companies?page=0&size=20&sort=id,asc" -H 'Accept: application/json' \
+curl "${BASE_URL}/api/companies?page=0&size=20&sort=id,asc" -k -H 'Accept: application/json' \
  -H "Authorization: Bearer ${token}"
 
-curl "${BASE_URL}/api/employees?page=0&size=20&sort=id,asc" -H 'Accept: application/json' \
+curl "${BASE_URL}/api/employees?page=0&size=20&sort=id,asc" -k -H 'Accept: application/json' \
  -H "Authorization: Bearer ${token}"
 
-curl "${BASE_URL}/api/employee-names?page=0&size=20&sort=id,asc" -H 'Accept: application/json' \
+curl "${BASE_URL}/api/employee-names?page=0&size=20&sort=id,asc" -k -H 'Accept: application/json' \
  -H "Authorization: Bearer ${token}"
 ```
 
@@ -73,16 +73,16 @@ The first PUT call uses data from [the testdata-generator project on GitHub](htt
 
 ```
 
-curl "${BASE_URL}/domain-api/employee-list" -H 'Accept: application/json' -H 'Content-Type: application/json' \
+curl "${BASE_URL}/domain-api/employee-list" -k -H 'Accept: application/json' -H 'Content-Type: application/json' \
  -H "Authorization: Bearer ${token}" -X PUT  --data @../data-10M/d-00000000/f-00000000.json
 
 curl "${BASE_URL}/domain-api/employees?companyExternalId=l-00000060&surnamePrefix=A&page=0&size=20&sort=id,asc" \
- -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+ -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 curl "${BASE_URL}/domain-api/employees?companyExternalId=l-00000060&surnamePrefix=Ar&page=0&size=20&sort=id,asc" \
- -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+ -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 
 curl "${BASE_URL}/domain-api/employees?surnamePrefix=X&page=0&size=20&externalCompanyId=l-00000060&sort=id,asc \
-  -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+ -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 
 curl "${BASE_URL}/domain-api/re-index?clear=false" -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 ```
@@ -142,9 +142,27 @@ select u.login from company_user cu, jhi_user u
 where cu.users_id = u.id
 and cu.companies_id = 1001
 
-# distribution of employee lookup names
+# distribution of employee lookup names per owner
 select count(owner_id) as count, owner_id
 from employee_name
 group by owner_id
 order by count desc
+
+# distribution of employee lookup names per occurence
+select count(name_value) as count, name_value
+from employee_name
+where name_key ='SN'
+group by name_value
+order by count desc
+
+> "smit"
+> "mueler"
+> "meir"
+> "sneiter"
+> "hofman"
+> "fiser"
+> "weber"
+> "wagner"
+> "sulz"
+> "beker"
 ```
