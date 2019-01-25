@@ -5,7 +5,9 @@ package com.giraone.pms.domain.enumeration;
  */
 public enum EmployeeNameFilterKey {
 
-    /** Surname normalized */
+    /** Surname lowercase */
+    SL,
+    /** Surname fully normalized */
     SN,
     /** Surname phonetic */
     SP

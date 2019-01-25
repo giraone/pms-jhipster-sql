@@ -1,7 +1,9 @@
 package com.giraone.pms.service.impl;
 
+import com.codahale.metrics.annotation.Timed;
 import com.giraone.pms.service.NameNormalizeService;
 import org.apache.commons.codec.language.DoubleMetaphone;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,7 +28,7 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
 
         if (ret.size() > 2) {
             // Accept a maximum of 2 parts
-            Collections.sort(ret, StringLengthComparator);
+            ret.sort(StringLengthComparator);
             ret = ret.subList(0, 2);
             // Remove small parts, when we have at least one longer
             // TODO
@@ -34,11 +36,19 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         return ret;
     }
 
+    @Timed
     public String normalizeSingleName(String name) {
 
         name = name.trim().toLowerCase();
-        name = replaceCharacterRepetitions(name);
         name = replaceUmlauts(name);
+        return name;
+    }
+
+    @Timed
+    public String normalizeSimplePhoneticSingleName(String name) {
+
+        name = replaceSimplePhoneticVariants(name);
+        name = replaceCharacterRepetitions(name);
         return name;
     }
 
@@ -48,8 +58,10 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         return this.doubleMetaphone.doubleMetaphone(name);
     }
 
-    public String replaceUmlauts(String in) {
-        if (in == null) return in;
+    String replaceUmlauts(String in) {
+        if (in == null) {
+            return null;
+        }
         StringBuilder ret = new StringBuilder();
         String r;
         for (int i = 0; i < in.length(); i++) {
@@ -62,8 +74,20 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         return ret.toString();
     }
 
-    public String replaceDigits(String in) {
-        if (in == null) return in;
+    String replaceSimplePhoneticVariants(String in) {
+        if (in == null) {
+            return null;
+        }
+        for (Pair<String, String> entry : SIMPLE_PHONETIC_REPLACEMENTS) {
+            in = in.replace(entry.getFirst(), entry.getSecond());
+        }
+        return in;
+    }
+
+    String replaceDigits(String in) {
+        if (in == null) {
+            return null;
+        }
         StringBuilder ret = new StringBuilder();
         String r;
         for (int i = 0; i < in.length(); i++) {
@@ -76,8 +100,10 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         return ret.toString();
     }
 
-    public String replaceCharacterRepetitions(String in) {
-        if (in == null) return in;
+    String replaceCharacterRepetitions(String in) {
+        if (in == null) {
+            return null;
+        }
         StringBuilder ret = new StringBuilder();
         char lastChar = ' ';
         for (int i = 0; i < in.length(); i++) {
@@ -90,15 +116,11 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         return ret.toString();
     }
 
-    private static final Comparator<String> StringLengthComparator = new Comparator<String>() {
-        @Override
-        public int compare(String s1, String s2) {
-            return s2.length() - s1.length();
-        }
-    };
+    private static final Comparator<String> StringLengthComparator = (s1, s2) -> s2.length() - s1.length();
 
-    private static final HashMap<Character, String> UMLAUT_REPLACEMENTS = new HashMap<Character, String>();
-    private static final HashMap<Character, String> SOUNDEX_DIGIT_REPLACEMENTS = new HashMap<Character, String>();
+    private static final HashMap<Character, String> UMLAUT_REPLACEMENTS = new HashMap<>();
+    private static final List<Pair<String, String>> SIMPLE_PHONETIC_REPLACEMENTS = new ArrayList<>();
+    private static final HashMap<Character, String> SOUNDEX_DIGIT_REPLACEMENTS = new HashMap<>();
 
     static {
         UMLAUT_REPLACEMENTS.put('Ä', "ae");
@@ -114,6 +136,36 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         UMLAUT_REPLACEMENTS.put('á', "a");
         UMLAUT_REPLACEMENTS.put('à', "a");
         UMLAUT_REPLACEMENTS.put('â', "a");
+        UMLAUT_REPLACEMENTS.put('ç', "c");
+
+        // Order is important!
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("sch", "s"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("chr", "kr"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ck", "k"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("dt", "t"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("th", "t"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("hm", "m"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("hn", "n"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("hl", "l"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("hr", "r"));
+        //SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ht", "t")); // wegen richter!
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ts", "tz"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ai", "ei"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ay", "ei"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ey", "ei"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ie", "i"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ad", "at"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ed", "et"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("id", "it"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("od", "ot"));
+        SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("ud", "ut"));
+
+        /*
+        Becker vs Bäcker
+         */
+        //SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("y", "i"));
+        //SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("v", "w"));
+        //SIMPLE_PHONETIC_REPLACEMENTS.add(Pair.of("p", "b"));
 
         SOUNDEX_DIGIT_REPLACEMENTS.put('0', "l");
         SOUNDEX_DIGIT_REPLACEMENTS.put('1', "s");

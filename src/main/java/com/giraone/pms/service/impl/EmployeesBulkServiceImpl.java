@@ -37,6 +37,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private final Logger log = LoggerFactory.getLogger(EmployeesBulkServiceImpl.class);
 
     private static final boolean CREATE_INITIAL_USER_FOR_COMPANY = true;
+    private static final boolean WITH_METAPHONE = false;
 
     private static final Set<String> INITIAL_USER_AUTHORITIES = new HashSet<>();
 
@@ -138,11 +139,13 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         Page<EmployeeDTO> pages;
         int ret = 0;
         do {
+            final long start = System.currentTimeMillis();
             pages = this.employeeService.findAll(pageable);
-            log.info("Page {} of {}", pages.getNumber(), pages.getTotalPages());
+
             ret += reIndex(pages.getNumber(), pages.getContent().stream(), clearFirst);
             pageable = pageable.next();
-            pages = this.employeeService.findAll(pageable);
+            final long end = System.currentTimeMillis();
+            log.info("Page {} of {} in {} msec", pages.getNumber(), pages.getTotalPages(), end-start);
         } while (pages.hasNext());
         return ret;
     }
@@ -184,10 +187,15 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     @Timed
     private Map<String, String> buildName(Employee employee) {
         final Map<String, String> ret = new HashMap<>();
-        List<String> surnames = nameNormalizeService.normalize(employee.getSurname());
-        for (String surname : surnames) {
-            ret.put(EmployeeNameFilterKey.SN.toString(), surname);
-            ret.put(EmployeeNameFilterKey.SP.toString(), this.doubleMetaphone.doubleMetaphone(surname));
+        final String originalName = employee.getSurname();
+        final String normalizedName = nameNormalizeService.normalizeSingleName(originalName);
+        ret.put(EmployeeNameFilterKey.SL.toString(), normalizedName);
+        final List<String> names = nameNormalizeService.normalize(originalName);
+        for (String name : names) {
+            ret.put(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.normalizeSimplePhoneticSingleName(normalizedName));
+            if (WITH_METAPHONE) {
+                ret.put(EmployeeNameFilterKey.SP.toString(), this.doubleMetaphone.doubleMetaphone(normalizedName));
+            }
         }
         return ret;
     }
