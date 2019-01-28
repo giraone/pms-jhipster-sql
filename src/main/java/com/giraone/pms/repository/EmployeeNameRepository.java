@@ -19,7 +19,7 @@ import java.util.List;
 @Repository
 public interface EmployeeNameRepository extends JpaRepository<EmployeeName, Long> {
 
-    @Query("select * from EmployeeName en where en.id.ownerId = ?1 and en.id.nameKey = ?2")
+    @Query("select en from EmployeeName en where en.id.ownerId = ?1 and en.id.nameKey = ?2")
     List<EmployeeName> findAllByOwnerIdAndNameKey(long ownerId, String nameKey);
 
     @Modifying
