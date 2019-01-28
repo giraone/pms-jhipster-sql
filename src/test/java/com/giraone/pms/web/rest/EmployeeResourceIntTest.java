@@ -155,7 +155,7 @@ public class EmployeeResourceIntTest {
         assertThat(testEmployee.getSurname()).isEqualTo(DEFAULT_SURNAME);
         assertThat(testEmployee.getGivenName()).isEqualTo(DEFAULT_GIVEN_NAME);
         assertThat(testEmployee.getDateOfBirth()).isEqualTo(DEFAULT_DATE_OF_BIRTH);
-        assertThat(testEmployee.getGender()).isEqualTo(DEFAULT_GENDER);
+        assertThat(testEmployee.getGender().toString()).isEqualTo(DEFAULT_GENDER.toString());
         assertThat(testEmployee.getPostalCode()).isEqualTo(DEFAULT_POSTAL_CODE);
         assertThat(testEmployee.getCity()).isEqualTo(DEFAULT_CITY);
         assertThat(testEmployee.getStreetAddress()).isEqualTo(DEFAULT_STREET_ADDRESS);
@@ -219,7 +219,7 @@ public class EmployeeResourceIntTest {
             .andExpect(jsonPath("$.[*].city").value(hasItem(DEFAULT_CITY.toString())))
             .andExpect(jsonPath("$.[*].streetAddress").value(hasItem(DEFAULT_STREET_ADDRESS.toString())));
     }
-    
+
     @Test
     @Transactional
     public void getEmployee() throws Exception {

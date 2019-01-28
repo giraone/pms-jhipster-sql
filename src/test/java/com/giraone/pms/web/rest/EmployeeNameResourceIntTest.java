@@ -3,6 +3,7 @@ package com.giraone.pms.web.rest;
 import com.giraone.pms.PmssqlApp;
 
 import com.giraone.pms.domain.EmployeeName;
+import com.giraone.pms.domain.EmployeeNameCompoundKey;
 import com.giraone.pms.repository.EmployeeNameRepository;
 import com.giraone.pms.service.EmployeeNameService;
 import com.giraone.pms.service.dto.EmployeeNameDTO;
@@ -99,10 +100,13 @@ public class EmployeeNameResourceIntTest {
      * if they test an entity which requires the current entity.
      */
     public static EmployeeName createEntity(EntityManager em) {
-        EmployeeName employeeName = new EmployeeName()
-            .ownerId(DEFAULT_OWNER_ID)
-            .nameKey(DEFAULT_NAME_KEY)
-            .nameValue(DEFAULT_NAME_VALUE);
+
+        EmployeeName employeeName = new EmployeeName();
+        EmployeeNameCompoundKey employeeNameCompoundKey = new EmployeeNameCompoundKey();
+        employeeName.setId(employeeNameCompoundKey);
+        employeeNameCompoundKey.setOwnerId(DEFAULT_OWNER_ID);
+        employeeNameCompoundKey.setNameKey(DEFAULT_NAME_KEY);
+        employeeNameCompoundKey.setNameValue(DEFAULT_NAME_VALUE);
         return employeeName;
     }
 
@@ -127,9 +131,9 @@ public class EmployeeNameResourceIntTest {
         List<EmployeeName> employeeNameList = employeeNameRepository.findAll();
         assertThat(employeeNameList).hasSize(databaseSizeBeforeCreate + 1);
         EmployeeName testEmployeeName = employeeNameList.get(employeeNameList.size() - 1);
-        assertThat(testEmployeeName.getOwnerId()).isEqualTo(DEFAULT_OWNER_ID);
-        assertThat(testEmployeeName.getNameKey()).isEqualTo(DEFAULT_NAME_KEY);
-        assertThat(testEmployeeName.getNameValue()).isEqualTo(DEFAULT_NAME_VALUE);
+        assertThat(testEmployeeName.getId().getOwnerId()).isEqualTo(DEFAULT_OWNER_ID);
+        assertThat(testEmployeeName.getId().getNameKey()).isEqualTo(DEFAULT_NAME_KEY);
+        assertThat(testEmployeeName.getId().getNameValue()).isEqualTo(DEFAULT_NAME_VALUE);
     }
 
     @Test
@@ -138,7 +142,7 @@ public class EmployeeNameResourceIntTest {
         int databaseSizeBeforeCreate = employeeNameRepository.findAll().size();
 
         // Create the EmployeeName with an existing ID
-        employeeName.setId(1L);
+        employeeName.getId().setOwnerId(1L);
         EmployeeNameDTO employeeNameDTO = employeeNameMapper.toDto(employeeName);
 
         // An entity with an existing ID cannot be created, so this API call must fail
@@ -157,7 +161,7 @@ public class EmployeeNameResourceIntTest {
     public void checkOwnerIdIsRequired() throws Exception {
         int databaseSizeBeforeTest = employeeNameRepository.findAll().size();
         // set the field null
-        employeeName.setOwnerId(null);
+        employeeName.getId().setOwnerId(0);
 
         // Create the EmployeeName, which fails.
         EmployeeNameDTO employeeNameDTO = employeeNameMapper.toDto(employeeName);
@@ -176,7 +180,7 @@ public class EmployeeNameResourceIntTest {
     public void checkNameKeyIsRequired() throws Exception {
         int databaseSizeBeforeTest = employeeNameRepository.findAll().size();
         // set the field null
-        employeeName.setNameKey(null);
+        employeeName.getId().setNameKey(null);
 
         // Create the EmployeeName, which fails.
         EmployeeNameDTO employeeNameDTO = employeeNameMapper.toDto(employeeName);
@@ -195,7 +199,7 @@ public class EmployeeNameResourceIntTest {
     public void checkNameValueIsRequired() throws Exception {
         int databaseSizeBeforeTest = employeeNameRepository.findAll().size();
         // set the field null
-        employeeName.setNameValue(null);
+        employeeName.getId().setNameValue(null);
 
         // Create the EmployeeName, which fails.
         EmployeeNameDTO employeeNameDTO = employeeNameMapper.toDto(employeeName);
@@ -218,13 +222,11 @@ public class EmployeeNameResourceIntTest {
         // Get all the employeeNameList
         restEmployeeNameMockMvc.perform(get("/api/employee-names?sort=id,desc"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(employeeName.getId().intValue())))
             .andExpect(jsonPath("$.[*].ownerId").value(hasItem(DEFAULT_OWNER_ID.intValue())))
             .andExpect(jsonPath("$.[*].nameKey").value(hasItem(DEFAULT_NAME_KEY.toString())))
             .andExpect(jsonPath("$.[*].nameValue").value(hasItem(DEFAULT_NAME_VALUE.toString())));
     }
-    
+
     @Test
     @Transactional
     public void getEmployeeName() throws Exception {
@@ -235,7 +237,6 @@ public class EmployeeNameResourceIntTest {
         restEmployeeNameMockMvc.perform(get("/api/employee-names/{id}", employeeName.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(employeeName.getId().intValue()))
             .andExpect(jsonPath("$.ownerId").value(DEFAULT_OWNER_ID.intValue()))
             .andExpect(jsonPath("$.nameKey").value(DEFAULT_NAME_KEY.toString()))
             .andExpect(jsonPath("$.nameValue").value(DEFAULT_NAME_VALUE.toString()));
@@ -258,13 +259,12 @@ public class EmployeeNameResourceIntTest {
         int databaseSizeBeforeUpdate = employeeNameRepository.findAll().size();
 
         // Update the employeeName
-        EmployeeName updatedEmployeeName = employeeNameRepository.findById(employeeName.getId()).get();
+        EmployeeName updatedEmployeeName = employeeNameRepository.findAllByOwnerIdAndNameKey(
+            employeeName.getId().getOwnerId(), employeeName.getId().getNameKey()).get(0);
         // Disconnect from session so that the updates on updatedEmployeeName are not directly saved in db
         em.detach(updatedEmployeeName);
-        updatedEmployeeName
-            .ownerId(UPDATED_OWNER_ID)
-            .nameKey(UPDATED_NAME_KEY)
-            .nameValue(UPDATED_NAME_VALUE);
+        updatedEmployeeName.getId().setOwnerId(UPDATED_OWNER_ID);
+        updatedEmployeeName.getId().setNameKey(UPDATED_NAME_KEY);
         EmployeeNameDTO employeeNameDTO = employeeNameMapper.toDto(updatedEmployeeName);
 
         restEmployeeNameMockMvc.perform(put("/api/employee-names")
@@ -276,9 +276,9 @@ public class EmployeeNameResourceIntTest {
         List<EmployeeName> employeeNameList = employeeNameRepository.findAll();
         assertThat(employeeNameList).hasSize(databaseSizeBeforeUpdate);
         EmployeeName testEmployeeName = employeeNameList.get(employeeNameList.size() - 1);
-        assertThat(testEmployeeName.getOwnerId()).isEqualTo(UPDATED_OWNER_ID);
-        assertThat(testEmployeeName.getNameKey()).isEqualTo(UPDATED_NAME_KEY);
-        assertThat(testEmployeeName.getNameValue()).isEqualTo(UPDATED_NAME_VALUE);
+        assertThat(testEmployeeName.getId().getOwnerId()).isEqualTo(UPDATED_OWNER_ID);
+        assertThat(testEmployeeName.getId().getNameKey()).isEqualTo(UPDATED_NAME_KEY);
+        assertThat(testEmployeeName.getId().getNameValue()).isEqualTo(UPDATED_NAME_VALUE);
     }
 
     @Test
@@ -322,14 +322,23 @@ public class EmployeeNameResourceIntTest {
     @Transactional
     public void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(EmployeeName.class);
+
         EmployeeName employeeName1 = new EmployeeName();
-        employeeName1.setId(1L);
+        EmployeeNameCompoundKey employeeNameCompoundKey1 = new EmployeeNameCompoundKey();
+        employeeName1.setId(employeeNameCompoundKey1);
+        employeeNameCompoundKey1.setOwnerId(1L);
+        employeeNameCompoundKey1.setNameKey("a");
+
         EmployeeName employeeName2 = new EmployeeName();
-        employeeName2.setId(employeeName1.getId());
+        EmployeeNameCompoundKey employeeNameCompoundKey2 = new EmployeeNameCompoundKey();
+        employeeName2.setId(employeeNameCompoundKey2);
+        employeeNameCompoundKey2.setOwnerId(2L);
+        employeeNameCompoundKey2.setNameKey("a");
+
         assertThat(employeeName1).isEqualTo(employeeName2);
-        employeeName2.setId(2L);
+        employeeNameCompoundKey1.setOwnerId(2L);
         assertThat(employeeName1).isNotEqualTo(employeeName2);
-        employeeName1.setId(null);
+        employeeNameCompoundKey1.setNameKey("b");
         assertThat(employeeName1).isNotEqualTo(employeeName2);
     }
 
@@ -338,21 +347,15 @@ public class EmployeeNameResourceIntTest {
     public void dtoEqualsVerifier() throws Exception {
         TestUtil.equalsVerifier(EmployeeNameDTO.class);
         EmployeeNameDTO employeeNameDTO1 = new EmployeeNameDTO();
-        employeeNameDTO1.setId(1L);
+
+        employeeNameDTO1.setOwnerId(1L);
         EmployeeNameDTO employeeNameDTO2 = new EmployeeNameDTO();
         assertThat(employeeNameDTO1).isNotEqualTo(employeeNameDTO2);
-        employeeNameDTO2.setId(employeeNameDTO1.getId());
+        employeeNameDTO2.setOwnerId(employeeNameDTO1.getOwnerId());
         assertThat(employeeNameDTO1).isEqualTo(employeeNameDTO2);
-        employeeNameDTO2.setId(2L);
+        employeeNameDTO2.setOwnerId(2L);
         assertThat(employeeNameDTO1).isNotEqualTo(employeeNameDTO2);
-        employeeNameDTO1.setId(null);
+        employeeNameDTO1.setOwnerId(3L);
         assertThat(employeeNameDTO1).isNotEqualTo(employeeNameDTO2);
-    }
-
-    @Test
-    @Transactional
-    public void testEntityFromId() {
-        assertThat(employeeNameMapper.fromId(42L).getId()).isEqualTo(42);
-        assertThat(employeeNameMapper.fromId(null)).isNull();
     }
 }
