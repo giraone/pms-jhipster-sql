@@ -3,6 +3,7 @@ package com.giraone.pms.web.rest;
 import com.giraone.pms.PmssqlApp;
 
 import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.Company;
 import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.EmployeeDTO;
@@ -122,6 +123,11 @@ public class EmployeeResourceIntTest {
             .postalCode(DEFAULT_POSTAL_CODE)
             .city(DEFAULT_CITY)
             .streetAddress(DEFAULT_STREET_ADDRESS);
+        // Add required entity
+        Company company = CompanyResourceIntTest.createEntity(em);
+        em.persist(company);
+        em.flush();
+        employee.setCompany(company);
         return employee;
     }
 
@@ -208,7 +214,7 @@ public class EmployeeResourceIntTest {
             .andExpect(jsonPath("$.[*].surname").value(hasItem(DEFAULT_SURNAME.toString())))
             .andExpect(jsonPath("$.[*].givenName").value(hasItem(DEFAULT_GIVEN_NAME.toString())))
             .andExpect(jsonPath("$.[*].dateOfBirth").value(hasItem(DEFAULT_DATE_OF_BIRTH.toString())))
-            .andExpect(jsonPath("$.[*].gender").value(hasItem(DEFAULT_GENDER.name())))
+            .andExpect(jsonPath("$.[*].gender").value(hasItem(DEFAULT_GENDER.toString())))
             .andExpect(jsonPath("$.[*].postalCode").value(hasItem(DEFAULT_POSTAL_CODE.toString())))
             .andExpect(jsonPath("$.[*].city").value(hasItem(DEFAULT_CITY.toString())))
             .andExpect(jsonPath("$.[*].streetAddress").value(hasItem(DEFAULT_STREET_ADDRESS.toString())));
@@ -228,7 +234,7 @@ public class EmployeeResourceIntTest {
             .andExpect(jsonPath("$.surname").value(DEFAULT_SURNAME.toString()))
             .andExpect(jsonPath("$.givenName").value(DEFAULT_GIVEN_NAME.toString()))
             .andExpect(jsonPath("$.dateOfBirth").value(DEFAULT_DATE_OF_BIRTH.toString()))
-            .andExpect(jsonPath("$.gender").value(DEFAULT_GENDER.name()))
+            .andExpect(jsonPath("$.gender").value(DEFAULT_GENDER.toString()))
             .andExpect(jsonPath("$.postalCode").value(DEFAULT_POSTAL_CODE.toString()))
             .andExpect(jsonPath("$.city").value(DEFAULT_CITY.toString()))
             .andExpect(jsonPath("$.streetAddress").value(DEFAULT_STREET_ADDRESS.toString()));
