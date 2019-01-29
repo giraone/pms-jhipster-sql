@@ -1,12 +1,13 @@
 package com.giraone.pms.repository;
 
 import com.giraone.pms.domain.EmployeeName;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 /**
@@ -23,4 +24,10 @@ public interface EmployeeNameRepository extends JpaRepository<EmployeeName, Long
     @Transactional
     @Query("delete from EmployeeName en where en.id.ownerId = ?1")
     void deleteByOwner(long ownerId);
+
+    @Modifying
+    @Transactional
+    @Query("delete from EmployeeName en where en.id.ownerId IN ?1")
+    void deleteByOwners(List<Long> owners);
 }
+

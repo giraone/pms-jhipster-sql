@@ -54,11 +54,14 @@ public class EmployeeFilter {
         String input = this.surname.get();
         switch (this.surnameSearchMode) {
             case NORMALIZED:
-                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.normalizeSingleName(input));
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(),
+                    nameNormalizeService.normalizeSingleName(input));
             case PREFIX_NORMALIZED:
-                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.normalizeSingleName(input) + "%");
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(),
+                    nameNormalizeService.normalizeSingleName(input) + "%");
             case PHONETIC:
-                return new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.normalizePhoneticSingleName(input));
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(),
+                    nameNormalizeService.normalizeSimplePhoneticSingleName(nameNormalizeService.normalizeSingleName(input)) + "%");
             default:
                 return new EmployeeFilterPair(null, input);
         }
