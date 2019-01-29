@@ -30,3 +30,4 @@ public interface EmployeeNameRepository extends JpaRepository<EmployeeName, Long
     @Query("delete from EmployeeName en where en.id.ownerId IN ?1")
     void deleteByOwners(List<Long> owners);
 }
+

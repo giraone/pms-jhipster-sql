@@ -100,6 +100,7 @@ public class EmployeeNameResourceIntTest {
      * if they test an entity which requires the current entity.
      */
     public static EmployeeName createEntity(EntityManager em) {
+
         EmployeeName employeeName = new EmployeeName();
         EmployeeNameCompoundKey employeeNameCompoundKey = new EmployeeNameCompoundKey();
         employeeName.setId(employeeNameCompoundKey);
@@ -221,7 +222,6 @@ public class EmployeeNameResourceIntTest {
         // Get all the employeeNameList
         restEmployeeNameMockMvc.perform(get("/api/employee-names?sort=id,desc"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].ownerId").value(hasItem(DEFAULT_OWNER_ID.intValue())))
             .andExpect(jsonPath("$.[*].nameKey").value(hasItem(DEFAULT_NAME_KEY.toString())))
             .andExpect(jsonPath("$.[*].nameValue").value(hasItem(DEFAULT_NAME_VALUE.toString())));
@@ -265,7 +265,6 @@ public class EmployeeNameResourceIntTest {
         em.detach(updatedEmployeeName);
         updatedEmployeeName.getId().setOwnerId(UPDATED_OWNER_ID);
         updatedEmployeeName.getId().setNameKey(UPDATED_NAME_KEY);
-        updatedEmployeeName.getId().setNameValue(UPDATED_NAME_VALUE);
         EmployeeNameDTO employeeNameDTO = employeeNameMapper.toDto(updatedEmployeeName);
 
         restEmployeeNameMockMvc.perform(put("/api/employee-names")
@@ -348,6 +347,7 @@ public class EmployeeNameResourceIntTest {
     public void dtoEqualsVerifier() throws Exception {
         TestUtil.equalsVerifier(EmployeeNameDTO.class);
         EmployeeNameDTO employeeNameDTO1 = new EmployeeNameDTO();
+
         employeeNameDTO1.setOwnerId(1L);
         EmployeeNameDTO employeeNameDTO2 = new EmployeeNameDTO();
         assertThat(employeeNameDTO1).isNotEqualTo(employeeNameDTO2);

@@ -25,7 +25,7 @@
     ],
     "relationships": [],
     "changelogDate": "20190123183134",
-    "javadoc": "Normalized names of the employee (Hint: We do not generated relations for performance reasons)",
+    "javadoc": "Normalized names of the employee",
     "entityTableName": "employee_name",
     "dto": "mapstruct",
     "pagination": "pagination",

@@ -27,7 +27,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
         " WHERE e.id = en.id.ownerId" +
         " AND e.company = :company" +
-        " AND en.id.nameKey LIKE :nameKey AND en.id.nameValue LIKE :nameValue")
+        " AND en.id.nameKey = :nameKey AND en.id.nameValue LIKE :nameValue")
     Page<Employee> findAllByCompanyAndKeyPairLike(
         @Param("company") Company company,
         @Param("nameKey") String key,
@@ -47,7 +47,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Timed
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
         " WHERE e.id = en.id.ownerId" +
-        " AND en.id.nameKey LIKE :nameKey AND en.id.nameValue LIKE :nameValue")
+        " AND en.id.nameKey = :nameKey AND en.id.nameValue LIKE :nameValue")
     Page<Employee> findAllByKeyPairLike(
         @Param("nameKey") String key,
         @Param("nameValue") String value,
