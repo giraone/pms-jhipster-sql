@@ -1,8 +1,9 @@
 package com.giraone.pms.service.impl;
 
-import com.giraone.pms.domain.*;
-import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
-import com.giraone.pms.repository.EmployeeBulkRepository;
+import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.EmployeeName;
+import com.giraone.pms.domain.User;
 import com.giraone.pms.repository.EmployeeNameRepository;
 import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.security.AuthoritiesConstants;
@@ -51,34 +52,34 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private final EmployeeBulkMapper employeeBulkMapper;
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
+    private final EmployeeDomainService employeeDomainService;
     private final EmployeeNameRepository employeeNameRepository;
     private final CompanyService companyService;
     private final CompanyMapper companyMapper;
     private final UserService userService;
     private final UserMapper userMapper;
-    private final NameNormalizeService nameNormalizeService;
 
     public EmployeesBulkServiceImpl(EmployeeRepository employeeRepository,
                                     EmployeeBulkMapper employeeBulkMapper,
                                     EmployeeMapper employeeMapper,
                                     EmployeeService employeeService,
+                                    EmployeeDomainService employeeDomainService,
                                     EmployeeNameRepository employeeNameRepository,
                                     CompanyService companyService,
                                     CompanyMapper companyMapper,
                                     UserService userService,
-                                    UserMapper userMapper,
-                                    NameNormalizeService nameNormalizeService
+                                    UserMapper userMapper
     ) {
         this.employeeRepository = employeeRepository;
         this.employeeBulkMapper = employeeBulkMapper;
         this.employeeMapper = employeeMapper;
         this.employeeService = employeeService;
+        this.employeeDomainService = employeeDomainService;
         this.employeeNameRepository = employeeNameRepository;
         this.companyService = companyService;
         this.companyMapper = companyMapper;
         this.userService = userService;
         this.userMapper = userMapper;
-        this.nameNormalizeService = nameNormalizeService;
     }
 
     /**
@@ -92,7 +93,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     public int save(List<EmployeeBulkDTO> employeeDTOList) {
 
         final List<Employee> employees = this.employeeBulkMapper.toEntity(employeeDTOList);
-        employees.stream().forEach(employee -> {
+        employees.forEach(employee -> {
             // Store the company, if it doesn't yet exist
             final String externalId = employee.getCompany().getExternalId();
             Optional<CompanyDTO> optionalCompany = this.companyService.findOneByExternalId(externalId);
@@ -156,21 +157,13 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
         log.info("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
         final List<Long> owners = new ArrayList<>();
-        final List<EmployeeName> names = new ArrayList<>();
+        final List<EmployeeName> employeeNamesList = new ArrayList<>();
         employeeStream.forEach(employeeDTO -> {
             final Employee employee = employeeMapper.toEntity(employeeDTO);
             owners.add(employee.getId());
-            Map<String, String> namesOfEmployee = buildName(employee);
-            for (Map.Entry<String, String> name : namesOfEmployee.entrySet()) {
-                final EmployeeName employeeName = new EmployeeName();
-                // This is a weird solution, because JPA does not handle tables without one primary key very well
-                final EmployeeNameCompoundKey employeeNameCompoundKey = new EmployeeNameCompoundKey();
-                employeeNameCompoundKey.setOwnerId(employee.getId());
-                employeeNameCompoundKey.setNameKey(name.getKey());
-                employeeNameCompoundKey.setNameValue(name.getValue());
-                employeeName.setId(employeeNameCompoundKey);
-                names.add(employeeName);
-            }
+
+            final List<EmployeeName> names = employeeDomainService.buildNames(employee);
+            employeeNamesList.addAll(names);
         });
         if (clearFirst) {
             log.info("EmployeesBulkServiceImpl.reIndex: clearFirst for {} owners", owners.size());
@@ -180,23 +173,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                 this.employeeNameRepository.deleteByOwners(ownerPartition);
             }
         }
-        log.info("EmployeesBulkServiceImpl.reIndex: insert for {} names", names.size());
-        return this.employeeNameRepository.saveAll(names).size();
-    }
-
-    @Timed
-    private Map<String, String> buildName(Employee employee) {
-        final Map<String, String> ret = new HashMap<>();
-        final String originalName = employee.getSurname();
-        final String normalizedName = nameNormalizeService.normalizeSingleName(originalName);
-        ret.put(EmployeeNameFilterKey.SL.toString(), normalizedName);
-        final List<String> names = nameNormalizeService.normalize(originalName);
-        for (String name : names) {
-            ret.put(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.normalizeSimplePhoneticSingleName(normalizedName));
-            if (WITH_METAPHONE) {
-                ret.put(EmployeeNameFilterKey.SP.toString(), this.doubleMetaphone.doubleMetaphone(normalizedName));
-            }
-        }
-        return ret;
+        log.info("EmployeesBulkServiceImpl.reIndex: insert for {} names", employeeNamesList.size());
+        return this.employeeNameRepository.saveAll(employeeNamesList).size();
     }
 }

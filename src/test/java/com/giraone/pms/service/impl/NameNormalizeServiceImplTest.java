@@ -1,6 +1,5 @@
 package com.giraone.pms.service.impl;
 
-import org.apache.commons.codec.language.DoubleMetaphone;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -11,56 +10,56 @@ import static org.junit.Assert.assertNull;
 public class NameNormalizeServiceImplTest {
 
     private NameNormalizeServiceImpl nameNormalizeService = new NameNormalizeServiceImpl();
-    private DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
 
     @Test
-    public void metaphone() {
+    public void split() {
 
-        assertNull(doubleMetaphone.doubleMetaphone(""));
-        assertEquals("A", doubleMetaphone.doubleMetaphone("A"));
-        assertEquals("L", doubleMetaphone.doubleMetaphone("li"));
-
-        assertEquals("HNS", doubleMetaphone.doubleMetaphone("heinz"));
-        assertEquals("MR", doubleMetaphone.doubleMetaphone("maier"));
-        assertEquals("XLS", doubleMetaphone.doubleMetaphone("schuelz"));
-        assertEquals("XLSR", doubleMetaphone.doubleMetaphone("schuelzer"));
-        assertEquals("XMT", doubleMetaphone.doubleMetaphone("schmidt"));
-        assertEquals("XMT", doubleMetaphone.doubleMetaphone("schmit"));
-        assertEquals("XMT", doubleMetaphone.doubleMetaphone("schmitt"));
+        assertEquals(Arrays.asList("schmidt", "wagner"), nameNormalizeService.split("Schmidt-Wagner"));
+        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl-Heinz"));
+        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl- Heinz"));
+        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl - Heinz"));
+        assertEquals(Arrays.asList("dr", "wegner"), nameNormalizeService.split("Dr. Wegner"));
+        assertEquals(Arrays.asList("vierer", "zwei"), nameNormalizeService.split("Ein Zwei Li Vierer"));
     }
 
     @Test
     public void normalize() {
 
-        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.normalize("Karl-Heinz"));
-        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.normalize("Karl- Heinz"));
-        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.normalize("Karl - Heinz"));
-        assertEquals(Arrays.asList("dr", "wegner"), nameNormalizeService.normalize("Dr. Wegner"));
-        assertEquals(Arrays.asList("vierer", "zwei"), nameNormalizeService.normalize("Ein Zwei Li Vierer"));
+        assertEquals("aether", nameNormalizeService.normalize("Äther"));
+        assertEquals("tuer", nameNormalizeService.normalize(" Tür "));
     }
 
     @Test
-    public void normalizeSingleName() {
+    public void reduceSimplePhonetic() {
 
-        assertEquals("aether", nameNormalizeService.normalizeSingleName("Äther"));
-        assertEquals("tuer", nameNormalizeService.normalizeSingleName(" Tür "));
+        assertEquals("boem", nameNormalizeService.reduceSimplePhonetic("boehm"));
+        assertEquals("boen", nameNormalizeService.reduceSimplePhonetic("boehn"));
+        assertEquals("boek", nameNormalizeService.reduceSimplePhonetic("boeck"));
+        assertEquals("koeler", nameNormalizeService.reduceSimplePhonetic("koehler"));
+        assertEquals("bart", nameNormalizeService.reduceSimplePhonetic("barth"));
+        assertEquals("smit", nameNormalizeService.reduceSimplePhonetic("schmidt"));
+        assertEquals("smit", nameNormalizeService.reduceSimplePhonetic("schmied"));
+        assertEquals("meir", nameNormalizeService.reduceSimplePhonetic("mayr"));
+        assertEquals("meir", nameNormalizeService.reduceSimplePhonetic("maier"));
+        assertEquals("smitz", nameNormalizeService.reduceSimplePhonetic("schmits"));
+        assertEquals("krist", nameNormalizeService.reduceSimplePhonetic("christ"));
+        assertEquals("richter", nameNormalizeService.reduceSimplePhonetic("richter"));
     }
 
     @Test
-    public void normalizeSimplePhoneticSingleName() {
+    public void phonetic() {
 
-        assertEquals("boem", nameNormalizeService.normalizeSimplePhoneticSingleName("boehm"));
-        assertEquals("boen", nameNormalizeService.normalizeSimplePhoneticSingleName("boehn"));
-        assertEquals("boek", nameNormalizeService.normalizeSimplePhoneticSingleName("boeck"));
-        assertEquals("koeler", nameNormalizeService.normalizeSimplePhoneticSingleName("koehler"));
-        assertEquals("bart", nameNormalizeService.normalizeSimplePhoneticSingleName("barth"));
-        assertEquals("smit", nameNormalizeService.normalizeSimplePhoneticSingleName("schmidt"));
-        assertEquals("smit", nameNormalizeService.normalizeSimplePhoneticSingleName("schmied"));
-        assertEquals("meir", nameNormalizeService.normalizeSimplePhoneticSingleName("mayr"));
-        assertEquals("meir", nameNormalizeService.normalizeSimplePhoneticSingleName("maier"));
-        assertEquals("smitz", nameNormalizeService.normalizeSimplePhoneticSingleName("schmits"));
-        assertEquals("krist", nameNormalizeService.normalizeSimplePhoneticSingleName("christ"));
-        assertEquals("richter", nameNormalizeService.normalizeSimplePhoneticSingleName("richter"));
+        assertNull(nameNormalizeService.phonetic(""));
+        assertEquals("A", nameNormalizeService.phonetic("A"));
+        assertEquals("L", nameNormalizeService.phonetic("li"));
+
+        assertEquals("HNS", nameNormalizeService.phonetic("heinz"));
+        assertEquals("MR", nameNormalizeService.phonetic("maier"));
+        assertEquals("XLS", nameNormalizeService.phonetic("schuelz"));
+        assertEquals("XLSR", nameNormalizeService.phonetic("schuelzer"));
+        assertEquals("XMT", nameNormalizeService.phonetic("schmidt"));
+        assertEquals("XMT", nameNormalizeService.phonetic("schmit"));
+        assertEquals("XMT", nameNormalizeService.phonetic("schmitt"));
     }
 
     @Test

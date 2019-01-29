@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class EmployeeFilterTest {
 
-    NameNormalizeService nameNormalizeService = new NameNormalizeServiceImpl();
+    private NameNormalizeService nameNormalizeService = new NameNormalizeServiceImpl();
 
     @Test
     public void buildQueryValueNull() {
@@ -23,7 +23,7 @@ public class EmployeeFilterTest {
     }
 
     @Test
-    public void buildQueryValueExact() {
+    public void buildQueryValue_EXACT() {
 
         EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.EXACT, Optional.empty());
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
@@ -32,21 +32,48 @@ public class EmployeeFilterTest {
     }
 
     @Test
-    public void buildQueryValueNormalized() {
+    public void buildQueryValue_PREFIX() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.NORMALIZED, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.PREFIX, Optional.empty());
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
-        Assert.assertEquals("SN", pair.getKey());
+        Assert.assertNull(pair.getKey());
+        Assert.assertEquals("Heinz", pair.getValue());
+    }
+
+    @Test
+    public void buildQueryValue_LOWERCASE() {
+
+        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.LOWERCASE, Optional.empty());
+        EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
+        Assert.assertEquals("SL", pair.getKey());
         Assert.assertEquals("heinz", pair.getValue());
     }
 
     @Test
-    public void buildQueryValuePrefixedNormalized() {
+    public void buildQueryValue_PREFIX_LOWERCASE() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.PREFIX_NORMALIZED, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.PREFIX_LOWERCASE, Optional.empty());
+        EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
+        Assert.assertEquals("SL", pair.getKey());
+        Assert.assertEquals("heinz%", pair.getValue());
+    }
+
+    @Test
+    public void buildQueryValue_REDUCED() {
+
+        EmployeeFilter filter = new EmployeeFilter(Optional.of("Thiel"), StringSearchMode.REDUCED, Optional.empty());
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertEquals("SN", pair.getKey());
-        Assert.assertEquals("heinz%", pair.getValue());
+        Assert.assertEquals("til", pair.getValue());
+    }
+
+    @Test
+    public void buildQueryValue_PREFIX_REDUCED() {
+
+        EmployeeFilter filter = new EmployeeFilter(Optional.of("Thiel"), StringSearchMode.PREFIX_REDUCED, Optional.empty());
+        EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
+        Assert.assertEquals("SN", pair.getKey());
+        Assert.assertEquals("til%", pair.getValue());
     }
 
     @Test

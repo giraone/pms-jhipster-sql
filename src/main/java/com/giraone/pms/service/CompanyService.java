@@ -52,6 +52,15 @@ public interface CompanyService {
     Optional<CompanyDTO> findOneByExternalId(String externalId);
 
     /**
+     * Save a employee.
+     *
+     * @param companyExternalId the externalId of the company
+     * @param userLogin the user to be added
+     * @return true, if the user was added or already contained, false on any error
+     */
+    boolean addUserToCompany(String companyExternalId, String userLogin);
+
+    /**
      * Delete the "id" company.
      *
      * @param id the id of the entity

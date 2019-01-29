@@ -1,8 +1,10 @@
 package com.giraone.pms.service.impl;
 
+import com.giraone.pms.domain.User;
 import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.repository.CompanyRepository;
+import com.giraone.pms.service.UserService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.mapper.CompanyMapper;
 import org.slf4j.Logger;
@@ -25,12 +27,13 @@ public class CompanyServiceImpl implements CompanyService {
     private final Logger log = LoggerFactory.getLogger(CompanyServiceImpl.class);
 
     private final CompanyRepository companyRepository;
-
     private final CompanyMapper companyMapper;
+    private final UserService userService;
 
-    public CompanyServiceImpl(CompanyRepository companyRepository, CompanyMapper companyMapper) {
+    public CompanyServiceImpl(CompanyRepository companyRepository, CompanyMapper companyMapper, UserService userService) {
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
+        this.userService = userService;
     }
 
     /**
@@ -98,6 +101,22 @@ public class CompanyServiceImpl implements CompanyService {
         log.debug("Request to get company by externalId : {}", externalId);
         return companyRepository.findOneByExternalId(externalId)
             .map(companyMapper::toDto);
+    }
+
+
+    @Override
+    public boolean addUserToCompany(String companyExternalId, String userLogin) {
+        Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
+        if (!company.isPresent()) {
+            return false;
+        }
+        Optional<User> user = userService.getUserWithAuthoritiesByLogin(userLogin);
+        if (!user.isPresent()) {
+            return false;
+        }
+        company.get().getUsers().add(user.get());
+        companyRepository.save(company.get());
+        return true;
     }
 
     /**

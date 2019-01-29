@@ -17,4 +17,12 @@ public class EmployeeFilterPair {
     public String getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "EmployeeFilterPair{" +
+            "key='" + key + '\'' +
+            ", value='" + value + '\'' +
+            '}';
+    }
 }

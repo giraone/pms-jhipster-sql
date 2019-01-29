@@ -1,5 +1,7 @@
 package com.giraone.pms.service;
 
+import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.EmployeeName;
 import com.giraone.pms.domain.filter.EmployeeFilter;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
@@ -22,7 +24,7 @@ public interface EmployeeDomainService {
      * @param pageable the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
-    public Optional<Page<EmployeeDTO>> findAll(Optional<String> companyExternalId, EmployeeFilter employeeFilter, Pageable pageable);
+    Optional<Page<EmployeeDTO>> findAll(Optional<String> companyExternalId, EmployeeFilter employeeFilter, Pageable pageable);
 
    /**
      * Get the "id" employee.
@@ -31,6 +33,26 @@ public interface EmployeeDomainService {
      * @return the entity
      */
     Optional<EmployeeDTO> findOne(Long id);
-    
+
+    /**
+     * Get a list of companies to which a user has access
+     * @param userLogin login of the user
+     * @return the list of companies
+     */
     List<CompanyDTO> getAllCompaniesOfEmployee(String userLogin);
+
+    /**
+     * Save a employee.
+     *
+     * @param employeeDTO the entity to save
+     * @return the persisted entity
+     */
+    EmployeeDTO save(EmployeeDTO employeeDTO);
+
+    /**
+     * Build the list of redundant EmployeeNames for an Employee entity
+     * @param employee the employee entity
+     * @return list of EmployeeName entities
+     */
+    List<EmployeeName> buildNames(Employee employee);
 }

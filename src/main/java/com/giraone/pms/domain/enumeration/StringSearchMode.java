@@ -5,6 +5,7 @@ package com.giraone.pms.domain.enumeration;
  */
 public enum StringSearchMode {
 
-    EXACT, PREFIX, NORMALIZED, PREFIX_NORMALIZED, PHONETIC
+    // LOWERCASE includes also Umlaut replacements
+    EXACT, PREFIX, LOWERCASE, PREFIX_LOWERCASE, REDUCED, PREFIX_REDUCED, PHONETIC
 
 }

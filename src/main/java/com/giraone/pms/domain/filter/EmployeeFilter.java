@@ -13,9 +13,6 @@ public class EmployeeFilter {
     private StringSearchMode surnameSearchMode;
     private Optional<LocalDate> dateOfBirth;
 
-    public EmployeeFilter() {
-    }
-
     public EmployeeFilter(Optional<String> surname, StringSearchMode surnameSearchMode, Optional<LocalDate> dateOfBirth) {
         this.surname = surname;
         this.surnameSearchMode = surnameSearchMode;
@@ -53,12 +50,21 @@ public class EmployeeFilter {
         }
         String input = this.surname.get();
         switch (this.surnameSearchMode) {
-            case NORMALIZED:
-                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.normalizeSingleName(input));
-            case PREFIX_NORMALIZED:
-                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.normalizeSingleName(input) + "%");
+            case LOWERCASE:
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(),
+                    nameNormalizeService.normalize(input));
+            case PREFIX_LOWERCASE:
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(),
+                    nameNormalizeService.normalize(input) + "%");
+            case REDUCED:
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(),
+                    nameNormalizeService.reduceSimplePhonetic(nameNormalizeService.normalize(input)));
+            case PREFIX_REDUCED:
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(),
+                    nameNormalizeService.reduceSimplePhonetic(nameNormalizeService.normalize(input)) + "%");
             case PHONETIC:
-                return new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.normalizePhoneticSingleName(input));
+                return new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(),
+                    nameNormalizeService.phonetic(nameNormalizeService.normalize(input)));
             default:
                 return new EmployeeFilterPair(null, input);
         }

@@ -9,7 +9,9 @@ import com.giraone.pms.service.AuthorizationService;
 import com.giraone.pms.service.EmployeeDomainService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.web.rest.errors.BadRequestAlertException;
 import com.giraone.pms.web.rest.errors.InternalServerErrorException;
+import com.giraone.pms.web.rest.util.HeaderUtil;
 import com.giraone.pms.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -22,6 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +39,8 @@ import java.util.Optional;
 public class EmployeeDomainResource {
 
     private final Logger log = LoggerFactory.getLogger(EmployeeDomainResource.class);
+
+    private static final String ENTITY_NAME = "employee";
 
     private final EmployeeDomainService employeeDomainService;
     private final AuthorizationService authorizationService;
@@ -66,7 +73,7 @@ public class EmployeeDomainResource {
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
         @RequestParam(required = false) Optional<String> companyExternalId,
         @RequestParam(required = false) Optional<String> surname,
-        @RequestParam(required = false, defaultValue = "PREFIX_NORMALIZED") StringSearchMode surnameSearchMode,
+        @RequestParam(required = false, defaultValue = "PREFIX_REDUCED") StringSearchMode surnameSearchMode,
         @RequestParam(required = false) Optional<LocalDate> dateOfBirth,
         Pageable pageable) {
 
@@ -125,8 +132,7 @@ public class EmployeeDomainResource {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
-        ResponseEntity<EmployeeDTO> ret = ResponseUtil.wrapOrNotFound(employeeDTO);
-        return ret;
+        return ResponseUtil.wrapOrNotFound(employeeDTO);
     }
     
     @GetMapping("/companies-of-employee")
@@ -139,5 +145,25 @@ public class EmployeeDomainResource {
 
         List<CompanyDTO> result = employeeDomainService.getAllCompaniesOfEmployee(userLogin);
         return ResponseEntity.ok().body(result);
+    }
+
+    /**
+     * POST  /employees : Create a new employee.
+     *
+     * @param employeeDTO the employeeDTO to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new employeeDTO, or with status 400 (Bad Request) if the employee has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/employees")
+    @Timed
+    public ResponseEntity<EmployeeDTO> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) throws URISyntaxException {
+        log.debug("REST request to save Employee : {}", employeeDTO);
+        if (employeeDTO.getId() != null) {
+            throw new BadRequestAlertException("A new employee cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        EmployeeDTO result = employeeDomainService.save(employeeDTO);
+        return ResponseEntity.created(new URI("/api/employees/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+            .body(result);
     }
 }

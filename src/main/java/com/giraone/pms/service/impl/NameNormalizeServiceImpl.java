@@ -13,10 +13,10 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
 
     private final DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
 
-    public List<String> normalize(String name) {
+    public List<String> split(String name) {
 
         List<String> ret = new ArrayList<>();
-        name = normalizeSingleName(name);
+        name = normalize(name);
 
         // Split a all non word characters
         String[] parts = name.split("[^\\p{L}\\p{Nd}]+");
@@ -37,7 +37,7 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
     }
 
     @Timed
-    public String normalizeSingleName(String name) {
+    public String normalize(String name) {
 
         name = name.trim().toLowerCase();
         name = replaceUmlauts(name);
@@ -45,14 +45,14 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
     }
 
     @Timed
-    public String normalizeSimplePhoneticSingleName(String name) {
+    public String reduceSimplePhonetic(String name) {
 
         name = replaceSimplePhoneticVariants(name);
         name = replaceCharacterRepetitions(name);
         return name;
     }
 
-    public String normalizePhoneticSingleName(String name) {
+    public String phonetic(String name) {
 
         name = replaceDigits(name);
         return this.doubleMetaphone.doubleMetaphone(name);
