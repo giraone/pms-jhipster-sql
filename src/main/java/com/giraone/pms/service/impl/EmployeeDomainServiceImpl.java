@@ -82,7 +82,7 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         Page<Employee> page;
         if (company.isPresent()) {
             // USER with access to only one company
-            page = getEmployees(employeeFilter, pageable, company);
+            page = getEmployees(employeeFilter, pageable, company.get());
         } else {
             // ADMIN with full access to all companies
             page = getEmployees(employeeFilter, pageable);
@@ -180,20 +180,20 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         return page;
     }
 
-    private Page<Employee> getEmployees(EmployeeFilter employeeFilter, Pageable pageable, Optional<Company> company) {
+    private Page<Employee> getEmployees(EmployeeFilter employeeFilter, Pageable pageable, Company company) {
         Page<Employee> page;
         if (employeeFilter.getSurname().isPresent()) {
             final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
             if (pair.getKey() == null) {
                 final String likeSuffix = employeeFilter.getSurnameSearchMode() == StringSearchMode.PREFIX ? "%" : "";
                 page = employeeRepository.findAllByCompanyAndSurnameLike(
-                    company.get(), pair.getValue() + likeSuffix, pageable);
+                    company, pair.getValue() + likeSuffix, pageable);
             } else {
                 page = employeeRepository.findAllByCompanyAndKeyPairLike(
-                    company.get(), pair.getKey(), pair.getValue(), pageable);
+                    company, pair.getKey(), pair.getValue(), pageable);
             }
         } else {
-            page = employeeRepository.findAllByCompany(company.get(), pageable);
+            page = employeeRepository.findAllByCompany(company, pageable);
         }
         return page;
     }
