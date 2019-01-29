@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -241,7 +242,7 @@ public class EmployeeDomainServiceIntTest {
         assertThat(result.get().getContent()).isNotEmpty();
         System.out.println(String.format("%d employees found in %s query", result.get().getContent().size(), stringSearchMode));
         result.get().getContent().forEach(matchingEmployee -> {
-            assertThat(matchingEmployee.getSurname()).isIn(matchingSurnames);
+            assertThat(matchingEmployee.getSurname()).isIn(Arrays.asList(matchingSurnames));
         });
     }
 
