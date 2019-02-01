@@ -1,6 +1,7 @@
 package com.giraone.pms.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.giraone.pms.service.util.StringUtil;
 import io.swagger.annotations.ApiModel;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -204,5 +205,18 @@ public class Employee implements Serializable {
             ", city='" + getCity() + "'" +
             ", streetAddress='" + getStreetAddress() + "'" +
             "}";
+    }
+
+    /**
+     * Normalize and trim all string fields
+     */
+    public void normalizeAndTrim() {
+
+        this.surname = StringUtil.trimAndNormalizeName(this.surname);
+        this.givenName = StringUtil.trimAndNormalizeName(this.givenName);
+        this.postalCode = StringUtil.trimAndNormalizeName(this.postalCode);
+
+        this.city = StringUtil.trimAndNormalizeText(this.city);
+        this.streetAddress = StringUtil.trimAndNormalizeText(this.streetAddress);
     }
 }

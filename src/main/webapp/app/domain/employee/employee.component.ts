@@ -69,12 +69,15 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         if (trimed.charAt(0) === '~') {
             surnameValue = trimed.substr(1);
             surnameSearchModeValue = 'PHONETIC';
+        } else if (trimed.charAt(0) === '-') {
+            surnameValue = trimed.substr(1);
+            surnameSearchModeValue = 'PREFIX_LOWERCASE';
         } else if (trimed.charAt(0) === '=') {
             surnameValue = trimed.substr(1);
             surnameSearchModeValue = 'EXACT';
         } else {
             surnameValue = trimed;
-            surnameSearchModeValue = 'PREFIX_NORMALIZED';
+            surnameSearchModeValue = 'PREFIX_REDUCED';
         }
         if (surnameValue.length < 2) {
             return;

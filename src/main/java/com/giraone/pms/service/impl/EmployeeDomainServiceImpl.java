@@ -128,6 +128,7 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         log.debug("Request to save Employee : {}", employeeDTO);
 
         Employee employee = employeeMapper.toEntity(employeeDTO);
+        employee.normalizeAndTrim();
         employee = employeeRepository.save(employee);
 
         // the redundant names for optimized querying (normalized, phonetic)

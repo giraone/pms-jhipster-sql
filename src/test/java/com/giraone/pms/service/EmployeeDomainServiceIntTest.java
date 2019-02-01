@@ -207,11 +207,43 @@ public class EmployeeDomainServiceIntTest {
 
     @Test
     @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_LOWERCASE_MULTIPLE() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.LOWERCASE, new String[]{"Schmidt-Huber", "Schmidt", "Huber", "Haber"},
-            "Huber", new String[]{"Schmidt-Huber", "Huber"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.LOWERCASE, new String[]{"Schmidt-Huber", "Schmidt", "Huber", "Haber"},
-            "Huber", new String[]{"Schmidt-Huber", "Huber"});
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_LOWERCASE1() {
+        storeThenQueryThenCheckMatch(false, StringSearchMode.LOWERCASE, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
+            "Huber", new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber"});
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_LOWERCASE2() {
+        storeThenQueryThenCheckMatch(true, StringSearchMode.LOWERCASE, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
+            "Schmidt", new String[]{"Schmidt-Huber", "Huber-Schmidt", "Schmidt"});
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_PREFIX_REDUCED1() {
+        storeThenQueryThenCheckMatch(false, StringSearchMode.PREFIX_REDUCED, new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier", "Schmidt"},
+            "Meier", new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier"});
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_PREFIX_REDUCED2() {
+        storeThenQueryThenCheckMatch(true, StringSearchMode.PREFIX_REDUCED, new String[]{"Schmidt-Mayer", "Mayer-Schmidt", "Mayer", "Schmied"},
+            "Schmitt", new String[]{"Schmidt-Mayer", "Mayer-Schmidt", "Schmied"});
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound() {
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Schmidt - Mayer" },
+            "Schmidt-Mayer", new String[]{"Schmidt-Mayer"});
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Wagner- Mayer" },
+            "Wagner-Mayer", new String[]{"Wagner-Mayer"});
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"von der  Tann" },
+            "von der Tann", new String[]{"von der Tann"});
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{" von der  Weide- Zaun " },
+            "von der Weide-Zaun", new String[]{"von der Weide-Zaun"});
     }
 
     //------------------------------------------------------------------------------------------------------------------
