@@ -1,6 +1,5 @@
 package com.giraone.pms.web.rest;
 
-import com.codahale.metrics.annotation.Timed;
 import com.giraone.pms.domain.filter.EmployeeFilter;
 import com.giraone.pms.domain.enumeration.StringSearchMode;
 import com.giraone.pms.security.AuthoritiesConstants;
@@ -14,6 +13,7 @@ import com.giraone.pms.web.rest.errors.InternalServerErrorException;
 import com.giraone.pms.web.rest.util.HeaderUtil;
 import com.giraone.pms.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;

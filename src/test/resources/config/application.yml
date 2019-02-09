@@ -42,7 +42,7 @@ spring:
             hibernate.connection.provider_disables_autocommit: true
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
-            hibernate.generate_statistics: true
+            hibernate.generate_statistics: false
             hibernate.hbm2ddl.auto: validate
             hibernate.jdbc.time_zone: UTC
     liquibase:
@@ -91,9 +91,8 @@ jhipster:
                 base64-secret: NDJmM2FkNmE3OGNiOTQ5MzBhNzQ3OGYzNDZkMTZjN2MwMjQ1MjcxYWU1OGY5M2ExNzExY2IxN2NkODM0YmQ0NjY2YjJiYmZhODEwNmEwYjAyOWI5ZWZiMWNmZGFhYTM0NzNmMzVmMTJmNGI3MGNhZGEwNWY3ZWYyZTY1NmU4NTc=
                 # Token is valid 24 hours
                 token-validity-in-seconds: 86400
-    metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
-        jmx.enabled: true
-        logs: # Reports Dropwizard metrics in the logs
+    metrics:
+        logs: # Reports metrics in the logs
             enabled: true
             report-frequency: 60 # in seconds
 

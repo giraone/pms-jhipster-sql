@@ -46,7 +46,6 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public CompanyDTO save(CompanyDTO companyDTO) {
         log.debug("Request to save Company : {}", companyDTO);
-
         Company company = companyMapper.toEntity(companyDTO);
         company = companyRepository.save(company);
         return companyMapper.toDto(company);
@@ -112,8 +111,7 @@ public class CompanyServiceImpl implements CompanyService {
      */
     @Override
     public void delete(Long id) {
-        log.debug("Request to delete Company : {}", id);
-        companyRepository.deleteById(id);
+        log.debug("Request to delete Company : {}", id);        companyRepository.deleteById(id);
     }
 
     /**

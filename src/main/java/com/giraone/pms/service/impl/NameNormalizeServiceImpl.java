@@ -1,7 +1,7 @@
 package com.giraone.pms.service.impl;
 
-import com.codahale.metrics.annotation.Timed;
 import com.giraone.pms.service.NameNormalizeService;
+import io.micrometer.core.annotation.Timed;
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;

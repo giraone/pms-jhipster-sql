@@ -103,7 +103,8 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void delete(Long id) {
-        log.debug("Request to delete Employee : {}", id);        employeeRepository.deleteById(id);
+        log.debug("Request to delete Employee : {}", id);
+        employeeRepository.deleteById(id);
     }
 
     //-- Extensions ----------------------------------------------------------------------------------------------------
@@ -194,19 +195,4 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         return page;
     }
-
-    /*
-    private Set<EmployeeFilterPair> buildName(Employee employee) {
-        final Set<EmployeeFilterPair> ret = new HashSet<>();
-        final String originalName = employee.getSurname();
-        final String normalizedName = nameNormalizeService.normalize(originalName);
-        ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(), normalizedName));
-        final List<String> names = nameNormalizeService.split(normalizedName);
-        for (String name : names) {
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
-        }
-        return ret;
-    }
-    */
 }

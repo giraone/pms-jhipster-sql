@@ -1,6 +1,4 @@
 package com.giraone.pms.web.rest;
-
-import com.codahale.metrics.annotation.Timed;
 import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
 import com.giraone.pms.web.rest.util.HeaderUtil;
@@ -47,7 +45,6 @@ public class EmployeeResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/employees")
-    @Timed
     public ResponseEntity<EmployeeDTO> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) throws URISyntaxException {
         log.debug("REST request to save Employee : {}", employeeDTO);
         if (employeeDTO.getId() != null) {
@@ -69,7 +66,6 @@ public class EmployeeResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/employees")
-    @Timed
     public ResponseEntity<EmployeeDTO> updateEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) throws URISyntaxException {
         log.debug("REST request to update Employee : {}", employeeDTO);
         if (employeeDTO.getId() == null) {
@@ -88,7 +84,6 @@ public class EmployeeResource {
      * @return the ResponseEntity with status 200 (OK) and the list of employees in body
      */
     @GetMapping("/employees")
-    @Timed
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(Pageable pageable) {
         log.debug("REST request to get a page of Employees");
         Page<EmployeeDTO> page = employeeService.findAllByFilter(pageable);
@@ -103,7 +98,6 @@ public class EmployeeResource {
      * @return the ResponseEntity with status 200 (OK) and with body the employeeDTO, or with status 404 (Not Found)
      */
     @GetMapping("/employees/{id}")
-    @Timed
     public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable Long id) {
         log.debug("REST request to get Employee : {}", id);
         Optional<EmployeeDTO> employeeDTO = employeeService.findOne(id);
@@ -117,7 +111,6 @@ public class EmployeeResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/employees/{id}")
-    @Timed
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         log.debug("REST request to delete Employee : {}", id);
         employeeService.delete(id);

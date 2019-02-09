@@ -1,8 +1,8 @@
 package com.giraone.pms.repository;
 
-import com.codahale.metrics.annotation.Timed;
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.domain.Employee;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

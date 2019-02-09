@@ -1,6 +1,4 @@
 package com.giraone.pms.web.rest;
-
-import com.codahale.metrics.annotation.Timed;
 import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
 import com.giraone.pms.web.rest.util.HeaderUtil;
@@ -48,7 +46,6 @@ public class CompanyResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/companies")
-    @Timed
     public ResponseEntity<CompanyDTO> createCompany(@Valid @RequestBody CompanyDTO companyDTO) throws URISyntaxException {
         log.debug("REST request to save Company : {}", companyDTO);
         if (companyDTO.getId() != null) {
@@ -70,7 +67,6 @@ public class CompanyResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/companies")
-    @Timed
     public ResponseEntity<CompanyDTO> updateCompany(@Valid @RequestBody CompanyDTO companyDTO) throws URISyntaxException {
         log.debug("REST request to update Company : {}", companyDTO);
         if (companyDTO.getId() == null) {
@@ -90,7 +86,6 @@ public class CompanyResource {
      * @return the ResponseEntity with status 200 (OK) and the list of companies in body
      */
     @GetMapping("/companies")
-    @Timed
     public ResponseEntity<List<CompanyDTO>> getAllCompanies(Pageable pageable, @RequestParam(required = false, defaultValue = "false") boolean eagerload) {
         log.debug("REST request to get a page of Companies");
         Page<CompanyDTO> page;
@@ -110,7 +105,6 @@ public class CompanyResource {
      * @return the ResponseEntity with status 200 (OK) and with body the companyDTO, or with status 404 (Not Found)
      */
     @GetMapping("/companies/{id}")
-    @Timed
     public ResponseEntity<CompanyDTO> getCompany(@PathVariable Long id) {
         log.debug("REST request to get Company : {}", id);
         Optional<CompanyDTO> companyDTO = companyService.findOne(id);
@@ -124,7 +118,6 @@ public class CompanyResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/companies/{id}")
-    @Timed
     public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
         log.debug("REST request to delete Company : {}", id);
         companyService.delete(id);
