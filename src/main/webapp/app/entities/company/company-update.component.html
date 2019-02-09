@@ -1,0 +1,61 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+            <h2 id="jhi-company-heading" jhiTranslate="pmssqlApp.company.home.createOrEditLabel">Create or edit a Company</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!company.id">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id"
+                        [(ngModel)]="company.id" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.company.externalId" for="field_externalId">External Id</label>
+                    <input type="text" class="form-control" name="externalId" id="field_externalId"
+                        [(ngModel)]="company.externalId" required/>
+                    <div [hidden]="!(editForm.controls.externalId?.dirty && editForm.controls.externalId?.invalid)">
+                        <small class="form-text text-danger"
+                        [hidden]="!editForm.controls.externalId?.errors?.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.company.name" for="field_name">Name</label>
+                    <input type="text" class="form-control" name="name" id="field_name"
+                        [(ngModel)]="company.name" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.company.postalCode" for="field_postalCode">Postal Code</label>
+                    <input type="text" class="form-control" name="postalCode" id="field_postalCode"
+                        [(ngModel)]="company.postalCode" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.company.city" for="field_city">City</label>
+                    <input type="text" class="form-control" name="city" id="field_city"
+                        [(ngModel)]="company.city" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="pmssqlApp.company.streetAddress" for="field_streetAddress">Street Address</label>
+                    <input type="text" class="form-control" name="streetAddress" id="field_streetAddress"
+                        [(ngModel)]="company.streetAddress" />
+                </div>
+
+                <div class="form-group">
+                    <label jhiTranslate="pmssqlApp.company.user" for="field_user">User</label>
+                    <select class="form-control" id="field_user" multiple name="user" [(ngModel)]="company.users">
+                        <option [ngValue]="getSelected(company.users, userOption)" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.id}}</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

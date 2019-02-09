@@ -1,0 +1,57 @@
+{
+    "name": "Employee",
+    "fields": [
+        {
+            "fieldName": "surname",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "givenName",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "dateOfBirth",
+            "fieldType": "LocalDate"
+        },
+        {
+            "fieldName": "gender",
+            "fieldType": "GenderType",
+            "fieldValues": "UNKNOWN,MALE,FEMALE"
+        },
+        {
+            "fieldName": "postalCode",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "city",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "streetAddress",
+            "fieldType": "String"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "relationshipValidateRules": "required",
+            "relationshipName": "company",
+            "otherEntityName": "company",
+            "otherEntityField": "id",
+            "otherEntityRelationshipName": "employee"
+        }
+    ],
+    "changelogDate": "20190118080003",
+    "javadoc": "The Employee entity.",
+    "entityTableName": "employee",
+    "dto": "mapstruct",
+    "pagination": "pagination",
+    "service": "serviceImpl",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}

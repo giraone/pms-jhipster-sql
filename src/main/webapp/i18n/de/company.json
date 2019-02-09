@@ -1,0 +1,26 @@
+{
+    "pmssqlApp": {
+        "company": {
+            "home": {
+                "title": "Companies",
+                "createLabel": "Company erstellen",
+                "createOrEditLabel": "Company erstellen oder bearbeiten"
+            },
+            "created": "Company erstellt mit ID {{ param }}",
+            "updated": "Company aktualisiert mit ID {{ param }}",
+            "deleted": "Company gelöscht mit ID {{ param }}",
+            "delete": {
+                "question": "Soll Company {{ id }} wirklich dauerhaft gelöscht werden?"
+            },
+            "detail": {
+                "title": "Company"
+            },
+            "externalId": "External Id",
+            "name": "Name",
+            "postalCode": "Postal Code",
+            "city": "City",
+            "streetAddress": "Street Address",
+            "user": "User"
+        }
+    }
+}

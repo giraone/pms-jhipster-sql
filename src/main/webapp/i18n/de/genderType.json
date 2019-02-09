@@ -1,0 +1,10 @@
+{
+    "pmssqlApp": {
+        "GenderType": {
+            "null": "",
+            "UNKNOWN": "UNKNOWN",
+            "MALE": "MALE",
+            "FEMALE": "FEMALE"
+        }
+    }
+}
