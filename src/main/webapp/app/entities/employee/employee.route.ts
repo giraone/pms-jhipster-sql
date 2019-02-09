@@ -17,7 +17,7 @@ import { IEmployee } from 'app/shared/model/employee.model';
 export class EmployeeResolve implements Resolve<IEmployee> {
     constructor(private service: EmployeeService) {}
 
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Employee> {
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IEmployee> {
         const id = route.params['id'] ? route.params['id'] : null;
         if (id) {
             return this.service.find(id).pipe(
@@ -31,7 +31,7 @@ export class EmployeeResolve implements Resolve<IEmployee> {
 
 export const employeeRoute: Routes = [
     {
-        path: 'employee',
+        path: '',
         component: EmployeeComponent,
         resolve: {
             pagingParams: JhiResolvePagingParams
@@ -44,7 +44,7 @@ export const employeeRoute: Routes = [
         canActivate: [UserRouteAccessService]
     },
     {
-        path: 'employee/:id/view',
+        path: ':id/view',
         component: EmployeeDetailComponent,
         resolve: {
             employee: EmployeeResolve
@@ -56,7 +56,7 @@ export const employeeRoute: Routes = [
         canActivate: [UserRouteAccessService]
     },
     {
-        path: 'employee/new',
+        path: 'new',
         component: EmployeeUpdateComponent,
         resolve: {
             employee: EmployeeResolve
@@ -68,7 +68,7 @@ export const employeeRoute: Routes = [
         canActivate: [UserRouteAccessService]
     },
     {
-        path: 'employee/:id/edit',
+        path: ':id/edit',
         component: EmployeeUpdateComponent,
         resolve: {
             employee: EmployeeResolve
@@ -83,7 +83,7 @@ export const employeeRoute: Routes = [
 
 export const employeePopupRoute: Routes = [
     {
-        path: 'employee/:id/delete',
+        path: ':id/delete',
         component: EmployeeDeletePopupComponent,
         resolve: {
             employee: EmployeeResolve
