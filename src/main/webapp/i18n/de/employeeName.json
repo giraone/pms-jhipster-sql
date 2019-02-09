@@ -1,0 +1,23 @@
+{
+    "pmssqlApp": {
+        "employeeName": {
+            "home": {
+                "title": "Employee Names",
+                "createLabel": "Employee Name erstellen",
+                "createOrEditLabel": "Employee Name erstellen oder bearbeiten"
+            },
+            "created": "Employee Name erstellt mit ID {{ param }}",
+            "updated": "Employee Name aktualisiert mit ID {{ param }}",
+            "deleted": "Employee Name gelöscht mit ID {{ param }}",
+            "delete": {
+                "question": "Soll Employee Name {{ id }} wirklich dauerhaft gelöscht werden?"
+            },
+            "detail": {
+                "title": "Employee Name"
+            },
+            "ownerId": "Owner Id",
+            "nameKey": "Name Key",
+            "nameValue": "Name Value"
+        }
+    }
+}

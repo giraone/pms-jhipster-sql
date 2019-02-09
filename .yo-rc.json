@@ -1,0 +1,39 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.giraone.pms",
+      "nativeLanguage": "en"
+    },
+    "jhipsterVersion": "5.7.2",
+    "applicationType": "monolith",
+    "baseName": "pmssql",
+    "packageName": "com.giraone.pms",
+    "packageFolder": "com/giraone/pms",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": true,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "NDJmM2FkNmE3OGNiOTQ5MzBhNzQ3OGYzNDZkMTZjN2MwMjQ1MjcxYWU1OGY5M2ExNzExY2IxN2NkODM0YmQ0NjY2YjJiYmZhODEwNmEwYjAyOWI5ZWZiMWNmZGFhYTM0NzNmMzVmMTJmNGI3MGNhZGEwNWY3ZWYyZTY1NmU4NTc=",
+    "clientFramework": "angularX",
+    "useSass": true,
+    "clientPackageManager": "npm",
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "otherModules": [],
+    "enableTranslation": true,
+    "nativeLanguage": "en",
+    "languages": [
+      "en",
+      "de"
+    ]
+  }
+}
