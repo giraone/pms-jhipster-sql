@@ -16,28 +16,29 @@
     <changeSet id="20190123183134-1" author="hs">
         <validCheckSum>ANY</validCheckSum>
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="employee_name" />
+            <tableExists tableName="employee_name"/>
         </preConditions>
-        <dropTable tableName="employee_name" />
+        <dropTable tableName="employee_name"/>
     </changeSet>
 
-    <changeSet id="20190123183134-2" author="jhipster">
+    <changeSet id="20190123183134-2" author="hs">
         <validCheckSum>ANY</validCheckSum>
         <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="employee_name" /></not>
+            <not>
+                <tableExists tableName="employee_name"/>
+            </not>
         </preConditions>
         <createTable tableName="employee_name" remarks="Normalized names of the employee">
             <column name="owner_id" type="bigint">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="name_key" type="varchar(2)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
 
             <column name="name_value" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
-            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
 
     </changeSet>
@@ -52,5 +53,12 @@
                                  referencedTableName="employee"/>
     </changeSet>
 
-    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
+    <changeSet id="20190123183134-4" author="hs">
+        <addForeignKeyConstraint baseColumnNames="owner_id"
+                                 baseTableName="employee_name"
+                                 constraintName="fk_employee_name_owner_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="employee"/>
+    </changeSet>
+
 </databaseChangeLog>
