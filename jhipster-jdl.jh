@@ -15,7 +15,7 @@ enum GenderType {
  * The Company entity.
  */
 entity Company {
- externalId String required,
+ externalId String required unique,
  name String,
  postalCode String,
  city String,
@@ -35,14 +35,11 @@ entity Employee {
  streetAddress String
 }
 
-/**
- * Normalized names of the employee
- */
-entity EmployeeName {
- ownerId Long required,
- nameKey String required,
- nameValue String required
-}
+// Only for the diagram
+// entity EmployeeName {
+//  nameKey String required,
+//  nameValue String required
+// }
 
 // --- --- --- RELATIONSHIPS --- --- ---
 
@@ -55,10 +52,15 @@ relationship ManyToMany {
 }
 
 // Only for the diagram
+// relationship ManyToOne {
+//  EmployeeName{owner required} to Employee
+// }
+
+// Only for the diagram
 // entity User {
 //  login String required unique,
 //  email String  required unique
-//}
+// }
 
 // --- --- --- MISC --- --- ---
 
@@ -66,14 +68,12 @@ relationship ManyToMany {
 //paginate Employee with infinite-scroll
 paginate Employee with pagination
 paginate Company with pagination
-paginate EmployeeName with pagination
 
 // Use Data Transfer Objects (DTO)
 dto * with mapstruct
 
-// Set service options to all except few
+// Set service options (use Impl)
 service all with serviceImpl
-// service all with serviceImpl except Employee
 
 // Set an angular suffix
 // angularSuffix * with mySuffix

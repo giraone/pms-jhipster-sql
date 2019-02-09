@@ -42,6 +42,12 @@ Both docker compose files share a common network
 jhipster import-jdl ./jhipster-jdl.jh --force
 ```
 
+## Upgrade jhipster version
+
+```
+jhipster upgrade [--verbose]
+```
+
 ## Security
 
 In constrast to the standard JHipster generated projects, only users with the role ADMIN can access the
@@ -63,8 +69,6 @@ curl "${BASE_URL}/api/companies?page=0&size=20&sort=id,asc" -k -H 'Accept: appli
 curl "${BASE_URL}/api/employees?page=0&size=20&sort=id,asc" -k -H 'Accept: application/json' \
  -H "Authorization: Bearer ${token}"
 
-curl "${BASE_URL}/api/employee-names?page=0&size=20&sort=id,asc" -k -H 'Accept: application/json' \
- -H "Authorization: Bearer ${token}"
 ```
 
 ## CURL samples (domain API)

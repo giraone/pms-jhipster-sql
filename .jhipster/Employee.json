@@ -40,7 +40,8 @@
             "relationshipValidateRules": "required",
             "relationshipName": "company",
             "otherEntityName": "company",
-            "otherEntityField": "id"
+            "otherEntityField": "id",
+            "otherEntityRelationshipName": "employee"
         }
     ],
     "changelogDate": "20190118080003",

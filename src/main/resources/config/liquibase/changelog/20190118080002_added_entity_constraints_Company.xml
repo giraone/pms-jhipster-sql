@@ -8,14 +8,14 @@
     -->
     <changeSet id="20190118080002-2" author="jhipster">
         
-        <addForeignKeyConstraint baseColumnNames="companies_id"
+        <addForeignKeyConstraint baseColumnNames="company_id"
                                  baseTableName="company_user"
-                                 constraintName="fk_company_user_companies_id"
+                                 constraintName="fk_company_user_company_id"
                                  referencedColumnNames="id"
                                  referencedTableName="company"/>
-        <addForeignKeyConstraint baseColumnNames="users_id"
+        <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="company_user"
-                                 constraintName="fk_company_user_users_id"
+                                 constraintName="fk_company_user_user_id"
                                  referencedColumnNames="id"
                                  referencedTableName="jhi_user"/>
         

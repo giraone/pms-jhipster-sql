@@ -42,7 +42,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
         log.debug("Request to save Employee : {}", employeeDTO);
-
         Employee employee = employeeMapper.toEntity(employeeDTO);
         employee = employeeRepository.save(employee);
         return employeeMapper.toDto(employee);
@@ -84,7 +83,6 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void delete(Long id) {
-        log.debug("Request to delete Employee : {}", id);
-        employeeRepository.deleteById(id);
+        log.debug("Request to delete Employee : {}", id);        employeeRepository.deleteById(id);
     }
 }
