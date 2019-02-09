@@ -9,7 +9,6 @@
                 "main": "Entities",
                 "company": "Company",
                 "employee": "Employee",
-                "employeeName": "Employee Names",
                 "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
             },
             "account": {

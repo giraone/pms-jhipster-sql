@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_URL="http://localhost:8080/"
+BASE_URL="http://localhost:8080"
 ROOT_DATA_DIR="../data-10M"
 
 token=$(curl "${BASE_URL}/api/authenticate" -s -H 'Accept: application/json' -H 'Content-Type: application/json' \

@@ -7,8 +7,8 @@ import com.giraone.pms.service.EmployeeDomainService;
 import com.giraone.pms.service.UserService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
+import com.giraone.pms.service.dto.UserDTO;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.Month;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -43,6 +44,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = PmssqlApp.class)
 public class EmployeeDomainResourceIntTest {
 
+    private static final String TEST_USER = "test-user-1";
+    private static final String TEST_COMPANY = "test-company-1";
+
     @Autowired
     private EmployeeDomainService employeeDomainService;
     @Autowired
@@ -53,31 +57,7 @@ public class EmployeeDomainResourceIntTest {
     @Autowired
     private WebApplicationContext wac;
 
-    private CompanyDTO company;
     private MockMvc restMockEmployeeDomainResource;
-
-    @Before
-    public void setupCompanyAndUsers() {
-
-        CompanyDTO company = new CompanyDTO();
-        company.setName("Test-Company");
-        company.setExternalId("test1");
-        this.company = companyService.save(company);
-
-        /*
-        UserDTO admin = new UserDTO();
-        admin.setLogin("admin");
-        userService.createUser(admin);
-
-        UserDTO user = new UserDTO();
-        user.setLogin("user");
-        userService.createUser(user);
-
-        companyService.addUserToCompany(this.company.getExternalId(), user.getLogin());
-        */
-
-        companyService.addUserToCompany(this.company.getExternalId(), "user");
-    }
 
     @Before
     public void setupMocks() {
@@ -98,11 +78,14 @@ public class EmployeeDomainResourceIntTest {
     public void getAllEmployeesAsAdmin() throws Exception {
 
         // arrange
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample());
+        CompanyDTO company = setupCompanyAndUser();
+        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
-            .perform(get("/domain-api/employees?sort=id,desc"));
+            .perform(
+                get("/domain-api/employees")
+                    .param("sort", "id,desc"));
 
         // assert
         resultActions.andExpect(status().isOk())
@@ -114,18 +97,21 @@ public class EmployeeDomainResourceIntTest {
             .andExpect(jsonPath("$.[*].companyId").value(hasItem(employee.getCompanyId().intValue())));
     }
 
-    @Ignore
     @Test
     @Transactional
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = TEST_USER, roles = "USER")
     public void getAllEmployeesAsUser() throws Exception {
 
         // arrange
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample());
+        CompanyDTO company = setupCompanyAndUser();
+        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
-            .perform(get("/domain-api/employees?sort=id,desc"));
+            .perform(
+                get("/domain-api/employees")
+                    .param("companyExternalId", company.getExternalId())
+                    .param("sort", "id,desc"));
 
         // assert
         resultActions.andExpect(status().isOk())
@@ -143,7 +129,8 @@ public class EmployeeDomainResourceIntTest {
     public void getEmployeeAsAdmin() throws Exception {
 
         // arrange
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample());
+        CompanyDTO company = setupCompanyAndUser();
+        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
@@ -159,14 +146,14 @@ public class EmployeeDomainResourceIntTest {
             .andExpect(jsonPath("$.companyId").value(employee.getCompanyId()));
     }
 
-    @Ignore
     @Test
     @Transactional
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = TEST_USER, roles = "USER")
     public void getEmployeeAsUser() throws Exception {
 
         // arrange
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample());
+        CompanyDTO company = setupCompanyAndUser();
+        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
@@ -184,14 +171,10 @@ public class EmployeeDomainResourceIntTest {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private EmployeeDTO getEmployeeSample() {
-        return getEmployeeSample("Schmitt");
-    }
-
-    private EmployeeDTO getEmployeeSample(String surname) {
+    private EmployeeDTO getEmployeeSample(CompanyDTO company) {
         EmployeeDTO employee = new EmployeeDTO();
-        employee.setCompanyId(this.company.getId());
-        employee.setSurname(surname);
+        employee.setCompanyId(company.getId());
+        employee.setSurname("Schmitt");
         employee.setGivenName("Thomas");
         employee.setDateOfBirth(LocalDate.of(1970, Month.JANUARY, 1));
         employee.setGender(GenderType.MALE);
@@ -199,5 +182,21 @@ public class EmployeeDomainResourceIntTest {
         employee.setPostalCode("98765");
         employee.setStreetAddress("Am Wegesrand 123");
         return employee;
+    }
+
+    private CompanyDTO setupCompanyAndUser() {
+
+        UserDTO user = new UserDTO();
+        user.setLogin(TEST_USER);
+        userService.createUser(user);
+
+        CompanyDTO company = new CompanyDTO();
+        company.setName(TEST_COMPANY);
+        company.setExternalId(TEST_COMPANY);
+        company = companyService.save(company);
+
+        boolean ok = companyService.addUserToCompany(company.getExternalId(), user.getLogin());
+        assertTrue(ok);
+        return company;
     }
 }

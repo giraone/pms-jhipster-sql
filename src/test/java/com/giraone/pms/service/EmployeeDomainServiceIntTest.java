@@ -6,7 +6,6 @@ import com.giraone.pms.domain.enumeration.StringSearchMode;
 import com.giraone.pms.domain.filter.EmployeeFilter;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
-import com.giraone.pms.service.dto.EmployeeNameDTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +23,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for the EmployeeDomainService
@@ -40,9 +40,6 @@ public class EmployeeDomainServiceIntTest {
 
     @Autowired
     private EmployeeDomainService employeeDomainService;
-
-    @Autowired
-    private EmployeeNameService employeeNameService;
 
     private CompanyDTO company;
 
@@ -88,7 +85,7 @@ public class EmployeeDomainServiceIntTest {
         Optional<EmployeeDTO> savedEmployee = employeeDomainService.findOne(employee.getId());
 
         // assert
-        assertThat(savedEmployee).isPresent();
+        assertTrue(savedEmployee.isPresent());
         assertThat(savedEmployee.get().getCompanyId()).isEqualTo(employee.getCompanyId());
         assertThat(savedEmployee.get().getSurname()).isEqualTo(employee.getSurname());
         assertThat(savedEmployee.get().getGivenName()).isEqualTo(employee.getGivenName());
@@ -99,48 +96,6 @@ public class EmployeeDomainServiceIntTest {
         assertThat(savedEmployee.get().getStreetAddress()).isEqualTo(employee.getStreetAddress());
     }
 
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatThreeNamesAreStoredForSingleName() {
-
-        // arrange
-
-        // act
-        final EmployeeDTO employee = employeeDomainService.save(getEmployeeSample());
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<EmployeeNameDTO> result = employeeNameService.findAll(pageable);
-
-        // assert
-        assertThat(result).isNotNull();
-        assertThat(result.getContent().size()).isEqualTo(3);
-        result.getContent().forEach(keyValue -> {
-            assertThat(keyValue.getOwnerId()).isEqualTo(employee.getId());
-            assertThat(keyValue.getNameKey()).isIn("SL", "SN", "SP");
-            assertThat(keyValue.getNameValue()).isIn("schmitt", "smit", "XMT");
-        });
-    }
-
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatMultipleNamesAreStoredForMultipleNames() {
-
-        // arrange
-
-        // act
-        final EmployeeDTO employee = employeeDomainService.save(getEmployeeSample("Schmidt-Wagner"));
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<EmployeeNameDTO> result = employeeNameService.findAll(pageable);
-
-        // assert
-        assertThat(result).isNotNull();
-        assertThat(result.getContent().size()).isEqualTo(5);
-        result.getContent().forEach(keyValue -> {
-            System.out.println(keyValue.getNameValue());
-            assertThat(keyValue.getOwnerId()).isEqualTo(employee.getId());
-            assertThat(keyValue.getNameKey()).isIn("SL", "SN", "SP");
-            assertThat(keyValue.getNameValue()).isIn("schmidt-wagner", "smit", "XMT", "wagner", "AKNR");
-        });
-    }
 
     @Test
     @Transactional
@@ -236,13 +191,13 @@ public class EmployeeDomainServiceIntTest {
     @Test
     @Transactional
     public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound() {
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Schmidt - Mayer" },
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Schmidt - Mayer"},
             "Schmidt-Mayer", new String[]{"Schmidt-Mayer"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Wagner- Mayer" },
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Wagner- Mayer"},
             "Wagner-Mayer", new String[]{"Wagner-Mayer"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"von der  Tann" },
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"von der  Tann"},
             "von der Tann", new String[]{"von der Tann"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{" von der  Weide- Zaun " },
+        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{" von der  Weide- Zaun "},
             "von der Weide-Zaun", new String[]{"von der Weide-Zaun"});
     }
 
@@ -268,24 +223,19 @@ public class EmployeeDomainServiceIntTest {
         Optional<Page<EmployeeDTO>> result = employeeDomainService.findAll(companyExternalId, employeeFilter, pageable);
 
         // assert
-        assertThat(result).isPresent();
+        assertTrue(result.isPresent());
         assertThat(result.get().getTotalElements()).isGreaterThan(0);
         assertThat(result.get().getTotalPages()).isGreaterThan(0);
         assertThat(result.get().getContent()).isNotEmpty();
         System.out.println(String.format("%d employees found in %s query", result.get().getContent().size(), stringSearchMode));
-        result.get().getContent().forEach(matchingEmployee -> {
-            assertThat(matchingEmployee.getSurname()).isIn(Arrays.asList(matchingSurnames));
-        });
+        result.get().getContent().forEach(
+            matchingEmployee -> assertThat(matchingEmployee.getSurname()).isIn(Arrays.asList(matchingSurnames)));
     }
 
     private EmployeeDTO getEmployeeSample() {
-        return getEmployeeSample("Schmitt");
-    }
-
-    private EmployeeDTO getEmployeeSample(String surname) {
         EmployeeDTO employee = new EmployeeDTO();
         employee.setCompanyId(this.company.getId());
-        employee.setSurname(surname);
+        employee.setSurname("Schmitt");
         employee.setGivenName("Thomas");
         employee.setDateOfBirth(LocalDate.of(1970, Month.JANUARY, 1));
         employee.setGender(GenderType.MALE);

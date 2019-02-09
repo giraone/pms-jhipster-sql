@@ -13,12 +13,12 @@ import org.mapstruct.*;
 public interface EmployeeNameMapper extends EntityMapper<EmployeeNameDTO, EmployeeName> {
 
 
-    @Mapping(source = "id.ownerId", target = "ownerId")
+    @Mapping(source = "id.owner.id", target = "ownerId")
     @Mapping(source = "id.nameKey", target = "nameKey")
     @Mapping(source = "id.nameValue", target = "nameValue")
     EmployeeNameDTO toDto(EmployeeName employeeName);
 
-    @Mapping(source = "ownerId", target = "id.ownerId")
+    @Mapping(source = "ownerId", target = "id.owner.id")
     @Mapping(source = "nameKey", target = "id.nameKey")
     @Mapping(source = "nameValue", target = "id.nameValue")
     EmployeeName toEntity(EmployeeNameDTO employeeDTO);

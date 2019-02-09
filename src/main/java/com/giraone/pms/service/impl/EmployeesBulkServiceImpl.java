@@ -2,9 +2,7 @@ package com.giraone.pms.service.impl;
 
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.domain.Employee;
-import com.giraone.pms.domain.EmployeeName;
 import com.giraone.pms.domain.User;
-import com.giraone.pms.repository.EmployeeNameRepository;
 import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.security.AuthoritiesConstants;
 import com.giraone.pms.service.*;
@@ -16,7 +14,6 @@ import com.giraone.pms.service.mapper.CompanyMapper;
 import com.giraone.pms.service.mapper.EmployeeBulkMapper;
 import com.giraone.pms.service.mapper.EmployeeMapper;
 import com.giraone.pms.service.mapper.UserMapper;
-import com.google.common.collect.Lists;
 import io.micrometer.core.annotation.Timed;
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.slf4j.Logger;
@@ -27,7 +24,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -53,7 +54,6 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
     private final EmployeeDomainService employeeDomainService;
-    private final EmployeeNameRepository employeeNameRepository;
     private final CompanyService companyService;
     private final CompanyMapper companyMapper;
     private final UserService userService;
@@ -64,7 +64,6 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                                     EmployeeMapper employeeMapper,
                                     EmployeeService employeeService,
                                     EmployeeDomainService employeeDomainService,
-                                    EmployeeNameRepository employeeNameRepository,
                                     CompanyService companyService,
                                     CompanyMapper companyMapper,
                                     UserService userService,
@@ -75,7 +74,6 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         this.employeeMapper = employeeMapper;
         this.employeeService = employeeService;
         this.employeeDomainService = employeeDomainService;
-        this.employeeNameRepository = employeeNameRepository;
         this.companyService = companyService;
         this.companyMapper = companyMapper;
         this.userService = userService;
@@ -146,34 +144,19 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
             ret += reIndex(pages.getNumber(), pages.getContent().stream(), clearFirst);
             pageable = pageable.next();
             final long end = System.currentTimeMillis();
-            log.info("Page {} of {} in {} msec", pages.getNumber(), pages.getTotalPages(), end-start);
+            log.info("Page {} of {} in {} msec", pages.getNumber(), pages.getTotalPages(), end - start);
         } while (pages.hasNext());
         return ret;
     }
 
     @Timed
     @Transactional
-    // Attention: Method must be public! Otherwise @Transactional does not work!
-    private int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
+    // public because otherwise @Transactional is not working
+    public int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
         log.info("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
-        final List<Long> owners = new ArrayList<>();
-        final List<EmployeeName> employeeNamesList = new ArrayList<>();
-        employeeStream.forEach(employeeDTO -> {
-            final Employee employee = employeeMapper.toEntity(employeeDTO);
-            owners.add(employee.getId());
-
-            final List<EmployeeName> names = employeeDomainService.buildNames(employee);
-            employeeNamesList.addAll(names);
-        });
-        if (clearFirst) {
-            log.info("EmployeesBulkServiceImpl.reIndex: clearFirst for {} owners", owners.size());
-            // Split into a maximum of 100 ids for the IN statement
-            List<List<Long>> ownerPartitions = Lists.partition(owners, 100);
-            for (List<Long> ownerPartition : ownerPartitions) {
-                this.employeeNameRepository.deleteByOwners(ownerPartition);
-            }
-        }
-        log.info("EmployeesBulkServiceImpl.reIndex: insert for {} names", employeeNamesList.size());
-        return this.employeeNameRepository.saveAll(employeeNamesList).size();
+        List<Employee> employeeList = employeeStream.map(employeeDTO -> employeeMapper.toEntity(employeeDTO)).collect(Collectors.toList());
+        int ret = this.employeeRepository.reIndex(employeeList, !clearFirst);
+        log.info("EmployeesBulkServiceImpl.reIndex: insert for {} names", ret);
+        return ret;
     }
 }

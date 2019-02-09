@@ -88,11 +88,12 @@ public class EmployeeDomainResource {
             log.debug("- by user {}", userLogin);
 
             if (!companyExternalId.isPresent()) {
-                log.warn("Attempt by user to query without companyExternalId! {}", userLogin);
+                log.warn("Attempt by user {} to query without companyExternalId!", userLogin);
                 return ResponseEntity.badRequest().build();
             }
 
             if (!this.authorizationService.check(companyExternalId.get(), userLogin)) {
+                log.warn("Attempt by user {} to query company {} without access rights!", userLogin, companyExternalId.get());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }

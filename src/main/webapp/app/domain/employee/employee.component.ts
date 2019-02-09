@@ -169,7 +169,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
     protected getExternalCompanyId() {
         if (this.currentCompanies == null || this.currentCompanies.length === 0) {
-            return 'none';
+            return null;
         }
         return this.currentCompanies[0].externalId;
     }

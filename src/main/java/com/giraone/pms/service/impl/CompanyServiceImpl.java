@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Service Implementation for managing Company.
@@ -70,10 +71,11 @@ public class CompanyServiceImpl implements CompanyService {
      *
      * @return the list of entities
      */
+    @Override
     public Page<CompanyDTO> findAllWithEagerRelationships(Pageable pageable) {
         return companyRepository.findAllWithEagerRelationships(pageable).map(companyMapper::toDto);
     }
-    
+
 
     /**
      * Get one company by id.
@@ -103,7 +105,24 @@ public class CompanyServiceImpl implements CompanyService {
             .map(companyMapper::toDto);
     }
 
+    /**
+     * Delete the company by id.
+     *
+     * @param id the id of the entity
+     */
+    @Override
+    public void delete(Long id) {
+        log.debug("Request to delete Company : {}", id);
+        companyRepository.deleteById(id);
+    }
 
+    /**
+     * Assign an user to a company.
+     *
+     * @param companyExternalId the externalId of the company
+     * @param userLogin         the user to be added
+     * @return true, if the user was added or already contained, false on any error
+     */
     @Override
     public boolean addUserToCompany(String companyExternalId, String userLogin) {
         Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
@@ -114,19 +133,39 @@ public class CompanyServiceImpl implements CompanyService {
         if (!user.isPresent()) {
             return false;
         }
-        company.get().getUsers().add(user.get());
-        companyRepository.save(company.get());
+        Set<User> users = company.get().getUsers();
+        if (!users.contains(user)) {
+            users.add(user.get());
+            companyRepository.save(company.get());
+        }
         return true;
     }
 
     /**
-     * Delete the company by id.
+     * Check, whether user is in a company
      *
-     * @param id the id of the entity
+     * @param companyExternalId the externalId of the company
+     * @param userLogin         the user lign to be checked
+     * @return true, if the user is assigned to the company
      */
     @Override
-    public void delete(Long id) {
-        log.debug("Request to delete Company : {}", id);
-        companyRepository.deleteById(id);
+    public boolean isUserInCompany(String companyExternalId, String userLogin) {
+
+        final Optional<Company> company = companyRepository.findOneByExternalIdAndUsersLogin(companyExternalId, userLogin);
+        return company.isPresent();
+    }
+
+    /**
+     * Check, whether user is in a company
+     *
+     * @param companyId the id of the company
+     * @param userLogin the user lign to be checked
+     * @return true, if the user is assigned to the company
+     */
+    @Override
+    public boolean isUserInCompany(long companyId, String userLogin) {
+
+        final Optional<Company> company = companyRepository.findOneByIdAndUsersLogin(companyId, userLogin);
+        return company.isPresent();
     }
 }

@@ -39,7 +39,18 @@
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
-        
+
     </changeSet>
+
+    <changeSet id="20190123183134-3" author="hs">
+        <validCheckSum>ANY</validCheckSum>
+        <addForeignKeyConstraint baseColumnNames="owner_id"
+                                 baseTableName="employee_name"
+                                 constraintName="fk_employee_name_to_owner"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="employee"/>
+    </changeSet>
+
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
 </databaseChangeLog>

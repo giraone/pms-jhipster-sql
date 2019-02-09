@@ -34,7 +34,7 @@ public interface CompanyService {
      * @return the list of entities
      */
     Page<CompanyDTO> findAllWithEagerRelationships(Pageable pageable);
-    
+
     /**
      * Get the "id" company.
      *
@@ -52,18 +52,36 @@ public interface CompanyService {
     Optional<CompanyDTO> findOneByExternalId(String externalId);
 
     /**
-     * Save a employee.
-     *
-     * @param companyExternalId the externalId of the company
-     * @param userLogin the user to be added
-     * @return true, if the user was added or already contained, false on any error
-     */
-    boolean addUserToCompany(String companyExternalId, String userLogin);
-
-    /**
      * Delete the "id" company.
      *
      * @param id the id of the entity
      */
     void delete(Long id);
+
+    /**
+     * Assign an user to a company.
+     *
+     * @param companyExternalId the externalId of the company
+     * @param userLogin         the user to be added
+     * @return true, if the user was added or already contained, false on any error
+     */
+    boolean addUserToCompany(String companyExternalId, String userLogin);
+
+    /**
+     * Check, whether user is in a company
+     *
+     * @param companyExternalId the externalId of the company
+     * @param userLogin         the user lign to be checked
+     * @return true, if the user is assigned to the company
+     */
+    boolean isUserInCompany(String companyExternalId, String userLogin);
+
+    /**
+     * Check, whether user is in a company
+     *
+     * @param companyId the id of the company
+     * @param userLogin the user lign to be checked
+     * @return true, if the user is assigned to the company
+     */
+    boolean isUserInCompany(long companyId, String userLogin);
 }

@@ -166,3 +166,13 @@ order by count desc
 > "sulz"
 > "beker"
 ```
+
+## Some design decisions
+
+### Redundant storage of "normalized" and "phonetic names"
+
+-   The used SQL table `EntityName` has no object id. It is managed by JPA and its
+    primary key is a composite key of all 3 columns (`owner_id`, `name_key`, `name_value`).
+-   Due to the fact, that a surname may consist of multiple values, the `name_value` must be part of the primary key.
+-   `EntityName` values are deleted via `ON CASCADE DELETE` using Liquibase - this is not done by JPA/Hibernate!
+-   `EntityName` are create by customizing the standard `JpaRepository<Employee, Long>` using an overwritten `save(Employee)` method.

@@ -34,7 +34,6 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
     private final Logger log = LoggerFactory.getLogger(EmployeeDomainServiceImpl.class);
 
     private final EmployeeRepository employeeRepository;
-    private final EmployeeNameRepository employeeNameRepository;
     private final CompanyRepository companyRepository;
     private final EmployeeMapper employeeMapper;
     private final CompanyMapper companyMapper;
@@ -42,13 +41,11 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
 
     public EmployeeDomainServiceImpl(
         EmployeeRepository employeeRepository,
-        EmployeeNameRepository employeeNameRepository,
         CompanyRepository companyRepository,
         EmployeeMapper employeeMapper,
         CompanyMapper companyMapper,
         NameNormalizeService nameNormalizeService) {
         this.employeeRepository = employeeRepository;
-        this.employeeNameRepository = employeeNameRepository;
         this.companyRepository = companyRepository;
         this.employeeMapper = employeeMapper;
         this.companyMapper = companyMapper;
@@ -118,8 +115,7 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
     }
 
     /**
-     * Save a employee.
-     *
+     * Save an employee.
      * @param employeeDTO the entity to save
      * @return the persisted entity
      */
@@ -128,37 +124,10 @@ public class EmployeeDomainServiceImpl implements EmployeeDomainService {
         log.debug("Request to save Employee : {}", employeeDTO);
 
         Employee employee = employeeMapper.toEntity(employeeDTO);
-        employee.normalizeAndTrim();
+        employee.normalizeAndTrim(); // remove unnecessary stuff like white spaces
         employee = employeeRepository.save(employee);
 
-        // the redundant names for optimized querying (normalized, phonetic)
-        List<EmployeeName> employeeNames = this.buildNames(employee);
-        employeeNameRepository.saveAll(employeeNames);
-
         return employeeMapper.toDto(employee);
-    }
-
-
-    /**
-     * Build the list of redundant EmployeeNames for an Employee entity
-     * @param employee the employee entity
-     * @return list of EmployeeName entities
-     */
-    public List<EmployeeName> buildNames(Employee employee) {
-
-        final List<EmployeeName> names = new ArrayList<>();
-        final Set<EmployeeFilterPair> namesOfEmployee = this.buildName(employee);
-        for (EmployeeFilterPair name : namesOfEmployee) {
-            final EmployeeName employeeName = new EmployeeName();
-            // This is a weird solution, because JPA does not handle tables without one primary key very well
-            final EmployeeNameCompoundKey employeeNameCompoundKey = new EmployeeNameCompoundKey();
-            employeeNameCompoundKey.setOwnerId(employee.getId());
-            employeeNameCompoundKey.setNameKey(name.getKey());
-            employeeNameCompoundKey.setNameValue(name.getValue());
-            employeeName.setId(employeeNameCompoundKey);
-            names.add(employeeName);
-        }
-        return names;
     }
 
     //------------------------------------------------------------------------------------------------------------------
