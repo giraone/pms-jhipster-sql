@@ -8,8 +8,6 @@ import com.giraone.pms.service.impl.NameNormalizeServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Optional;
-
 public class EmployeeFilterTest {
 
     private NameNormalizeService nameNormalizeService = new NameNormalizeServiceImpl();
@@ -17,7 +15,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValueNull() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.empty(), StringSearchMode.EXACT, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter();
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertNull(pair);
     }
@@ -25,7 +23,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValue_EXACT() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.EXACT, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Heinz", StringSearchMode.EXACT);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertNull(pair.getKey());
         Assert.assertEquals("Heinz", pair.getValue());
@@ -34,7 +32,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValue_PREFIX() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.PREFIX, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Heinz", StringSearchMode.PREFIX);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertNull(pair.getKey());
         Assert.assertEquals("Heinz", pair.getValue());
@@ -43,7 +41,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValue_LOWERCASE() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.LOWERCASE, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Heinz", StringSearchMode.LOWERCASE);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertEquals("SL", pair.getKey());
         Assert.assertEquals("heinz", pair.getValue());
@@ -52,7 +50,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValue_PREFIX_LOWERCASE() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.PREFIX_LOWERCASE, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Heinz", StringSearchMode.PREFIX_LOWERCASE);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertEquals("SL", pair.getKey());
         Assert.assertEquals("heinz%", pair.getValue());
@@ -61,7 +59,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValue_REDUCED() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Thiel"), StringSearchMode.REDUCED, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Thiel", StringSearchMode.REDUCED);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertEquals("SN", pair.getKey());
         Assert.assertEquals("til", pair.getValue());
@@ -70,7 +68,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValue_PREFIX_REDUCED() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Thiel"), StringSearchMode.PREFIX_REDUCED, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Thiel", StringSearchMode.PREFIX_REDUCED);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertEquals("SN", pair.getKey());
         Assert.assertEquals("til%", pair.getValue());
@@ -79,7 +77,7 @@ public class EmployeeFilterTest {
     @Test
     public void buildQueryValuePhonetic() {
 
-        EmployeeFilter filter = new EmployeeFilter(Optional.of("Heinz"), StringSearchMode.PHONETIC, Optional.empty());
+        EmployeeFilter filter = new EmployeeFilter("Heinz", StringSearchMode.PHONETIC);
         EmployeeFilterPair pair = filter.buildQueryValue(nameNormalizeService);
         Assert.assertEquals("SP", pair.getKey());
         Assert.assertEquals("HNS", pair.getValue());

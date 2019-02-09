@@ -5,25 +5,33 @@ import com.giraone.pms.domain.enumeration.StringSearchMode;
 import com.giraone.pms.service.NameNormalizeService;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class EmployeeFilter {
 
-    private Optional<String> surname;
+    private String surname;
     private StringSearchMode surnameSearchMode;
-    private Optional<LocalDate> dateOfBirth;
+    private LocalDate dateOfBirth;
 
-    public EmployeeFilter(Optional<String> surname, StringSearchMode surnameSearchMode, Optional<LocalDate> dateOfBirth) {
+    public EmployeeFilter(String surname, StringSearchMode surnameSearchMode, LocalDate dateOfBirth) {
         this.surname = surname;
         this.surnameSearchMode = surnameSearchMode;
         this.dateOfBirth = dateOfBirth;
     }
 
-    public Optional<String> getSurname() {
+    public EmployeeFilter() {
+        this.surnameSearchMode = StringSearchMode.EXACT;
+    }
+
+    public EmployeeFilter(String surname, StringSearchMode surnameSearchMode) {
+        this.surname = surname;
+        this.surnameSearchMode = surnameSearchMode;
+    }
+
+    public String getSurname() {
         return surname;
     }
 
-    public void setSurname(Optional<String> surname) {
+    public void setSurname(String surname) {
         this.surname = surname;
     }
 
@@ -35,20 +43,20 @@ public class EmployeeFilter {
         this.surnameSearchMode = surnameSearchMode;
     }
 
-    public Optional<LocalDate> getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Optional<LocalDate> dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
     public EmployeeFilterPair buildQueryValue(NameNormalizeService nameNormalizeService) {
 
-        if (!surname.isPresent()) {
+        if (surname == null) {
             return null;
         }
-        String input = this.surname.get();
+        String input = this.surname;
         switch (this.surnameSearchMode) {
             case LOWERCASE:
                 return new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(),

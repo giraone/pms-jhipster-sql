@@ -3,7 +3,7 @@ package com.giraone.pms.web.rest;
 import com.giraone.pms.PmssqlApp;
 import com.giraone.pms.domain.enumeration.GenderType;
 import com.giraone.pms.service.CompanyService;
-import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.UserService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
@@ -48,7 +48,7 @@ public class EmployeeDomainResourceIntTest {
     private static final String TEST_COMPANY = "test-company-1";
 
     @Autowired
-    private EmployeeDomainService employeeDomainService;
+    private EmployeeService employeeService;
     @Autowired
     private CompanyService companyService;
     @Autowired
@@ -79,7 +79,7 @@ public class EmployeeDomainResourceIntTest {
 
         // arrange
         CompanyDTO company = setupCompanyAndUser();
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
+        EmployeeDTO employee = employeeService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
@@ -104,7 +104,7 @@ public class EmployeeDomainResourceIntTest {
 
         // arrange
         CompanyDTO company = setupCompanyAndUser();
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
+        EmployeeDTO employee = employeeService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
@@ -130,7 +130,7 @@ public class EmployeeDomainResourceIntTest {
 
         // arrange
         CompanyDTO company = setupCompanyAndUser();
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
+        EmployeeDTO employee = employeeService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
@@ -153,7 +153,7 @@ public class EmployeeDomainResourceIntTest {
 
         // arrange
         CompanyDTO company = setupCompanyAndUser();
-        EmployeeDTO employee = employeeDomainService.save(getEmployeeSample(company));
+        EmployeeDTO employee = employeeService.save(getEmployeeSample(company));
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource

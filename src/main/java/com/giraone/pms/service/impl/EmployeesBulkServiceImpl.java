@@ -53,7 +53,6 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     private final EmployeeBulkMapper employeeBulkMapper;
     private final EmployeeMapper employeeMapper;
     private final EmployeeService employeeService;
-    private final EmployeeDomainService employeeDomainService;
     private final CompanyService companyService;
     private final CompanyMapper companyMapper;
     private final UserService userService;
@@ -63,7 +62,6 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                                     EmployeeBulkMapper employeeBulkMapper,
                                     EmployeeMapper employeeMapper,
                                     EmployeeService employeeService,
-                                    EmployeeDomainService employeeDomainService,
                                     CompanyService companyService,
                                     CompanyMapper companyMapper,
                                     UserService userService,
@@ -73,7 +71,6 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         this.employeeBulkMapper = employeeBulkMapper;
         this.employeeMapper = employeeMapper;
         this.employeeService = employeeService;
-        this.employeeDomainService = employeeDomainService;
         this.companyService = companyService;
         this.companyMapper = companyMapper;
         this.userService = userService;
@@ -139,7 +136,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         int ret = 0;
         do {
             final long start = System.currentTimeMillis();
-            pages = this.employeeService.findAll(pageable);
+            pages = this.employeeService.findAllByFilter(pageable);
 
             ret += reIndex(pages.getNumber(), pages.getContent().stream(), clearFirst);
             pageable = pageable.next();
@@ -154,7 +151,8 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
     // public because otherwise @Transactional is not working
     public int reIndex(int pageIndex, Stream<EmployeeDTO> employeeStream, boolean clearFirst) {
         log.info("EmployeesBulkServiceImpl.reIndex {}", pageIndex);
-        List<Employee> employeeList = employeeStream.map(employeeDTO -> employeeMapper.toEntity(employeeDTO)).collect(Collectors.toList());
+        List<Employee> employeeList = employeeStream.map(
+            employeeDTO -> employeeMapper.toEntity(employeeDTO)).collect(Collectors.toList());
         int ret = this.employeeRepository.reIndex(employeeList, !clearFirst);
         log.info("EmployeesBulkServiceImpl.reIndex: insert for {} names", ret);
         return ret;

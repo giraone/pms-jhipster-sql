@@ -6,7 +6,7 @@ import com.giraone.pms.domain.enumeration.StringSearchMode;
 import com.giraone.pms.security.AuthoritiesConstants;
 import com.giraone.pms.security.SecurityUtils;
 import com.giraone.pms.service.AuthorizationService;
-import com.giraone.pms.service.EmployeeDomainService;
+import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
@@ -42,12 +42,12 @@ public class EmployeeDomainResource {
 
     private static final String ENTITY_NAME = "employee";
 
-    private final EmployeeDomainService employeeDomainService;
+    private final EmployeeService employeeService;
     private final AuthorizationService authorizationService;
 
-    public EmployeeDomainResource(EmployeeDomainService employeeDomainService,
+    public EmployeeDomainResource(EmployeeService employeeService,
                                   AuthorizationService authorizationService) {
-        this.employeeDomainService = employeeDomainService;
+        this.employeeService = employeeService;
         this.authorizationService = authorizationService;
     }
 
@@ -71,10 +71,10 @@ public class EmployeeDomainResource {
     @GetMapping("/employees")
     @Timed
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
-        @RequestParam(required = false) Optional<String> companyExternalId,
-        @RequestParam(required = false) Optional<String> surname,
+        @RequestParam(required = false) String companyExternalId,
+        @RequestParam(required = false) String surname,
         @RequestParam(required = false, defaultValue = "PREFIX_REDUCED") StringSearchMode surnameSearchMode,
-        @RequestParam(required = false) Optional<LocalDate> dateOfBirth,
+        @RequestParam(required = false) LocalDate dateOfBirth,
         Pageable pageable) {
 
         log.debug("REST request to query employees companyExternalId={}, surname={}", companyExternalId, surname, dateOfBirth);
@@ -87,17 +87,17 @@ public class EmployeeDomainResource {
             final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
             log.debug("- by user {}", userLogin);
 
-            if (!companyExternalId.isPresent()) {
+            if (companyExternalId == null) {
                 log.warn("Attempt by user {} to query without companyExternalId!", userLogin);
                 return ResponseEntity.badRequest().build();
             }
 
-            if (!this.authorizationService.check(companyExternalId.get(), userLogin)) {
-                log.warn("Attempt by user {} to query company {} without access rights!", userLogin, companyExternalId.get());
+            if (!this.authorizationService.check(companyExternalId, userLogin)) {
+                log.warn("Attempt by user {} to query company {} without access rights!", userLogin, companyExternalId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
-        result = employeeDomainService.findAll(companyExternalId, employeeFilter, pageable);
+        result = employeeService.findAllByFilter(companyExternalId, employeeFilter, pageable);
         if (!result.isPresent()) {
             log.debug("- companyExternalId {} is invalid!", companyExternalId);
             return ResponseEntity.notFound().build();
@@ -128,7 +128,7 @@ public class EmployeeDomainResource {
         final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
         log.debug("- by user {}", userLogin);
 	
-	    Optional<EmployeeDTO> employeeDTO = employeeDomainService.findOne(id);
+	    Optional<EmployeeDTO> employeeDTO = employeeService.findOne(id);
         if (employeeDTO.isPresent() && !admin && !this.authorizationService.check(employeeDTO.get().getCompanyId(), userLogin)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -144,7 +144,7 @@ public class EmployeeDomainResource {
         final String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new InternalServerErrorException("Current user login not found"));
         log.debug("- by user {}", userLogin);
 
-        List<CompanyDTO> result = employeeDomainService.getAllCompaniesOfEmployee(userLogin);
+        List<CompanyDTO> result = employeeService.getAllCompaniesOfEmployee(userLogin);
         return ResponseEntity.ok().body(result);
     }
 
@@ -162,7 +162,7 @@ public class EmployeeDomainResource {
         if (employeeDTO.getId() != null) {
             throw new BadRequestAlertException("A new employee cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        EmployeeDTO result = employeeDomainService.save(employeeDTO);
+        EmployeeDTO result = employeeService.save(employeeDTO);
         return ResponseEntity.created(new URI("/api/employees/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +91,7 @@ public class EmployeeResource {
     @Timed
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(Pageable pageable) {
         log.debug("REST request to get a page of Employees");
-        Page<EmployeeDTO> page = employeeService.findAll(pageable);
+        Page<EmployeeDTO> page = employeeService.findAllByFilter(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

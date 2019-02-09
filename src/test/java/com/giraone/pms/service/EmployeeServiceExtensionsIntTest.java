@@ -26,20 +26,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test class for the EmployeeDomainService
- *
- * @see EmployeeDomainService
+ * Test class for the {@link EmployeeService} which tests the extensions, that are not
+ * basic CRUD operations from JHipster,
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = PmssqlApp.class)
 @Transactional
-public class EmployeeDomainServiceIntTest {
+public class EmployeeServiceExtensionsIntTest {
 
     @Autowired
     private CompanyService companyService;
 
     @Autowired
-    private EmployeeDomainService employeeDomainService;
+    private EmployeeService employeeService;
 
     private CompanyDTO company;
 
@@ -60,7 +59,7 @@ public class EmployeeDomainServiceIntTest {
         EmployeeDTO employee = getEmployeeSample();
 
         // act
-        EmployeeDTO savedEmployee = employeeDomainService.save(employee);
+        EmployeeDTO savedEmployee = employeeService.save(employee);
 
         // assert
         assertThat(savedEmployee).isNotNull();
@@ -79,10 +78,10 @@ public class EmployeeDomainServiceIntTest {
     public void whenSavingEntity_checkThatFindByIdWorks() {
 
         // arrange
-        final EmployeeDTO employee = employeeDomainService.save(getEmployeeSample());
+        final EmployeeDTO employee = employeeService.save(getEmployeeSample());
 
         // act
-        Optional<EmployeeDTO> savedEmployee = employeeDomainService.findOne(employee.getId());
+        Optional<EmployeeDTO> savedEmployee = employeeService.findOne(employee.getId());
 
         // assert
         assertTrue(savedEmployee.isPresent());
@@ -212,15 +211,14 @@ public class EmployeeDomainServiceIntTest {
             EmployeeDTO employee = new EmployeeDTO();
             employee.setCompanyId(this.company.getId());
             employee.setSurname(surname);
-            employeeDomainService.save(employee);
+            employeeService.save(employee);
         }
 
         // act
-        Optional<String> companyExternalId = withCompany ? Optional.of(company.getExternalId()) : Optional.empty();
-        EmployeeFilter employeeFilter = new EmployeeFilter(
-            Optional.of(queriedSurname), stringSearchMode, Optional.empty());
+        String companyExternalId = withCompany ? company.getExternalId() : null;
+        EmployeeFilter employeeFilter = new EmployeeFilter(queriedSurname, stringSearchMode);
         Pageable pageable = PageRequest.of(0, 10);
-        Optional<Page<EmployeeDTO>> result = employeeDomainService.findAll(companyExternalId, employeeFilter, pageable);
+        Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(companyExternalId, employeeFilter, pageable);
 
         // assert
         assertTrue(result.isPresent());
