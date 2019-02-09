@@ -1,7 +1,7 @@
 package com.giraone.pms.domain;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -17,14 +17,13 @@ import com.giraone.pms.domain.enumeration.GenderType;
 /**
  * The Employee entity.
  */
-@ApiModel(description = "The Employee entity.")
 @Entity
 @Table(name = "employee")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Employee implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
@@ -55,7 +54,7 @@ public class Employee implements Serializable {
 
     @ManyToOne(optional = false)
     @NotNull
-    @JsonIgnoreProperties("")
+    @JsonIgnoreProperties("employees")
     private Company company;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove

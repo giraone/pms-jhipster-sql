@@ -315,7 +315,7 @@ public class EmployeeResourceIntTest {
 
         int databaseSizeBeforeDelete = employeeRepository.findAll().size();
 
-        // Get the employee
+        // Delete the employee
         restEmployeeMockMvc.perform(delete("/api/employees/{id}", employee.getId())
             .accept(TestUtil.APPLICATION_JSON_UTF8))
             .andExpect(status().isOk());

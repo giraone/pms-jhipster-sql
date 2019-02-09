@@ -1,6 +1,6 @@
 package com.giraone.pms.domain;
 
-import io.swagger.annotations.ApiModel;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -15,14 +15,13 @@ import java.util.Objects;
 /**
  * The Company entity.
  */
-@ApiModel(description = "The Company entity.")
 @Entity
 @Table(name = "company")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Company implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
@@ -47,8 +46,8 @@ public class Company implements Serializable {
     @ManyToMany
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @JoinTable(name = "company_user",
-               joinColumns = @JoinColumn(name = "companies_id", referencedColumnName = "id"),
-               inverseJoinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"))
+               joinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"),
+               inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     private Set<User> users = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
@@ -136,13 +135,11 @@ public class Company implements Serializable {
 
     public Company addUser(User user) {
         this.users.add(user);
-        user.getCompanies().add(this);
         return this;
     }
 
     public Company removeUser(User user) {
         this.users.remove(user);
-        user.getCompanies().remove(this);
         return this;
     }
 

@@ -1,5 +1,5 @@
 package com.giraone.pms.service.dto;
-
+import io.swagger.annotations.ApiModel;
 import java.time.LocalDate;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -9,6 +9,7 @@ import com.giraone.pms.domain.enumeration.GenderType;
 /**
  * A DTO for the Employee entity.
  */
+@ApiModel(description = "The Employee entity.")
 public class EmployeeDTO implements Serializable {
 
     private Long id;
@@ -27,6 +28,7 @@ public class EmployeeDTO implements Serializable {
     private String city;
 
     private String streetAddress;
+
 
     private Long companyId;
 
