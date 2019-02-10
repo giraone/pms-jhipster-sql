@@ -109,15 +109,27 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom<Employee
     }
 
     private Set<EmployeeFilterPair> buildName(Employee employee) {
+
         final Set<EmployeeFilterPair> ret = new HashSet<>();
-        final String originalName = employee.getSurname();
-        final String normalizedName = nameNormalizeService.normalize(originalName);
-        ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(), normalizedName));
-        final List<String> names = nameNormalizeService.split(normalizedName);
-        for (String name : names) {
+
+        final String originalSurname = employee.getSurname();
+        final String normalizedSurname = nameNormalizeService.normalize(originalSurname);
+        ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(), normalizedSurname));
+        final List<String> surNames = nameNormalizeService.split(normalizedSurname);
+        for (String name : surNames) {
             ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
             ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
         }
+
+        final String originalGivenName = employee.getGivenName();
+        final String normalizedGivenName = nameNormalizeService.normalize(originalGivenName);
+        ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GL.toString(), normalizedGivenName));
+        final List<String> givenNames = nameNormalizeService.split(normalizedGivenName);
+        for (String name : givenNames) {
+            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GP.toString(), nameNormalizeService.phonetic(name)));
+        }
+
         return ret;
     }
 

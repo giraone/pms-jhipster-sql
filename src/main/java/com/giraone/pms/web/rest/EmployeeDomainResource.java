@@ -1,7 +1,6 @@
 package com.giraone.pms.web.rest;
 
-import com.giraone.pms.domain.filter.EmployeeFilter;
-import com.giraone.pms.domain.enumeration.StringSearchMode;
+import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.security.AuthoritiesConstants;
 import com.giraone.pms.security.SecurityUtils;
 import com.giraone.pms.service.AuthorizationService;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,9 +53,7 @@ public class EmployeeDomainResource {
      * GET  /employees : get all the employees.
      *
      * @param companyExternalId restrict the query to employees of this company
-     * @param surname restrict the query to employees with a given surname
-     * @param surnameSearchMode indicator, how the query filter for surname is performed
-     * @param dateOfBirth restrict the query to employees with a date of birth
+     * @param filter restrict the output to employees matching this free form filter
      * @param pageable the pagination information
      * @return the ResponseEntity with status 200 (OK) and the list of employees in body
      * or status 404 (NOT FOUND), if the companyExternalId is invalid.
@@ -72,14 +68,11 @@ public class EmployeeDomainResource {
     @Timed
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
         @RequestParam(required = false) String companyExternalId,
-        @RequestParam(required = false) String surname,
-        @RequestParam(required = false, defaultValue = "PREFIX_REDUCED") StringSearchMode surnameSearchMode,
-        @RequestParam(required = false) LocalDate dateOfBirth,
+        @RequestParam(required = false) String filter,
         Pageable pageable) {
 
-        log.debug("REST request to query employees companyExternalId={}, surname={}", companyExternalId, surname, dateOfBirth);
+        log.debug("REST request to query employees companyExternalId={}, filter={}", companyExternalId, filter);
 
-        EmployeeFilter employeeFilter = new EmployeeFilter(surname, surnameSearchMode, dateOfBirth);
         boolean admin = SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN);
 
         Optional<Page<EmployeeDTO>> result;
@@ -97,7 +90,10 @@ public class EmployeeDomainResource {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
-        result = employeeService.findAllByFilter(companyExternalId, employeeFilter, pageable);
+
+        PersonFilter personFilter = new PersonFilter(filter);
+
+        result = employeeService.findAllByFilter(companyExternalId, personFilter, pageable);
         if (!result.isPresent()) {
             log.debug("- companyExternalId {} is invalid!", companyExternalId);
             return ResponseEntity.notFound().build();

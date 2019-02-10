@@ -1,6 +1,8 @@
 package com.giraone.pms.service.impl;
 
+import com.giraone.pms.service.NameNormalizeService;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 
@@ -9,6 +11,7 @@ import static org.junit.Assert.assertNull;
 
 public class NameNormalizeServiceImplTest {
 
+    @Autowired
     private NameNormalizeServiceImpl nameNormalizeService = new NameNormalizeServiceImpl();
 
     @Test
@@ -20,6 +23,7 @@ public class NameNormalizeServiceImplTest {
         assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl - Heinz"));
         assertEquals(Arrays.asList("dr", "wegner"), nameNormalizeService.split("Dr. Wegner"));
         assertEquals(Arrays.asList("vierer", "zwei"), nameNormalizeService.split("Ein Zwei Li Vierer"));
+        assertEquals(Arrays.asList("zwei"), nameNormalizeService.split("X1 Zwei X3"));
     }
 
     @Test

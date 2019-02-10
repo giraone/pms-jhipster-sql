@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static com.giraone.pms.repository.CustomAuditEventRepository.EVENT_DATA_COLUMN_MAX_LENGTH;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class for the CustomAuditEventRepository class.
@@ -33,6 +34,7 @@ import static com.giraone.pms.repository.CustomAuditEventRepository.EVENT_DATA_C
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = PmssqlApp.class)
 @Transactional
+@ActiveProfiles("test")
 public class CustomAuditEventRepositoryIntTest {
 
     @Autowired

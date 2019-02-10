@@ -1,9 +1,9 @@
 package com.giraone.pms.web.rest;
 
-import com.giraone.pms.PmssqlApp;
-import com.giraone.pms.web.rest.vm.LoggerVM;
 import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.LoggerContext;
+import com.giraone.pms.PmssqlApp;
+import com.giraone.pms.web.rest.vm.LoggerVM;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

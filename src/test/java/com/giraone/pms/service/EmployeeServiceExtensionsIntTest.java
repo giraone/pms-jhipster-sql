@@ -3,7 +3,7 @@ package com.giraone.pms.service;
 import com.giraone.pms.PmssqlApp;
 import com.giraone.pms.domain.enumeration.GenderType;
 import com.giraone.pms.domain.enumeration.StringSearchMode;
-import com.giraone.pms.domain.filter.EmployeeFilter;
+import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import org.junit.Before;
@@ -203,8 +203,7 @@ public class EmployeeServiceExtensionsIntTest {
     //------------------------------------------------------------------------------------------------------------------
 
     private void storeThenQueryThenCheckMatch(boolean withCompany, StringSearchMode stringSearchMode,
-                                              String[] storedSurnames,
-                                              String queriedSurname, String[] matchingSurnames) {
+                                              String[] storedSurnames, String filter, String[] matchingSurnames) {
 
         // arrange
         for (String surname : storedSurnames) {
@@ -216,16 +215,16 @@ public class EmployeeServiceExtensionsIntTest {
 
         // act
         String companyExternalId = withCompany ? company.getExternalId() : null;
-        EmployeeFilter employeeFilter = new EmployeeFilter(queriedSurname, stringSearchMode);
+        PersonFilter personFilter = new PersonFilter(filter);
         Pageable pageable = PageRequest.of(0, 10);
-        Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(companyExternalId, employeeFilter, pageable);
+        Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(companyExternalId, personFilter, pageable);
 
         // assert
         assertTrue(result.isPresent());
         assertThat(result.get().getTotalElements()).isGreaterThan(0);
         assertThat(result.get().getTotalPages()).isGreaterThan(0);
         assertThat(result.get().getContent()).isNotEmpty();
-        System.out.println(String.format("%d employees found in %s query", result.get().getContent().size(), stringSearchMode));
+        System.out.println(String.format("%d employees found in query", result.get().getContent().size()));
         result.get().getContent().forEach(
             matchingEmployee -> assertThat(matchingEmployee.getSurname()).isIn(Arrays.asList(matchingSurnames)));
     }

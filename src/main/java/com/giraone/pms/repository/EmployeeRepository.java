@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -41,14 +42,67 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
         Pageable pageable);
 
     @Timed
-    @Query("SELECT e FROM Employee e" +
-        " WHERE e.company = :company" +
-        " AND e.surname LIKE :surname")
-    Page<Employee> findAllByCompanyAndSurnameLike(
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND e.company = :company" +
+        " AND e.dateOfBirth = :dateOfBirth" +
+        " AND en.id.nameKey = :nameKey AND en.id.nameValue LIKE :nameValue")
+    Page<Employee> findAllByCompanyAndDateOfBirthAndKeyPairLike(
+        @Param("company") Company company,
+        @Param("dateOfBirth") LocalDate dateOfBirth,
+        @Param("nameKey") String key,
+        @Param("nameValue") String value,
+        Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND e.company = :company" +
+        " AND en.id.nameKey = 'SL' AND en.id.nameValue LIKE :surname")
+    Page<Employee> findAllByCompanyAndSurname(
         @Param("company") Company company, @Param("surname") String surname, Pageable pageable);
 
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND e.company = :company" +
+        " AND e.dateOfBirth = :dateOfBirth" +
+        " AND en.id.nameKey = 'SL' AND en.id.nameValue LIKE :surname")
+    Page<Employee> findAllByCompanyAndSurnameAndDateOfBirth(
+        @Param("company") Company company, @Param("surname") String surname, @Param("dateOfBirth") LocalDate dateOfBirth, Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en1, EmployeeName en2" +
+        " WHERE e = en1.id.owner AND e = en2.id.owner" +
+        " AND e.company = :company" +
+        " AND en1.id.nameKey = 'SL' AND en1.id.nameValue LIKE :surname" +
+        " AND en2.id.nameKey = 'GL' AND en2.id.nameValue LIKE :givenName")
+    Page<Employee> findAllByCompanyAndSurnameAndGivenName(
+        @Param("company") Company company, @Param("surname") String surname, @Param("givenName") String givenName, Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en1, EmployeeName en2" +
+        " WHERE e = en1.id.owner AND e = en2.id.owner" +
+        " AND e.company = :company" +
+        " AND e.dateOfBirth = :dateOfBirth" +
+        " AND en1.id.nameKey = 'SL' AND en1.id.nameValue LIKE :surname" +
+        " AND en2.id.nameKey = 'GL' AND en2.id.nameValue LIKE :givenName")
+    Page<Employee> findAllByCompanyAndSurnameAndGivenNameAndDateOfBirth(
+        @Param("company") Company company, @Param("surname") String surname, @Param("givenName") String givenName,
+        @Param("dateOfBirth") LocalDate dateOfBirth, Pageable pageable);
 
     // --- QUERIES WITHOUT COMPANY -------------------------------------------------------------------------------------
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND e.dateOfBirth = :dateOfBirth" +
+        " AND en.id.nameKey = :nameKey AND en.id.nameValue LIKE :nameValue")
+    Page<Employee> findAllByDateOfBirthAndKeyPairLike(
+        @Param("dateOfBirth") LocalDate dateOfBirth,
+        @Param("nameKey") String key,
+        @Param("nameValue") String value,
+        Pageable pageable);
 
     @Timed
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
@@ -60,10 +114,37 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
         Pageable pageable);
 
     @Timed
-    @Query("SELECT e FROM Employee e" +
-        " WHERE e.surname LIKE :surname")
-    Page<Employee> findAllBySurnameLike(
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND en.id.nameKey = 'SL' AND en.id.nameValue LIKE :surname")
+    Page<Employee> findAllBySurname(
         @Param("surname") String surname, Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND e.dateOfBirth = :dateOfBirth" +
+        " AND en.id.nameKey = 'SL' AND en.id.nameValue LIKE :surname")
+    Page<Employee> findAllBySurnameAndDateOfBirth(
+        @Param("surname") String surname, @Param("dateOfBirth") LocalDate dateOfBirth, Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en1, EmployeeName en2" +
+        " WHERE e = en1.id.owner AND e = en2.id.owner" +
+        " AND en1.id.nameKey = 'SL' AND en1.id.nameValue LIKE :surname" +
+        " AND en2.id.nameKey = 'GL' AND en2.id.nameValue LIKE :givenName")
+    Page<Employee> findAllBySurnameAndGivenName(
+        @Param("surname") String surname, @Param("givenName") String givenName, Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en1, EmployeeName en2" +
+        " WHERE e = en1.id.owner AND e = en2.id.owner" +
+        " AND e.dateOfBirth = :dateOfBirth" +
+        " AND en1.id.nameKey = 'SL' AND en1.id.nameValue LIKE :surname" +
+        " AND en2.id.nameKey = 'GL' AND en2.id.nameValue LIKE :givenName")
+    Page<Employee> findAllBySurnameAndGivenNameAndDateOfBirth(
+        @Param("surname") String surname, @Param("givenName") String givenName, @Param("dateOfBirth") LocalDate dateOfBirth, Pageable pageable);
+
 
     // --- NAME INDEX  -------------------------------------------------------------------------------------------------
 

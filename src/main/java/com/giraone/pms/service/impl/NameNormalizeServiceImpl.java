@@ -3,48 +3,76 @@ package com.giraone.pms.service.impl;
 import com.giraone.pms.service.NameNormalizeService;
 import io.micrometer.core.annotation.Timed;
 import org.apache.commons.codec.language.DoubleMetaphone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class NameNormalizeServiceImpl implements NameNormalizeService {
 
+    private static final Logger log = LoggerFactory.getLogger(NameNormalizeServiceImpl.class);
+
     private final DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
 
-    public List<String> split(String name) {
+    public NameNormalizeServiceImpl() {
+    }
+
+    /**
+     * Split a given string into name pairs, e.g. spit double names like "Wagner-Schmidt", "von der Tann"
+     *
+     * @param input The input string
+     * @return list of names, that have at least 2 characters, which is sorted by string length descending and
+     * which has a maximum of 2 entries.
+     */
+    public List<String> split(String input) {
 
         List<String> ret = new ArrayList<>();
-        name = normalize(name);
+        input = normalize(input);
 
-        // Split a all non word characters
-        String[] parts = name.split("[^\\p{L}\\p{Nd}]+");
+        // Split a all non word characters (this includes digits!)
+        String[] parts = input.split("[^\\p{L}\\p{Nd}]+");
         for (String part : parts) {
+            //log.debug("split " + part);
             if (part.length() > 1) { // single characters are not accepted
-                ret.add(part);
+                if (part.charAt(0) < '0' || part.charAt(0) > '9') { // skip words starting with a leading digit
+                    //log.debug("add " + part);
+                    ret.add(part);
+                }
             }
         }
 
-        if (ret.size() > 2) {
+        if (ret.size() >= 2) {
             // Accept a maximum of 2 parts
             ret.sort(StringLengthComparator);
             ret = ret.subList(0, 2);
             // Remove small parts, when we have at least one longer
-            // TODO
+            if (ret.get(0).length() >= 4 && ret.get(1).length() <= 2) {
+                //log.debug("remove " + ret.get(1));
+                ret.remove(1);
+            }
         }
         return ret;
     }
 
-    @Timed
-    public String normalize(String name) {
+    /**
+     * Normalize a name by using trim, lowercase and umlaut replacement
+     *
+     * @param input The input string
+     * @return the normalized input string
+     */
+    public String normalize(String input) {
 
-        name = name.trim().toLowerCase();
-        name = replaceUmlauts(name);
-        return name;
+        input = input.trim().toLowerCase();
+        input = replaceUmlauts(input);
+        return input;
     }
 
-    @Timed
     public String reduceSimplePhonetic(String name) {
 
         name = replaceSimplePhoneticVariants(name);

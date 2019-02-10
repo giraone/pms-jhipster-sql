@@ -10,5 +10,11 @@ public enum EmployeeNameFilterKey {
     /** Surname fully normalized */
     SN,
     /** Surname phonetic */
-    SP
+    SP,
+    /** Given name lowercase */
+    GL,
+    /** Given name fully normalized */
+    GN,
+    /** Given name phonetic */
+    GP
 }

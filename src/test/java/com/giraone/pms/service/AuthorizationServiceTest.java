@@ -1,8 +1,6 @@
 package com.giraone.pms.service;
 
 import com.giraone.pms.PmssqlApp;
-import com.giraone.pms.service.impl.AuthorizationServiceImpl;
-import com.giraone.pms.service.impl.CompanyServiceImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -17,7 +15,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = PmssqlApp.class)

@@ -1,7 +1,7 @@
 package com.giraone.pms.service;
-import com.giraone.pms.config.Constants;
 
 import com.giraone.pms.PmssqlApp;
+import com.giraone.pms.config.Constants;
 import com.giraone.pms.domain.User;
 import io.github.jhipster.config.JHipsterProperties;
 import org.junit.Before;

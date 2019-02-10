@@ -1,14 +1,12 @@
 package com.giraone.pms.web.rest;
 
 import com.giraone.pms.PmssqlApp;
-
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.repository.CompanyRepository;
 import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.mapper.CompanyMapper;
 import com.giraone.pms.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -30,7 +27,6 @@ import org.springframework.validation.Validator;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
 
 import static com.giraone.pms.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;

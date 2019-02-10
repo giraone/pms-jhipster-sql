@@ -1,15 +1,14 @@
 package com.giraone.pms.web.rest;
 
 import com.giraone.pms.PmssqlApp;
-
-import com.giraone.pms.domain.Employee;
 import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.Employee;
+import com.giraone.pms.domain.enumeration.GenderType;
 import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import com.giraone.pms.service.mapper.EmployeeMapper;
 import com.giraone.pms.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,14 +29,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-
 import static com.giraone.pms.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import com.giraone.pms.domain.enumeration.GenderType;
 /**
  * Test class for the EmployeeResource REST controller.
  *

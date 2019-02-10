@@ -2,9 +2,9 @@ package com.giraone.pms.service.impl;
 
 import com.giraone.pms.domain.Company;
 import com.giraone.pms.domain.Employee;
-import com.giraone.pms.domain.enumeration.StringSearchMode;
-import com.giraone.pms.domain.filter.EmployeeFilter;
+import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
 import com.giraone.pms.domain.filter.EmployeeFilterPair;
+import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.repository.CompanyRepository;
 import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.service.EmployeeService;
@@ -113,15 +113,15 @@ public class EmployeeServiceImpl implements EmployeeService {
      * Query the employees of a company.
      *
      * @param companyExternalId restrict the query to employees of this company, if null no restrictions are applied
-     * @param employeeFilter restrict the query to employees matching this filter
+     * @param personFilter restrict the query to employees matching this filter
      * @param pageable the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
     @Timed
     @Transactional(readOnly = true)
-    public Optional<Page<EmployeeDTO>> findAllByFilter(String companyExternalId, EmployeeFilter employeeFilter, Pageable pageable) {
+    public Optional<Page<EmployeeDTO>> findAllByFilter(String companyExternalId, PersonFilter personFilter, Pageable pageable) {
 
-        log.debug("Service request to query employees companyExternalId={}, employeeFilter={}", companyExternalId, employeeFilter);
+        log.debug("Service request to query employees companyExternalId={}, personFilter={}", companyExternalId, personFilter);
 
         Optional<Company> company;
         if (companyExternalId != null) {
@@ -136,10 +136,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         Page<Employee> page;
         if (company.isPresent()) {
             // USER with access to only one company
-            page = getEmployees(employeeFilter, pageable, company.get());
+            page = getEmployees(personFilter, pageable, company.get());
         } else {
             // ADMIN with full access to all companies
-            page = getEmployees(employeeFilter, pageable);
+            page = getEmployees(personFilter, pageable);
         }
 
         return Optional.of(page.map(employeeMapper::toDto));
@@ -160,38 +160,83 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private Page<Employee> getEmployees(EmployeeFilter employeeFilter, Pageable pageable) {
+    private Page<Employee> getEmployees(PersonFilter personFilter, Pageable pageable) {
         Page<Employee> page;
-        if (employeeFilter.getSurname() != null) {
-            final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
-            if (pair.getKey() == null) {
-                final String likeSuffix = employeeFilter.getSurnameSearchMode() == StringSearchMode.PREFIX ? "%" : "";
-                page = employeeRepository.findAllBySurnameLike(
-                    pair.getValue() + likeSuffix, pageable);
+        if (personFilter.getDateOfBirth() != null) {
+            if (personFilter.hasNames()) {
+                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
+                if (personFilter.hasExactNames()) {
+                    if (personFilter.getExactNames().size() > 1) {
+                        page = employeeRepository.findAllBySurnameAndGivenNameAndDateOfBirth(
+                            personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), personFilter.getDateOfBirth(), pageable);
+                    } else {
+                        page = employeeRepository.findAllBySurnameAndDateOfBirth(
+                            personFilter.getExactNames().get(0), personFilter.getDateOfBirth(), pageable);
+                    }
+                } else {
+                    page = employeeRepository.findAllByKeyPairLike(EmployeeNameFilterKey.SN.toString(),
+                        personFilter.getWeakMatchingNames().get(0), pageable);
+                }
             } else {
-                page = employeeRepository.findAllByKeyPairLike(
-                    pair.getKey(), pair.getValue(), pageable);
+                page = employeeRepository.findAll(pageable);
             }
         } else {
-            page = employeeRepository.findAll(pageable);
+            if (personFilter.hasNames()) {
+                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
+                if (personFilter.hasExactNames()) {
+                    if (personFilter.getExactNames().size() > 1) {
+                        page = employeeRepository.findAllBySurnameAndGivenName(
+                            personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), pageable);
+                    } else {
+                        page = employeeRepository.findAllBySurname(personFilter.getExactNames().get(0), pageable);
+                    }
+                } else {
+                    page = employeeRepository.findAllByKeyPairLike(EmployeeNameFilterKey.SN.toString(),
+                        personFilter.getWeakMatchingNames().get(0), pageable);
+                }
+            } else {
+                page = employeeRepository.findAll(pageable);
+            }
         }
         return page;
     }
 
-    private Page<Employee> getEmployees(EmployeeFilter employeeFilter, Pageable pageable, Company company) {
+    private Page<Employee> getEmployees(PersonFilter personFilter, Pageable pageable, Company company) {
         Page<Employee> page;
-        if (employeeFilter.getSurname() != null) {
-            final EmployeeFilterPair pair = employeeFilter.buildQueryValue(nameNormalizeService);
-            if (pair.getKey() == null) {
-                final String likeSuffix = employeeFilter.getSurnameSearchMode() == StringSearchMode.PREFIX ? "%" : "";
-                page = employeeRepository.findAllByCompanyAndSurnameLike(
-                    company, pair.getValue() + likeSuffix, pageable);
+        if (personFilter.getDateOfBirth() != null) {
+            if (personFilter.hasNames()) {
+                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
+                if (personFilter.hasExactNames()) {
+                    if (personFilter.getExactNames().size() > 1) {
+                        page = employeeRepository.findAllBySurnameAndGivenName(
+                            personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), pageable);
+                    } else {
+                        page = employeeRepository.findAllBySurname(personFilter.getExactNames().get(0), pageable);
+                    }
+                } {
+                    page = employeeRepository.findAllByKeyPairLike(EmployeeNameFilterKey.SN.toString(),
+                        personFilter.getWeakMatchingNames().get(0), pageable);
+                }
             } else {
-                page = employeeRepository.findAllByCompanyAndKeyPairLike(
-                    company, pair.getKey(), pair.getValue(), pageable);
+                page = employeeRepository.findAll(pageable);
             }
         } else {
-            page = employeeRepository.findAllByCompany(company, pageable);
+            if (personFilter.hasNames()) {
+                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
+                if (personFilter.hasExactNames()) {
+                    if (personFilter.getExactNames().size() > 1) {
+                        page = employeeRepository.findAllBySurnameAndGivenName(
+                            personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), pageable);
+                    } else {
+                        page = employeeRepository.findAllBySurname(personFilter.getExactNames().get(0), pageable);
+                    }
+                } else {
+                    page = employeeRepository.findAllByKeyPairLike(EmployeeNameFilterKey.SN.toString(),
+                        personFilter.getWeakMatchingNames().get(0), pageable);
+                }
+            } else {
+                page = employeeRepository.findAll(pageable);
+            }
         }
         return page;
     }

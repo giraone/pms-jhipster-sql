@@ -3,7 +3,6 @@ package com.giraone.pms.security;
 import com.giraone.pms.PmssqlApp;
 import com.giraone.pms.domain.User;
 import com.giraone.pms.repository.UserRepository;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
