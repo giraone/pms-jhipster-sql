@@ -32,11 +32,10 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
     public List<String> split(String input) {
 
         List<String> ret = new ArrayList<>();
+        input = normalize(input);
         if (input == null) {
             return ret;
         }
-        input = normalize(input);
-
         // Split a all non word characters (this includes digits!)
         String[] parts = input.split("[^\\p{L}\\p{Nd}]+");
         for (String part : parts) {

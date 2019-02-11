@@ -61,14 +61,25 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
     load() {
         const filterValue = this.input.trim();
-        this.employeeService
-            .query({
+        let params;
+        if (this.getExternalCompanyId()) {
+            params = {
                 companyExternalId: this.getExternalCompanyId(),
                 filter: filterValue,
                 page: this.page,
                 size: this.itemsPerPage,
                 sort: this.sort()
-            })
+            };
+        } else {
+            params = {
+                filter: filterValue,
+                page: this.page,
+                size: this.itemsPerPage,
+                sort: this.sort()
+            };
+        }
+        this.employeeService
+            .query(params)
             .subscribe(
                 (res: HttpResponse<IEmployee[]>) => this.paginateEmployees(res.body, res.headers),
                 (res: HttpErrorResponse) => this.onError(res.message)
