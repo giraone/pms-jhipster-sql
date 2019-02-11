@@ -1,7 +1,6 @@
 package com.giraone.pms.domain.filter;
 
 import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
-import com.giraone.pms.domain.enumeration.StringSearchMode;
 import com.giraone.pms.service.NameNormalizeService;
 import com.giraone.pms.service.impl.NameNormalizeServiceImpl;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class PersonFilter {
 
@@ -27,11 +27,16 @@ public class PersonFilter {
 
     private List<String> exactNames = new ArrayList<>();
     private List<String> weakMatchingNames = new ArrayList<>();
-    private StringSearchMode nameSearchMode = StringSearchMode.EXACT;
+    private boolean phonetic = false;
     private LocalDate dateOfBirth;
 
 
     public PersonFilter(String input) {
+        this.buildFromInput(input);
+    }
+
+    public PersonFilter(String input, boolean phonetic) {
+        this.phonetic = phonetic;
         this.buildFromInput(input);
     }
 
@@ -59,6 +64,9 @@ public class PersonFilter {
         return dateOfBirth;
     }
 
+    public boolean isPhonetic() {
+        return phonetic;
+    }
 
     public EmployeeFilterPair buildQueryValueSingleName() {
 
@@ -135,7 +143,13 @@ public class PersonFilter {
 
     private void extractWeakNames(String input) {
 
-        final List<String> nameList = this.nameNormalizeService.split(input);
+        final List<String> nameList = this.nameNormalizeService.split(input)
+            .stream()
+            .map(name -> this.nameNormalizeService.normalize(name))
+            .map(name -> this.phonetic ?
+                this.nameNormalizeService.phonetic(name) : this.nameNormalizeService.reduceSimplePhonetic(name))
+            .map(name -> name + "%")
+            .collect(Collectors.toList());
         if (nameList.size() > 0) {
             log.debug(String.format("Name list found with %d elements: %s", nameList.size(), nameList.toString()));
         }
@@ -145,10 +159,9 @@ public class PersonFilter {
     @Override
     public String toString() {
         return "PersonFilter{" +
-            "nameNormalizeService=" + nameNormalizeService +
-            ", exactNames=" + exactNames +
+            "exactNames=" + exactNames +
             ", weakMatchingNames=" + weakMatchingNames +
-            ", nameSearchMode=" + nameSearchMode +
+            ", phonetic=" + phonetic +
             ", dateOfBirth=" + dateOfBirth +
             '}';
     }

@@ -1,7 +1,6 @@
 package com.giraone.pms.service.impl;
 
 import com.giraone.pms.service.NameNormalizeService;
-import io.micrometer.core.annotation.Timed;
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +32,9 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
     public List<String> split(String input) {
 
         List<String> ret = new ArrayList<>();
+        if (input == null) {
+            return ret;
+        }
         input = normalize(input);
 
         // Split a all non word characters (this includes digits!)
@@ -64,27 +66,57 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
      * Normalize a name by using trim, lowercase and umlaut replacement
      *
      * @param input The input string
-     * @return the normalized input string
+     * @return the normalized input string or null, if the input is ull or contains only whitespaces
      */
     public String normalize(String input) {
 
+        if (input == null) {
+            return null;
+        }
         input = input.trim().toLowerCase();
         input = replaceUmlauts(input);
-        return input;
+        if (input.length() > 0) {
+            return input;
+        } else {
+            return null;
+        }
     }
 
-    public String reduceSimplePhonetic(String name) {
+    /**
+     * Apply simple phonetic reduction on top of normalization
+     *
+     * @param input The input string, that must be already normalized
+     * @return the phonetic reduced string or null, if the input is null or contains only whitespaces
+     */
+    public String reduceSimplePhonetic(String input) {
 
-        name = replaceSimplePhoneticVariants(name);
-        name = replaceCharacterRepetitions(name);
-        return name;
+        if (input == null) {
+            return null;
+        }
+        input = replaceSimplePhoneticVariants(input);
+        input = replaceCharacterRepetitions(input);
+        if (input.length() > 0) {
+            return input;
+        } else {
+            return null;
+        }
     }
 
-    public String phonetic(String name) {
+    /**
+     * Apply double metaphone algorithm on top of normalization
+     *
+     * @param input The input string, that must be already normalized
+     * @return the double metaphone string or null, if the input is null or contains only whitespaces
+     */
+    public String phonetic(String input) {
 
-        name = replaceDigits(name);
-        return this.doubleMetaphone.doubleMetaphone(name);
+        if (input == null) {
+            return null;
+        }
+        input = replaceDigits(input);
+        return this.doubleMetaphone.doubleMetaphone(input);
     }
+
 
     String replaceUmlauts(String in) {
         if (in == null) {

@@ -114,22 +114,24 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom<Employee
 
         final String originalSurname = employee.getSurname();
         final String normalizedSurname = nameNormalizeService.normalize(originalSurname);
-        ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(), normalizedSurname));
-        final List<String> surNames = nameNormalizeService.split(normalizedSurname);
-        for (String name : surNames) {
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
+        if (normalizedSurname != null) {
+            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(), normalizedSurname));
+            final List<String> surNames = nameNormalizeService.split(normalizedSurname);
+            for (String name : surNames) {
+                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
+            }
         }
-
         final String originalGivenName = employee.getGivenName();
         final String normalizedGivenName = nameNormalizeService.normalize(originalGivenName);
-        ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GL.toString(), normalizedGivenName));
-        final List<String> givenNames = nameNormalizeService.split(normalizedGivenName);
-        for (String name : givenNames) {
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GP.toString(), nameNormalizeService.phonetic(name)));
+        if (normalizedGivenName != null) {
+            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GL.toString(), normalizedGivenName));
+            final List<String> givenNames = nameNormalizeService.split(normalizedGivenName);
+            for (String name : givenNames) {
+                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GP.toString(), nameNormalizeService.phonetic(name)));
+            }
         }
-
         return ret;
     }
 

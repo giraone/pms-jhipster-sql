@@ -13,6 +13,13 @@
 # http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
 
+logging:
+    level:
+        ROOT: WARN
+        io.github.jhipster: WARN
+        # Log the JDBC parameters passed to a query also (jpa.show-sql=true logs only the statement!)
+        # org.hibernate.type: TRACE
+        com.giraone.pms: DEBUG
 
 spring:
     application:
@@ -31,7 +38,7 @@ spring:
         database-platform: io.github.jhipster.domain.util.FixedH2Dialect
         database: H2
         open-in-view: false
-        show-sql: false
+        show-sql: true
         hibernate:
             ddl-auto: none
             naming:

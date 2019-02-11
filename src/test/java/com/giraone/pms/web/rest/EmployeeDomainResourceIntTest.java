@@ -165,7 +165,7 @@ public class EmployeeDomainResourceIntTest {
             .andExpect(jsonPath("$.id").value(employee.getId().intValue()))
             .andExpect(jsonPath("$.surname").value(employee.getSurname()))
             .andExpect(jsonPath("$.dateOfBirth").value(employee.getDateOfBirth().toString()))
-            .andExpect(jsonPath("$.gender").value(employee.getGender().toString()))
+            .andExpect(jsonPath("$.gender").value(employee.getGender().name()))
             .andExpect(jsonPath("$.companyId").value(employee.getCompanyId()));
     }
 

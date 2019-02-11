@@ -58,6 +58,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
         " WHERE e = en.id.owner" +
         " AND e.company = :company" +
+        " AND e.dateOfBirth = :dateOfBirth")
+    Page<Employee> findAllByCompanyAndDateOfBirth(
+        @Param("company") Company company, @Param("dateOfBirth") LocalDate dateOfBirth, Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e, EmployeeName en" +
+        " WHERE e = en.id.owner" +
+        " AND e.company = :company" +
         " AND en.id.nameKey = 'SL' AND en.id.nameValue LIKE :surname")
     Page<Employee> findAllByCompanyAndSurname(
         @Param("company") Company company, @Param("surname") String surname, Pageable pageable);
@@ -112,6 +120,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
         @Param("nameKey") String key,
         @Param("nameValue") String value,
         Pageable pageable);
+
+    @Timed
+    @Query("SELECT distinct e FROM Employee e WHERE e.dateOfBirth = :dateOfBirth")
+    Page<Employee> findAllByDateOfBirth(
+        @Param("dateOfBirth") LocalDate dateOfBirth, Pageable pageable);
 
     @Timed
     @Query("SELECT distinct e FROM Employee e, EmployeeName en" +

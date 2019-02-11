@@ -2,7 +2,6 @@ package com.giraone.pms.service;
 
 import com.giraone.pms.PmssqlApp;
 import com.giraone.pms.domain.enumeration.GenderType;
-import com.giraone.pms.domain.enumeration.StringSearchMode;
 import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
@@ -95,115 +94,84 @@ public class EmployeeServiceExtensionsIntTest {
         assertThat(savedEmployee.get().getStreetAddress()).isEqualTo(employee.getStreetAddress());
     }
 
-
     @Test
     @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_EXACT() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.EXACT, new String[]{"Schmidt", "Schmitt"},
-            "Schmidt", new String[]{"Schmidt"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Schmidt", "Schmitt"},
-            "Schmidt", new String[]{"Schmidt"});
-    }
-
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_PREFIX() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.PREFIX, new String[]{"Schmidt", "Schulz", "Smith"},
-            "Sch", new String[]{"Schmidt", "Schulz"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.PREFIX, new String[]{"Schmidt", "Schulz", "Smith"},
-            "Sch", new String[]{"Schmidt", "Schulz"});
-    }
-
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_LOWERCASE() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.LOWERCASE, new String[]{"Schmidt", "schmidt", "schmud"},
-            "Schmidt", new String[]{"Schmidt", "schmidt"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.LOWERCASE, new String[]{"Schmidt", "schmidt", "schmud"},
-            "Schmidt", new String[]{"Schmidt", "schmidt"});
-    }
-
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_PREFIX_LOWERCASE() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.PREFIX_LOWERCASE, new String[]{"Schmidt", "schmidt", "schmitt", "Schand"},
-            "Schmi", new String[]{"Schmidt", "schmidt", "schmitt"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.PREFIX_LOWERCASE, new String[]{"Schmidt", "schmidt", "schmitt", "Schand"},
-            "Schmi", new String[]{"Schmidt", "schmidt", "schmitt"});
-    }
-
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_NORMALIZED() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.REDUCED, new String[]{"Schmidt", "Schmitt", "Schmudt"},
-            "Schmidt", new String[]{"Schmidt", "Schmitt"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.REDUCED, new String[]{"Schmidt", "Schmitt", "Schmudt"},
-            "Schmidt", new String[]{"Schmidt", "Schmitt"});
-    }
-
-    @Test
-    @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_PREFIX_NORMALIZED() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.PREFIX_REDUCED, new String[]{"Schmidt", "Schmitt", "Schmand", "Schand"},
-            "Schm", new String[]{"Schmidt", "Schmitt", "Schmand"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.PREFIX_REDUCED, new String[]{"Schmidt", "Schmitt", "Schmand", "Schand"},
+    public void whenSavingEntity_checkThatItIsFoundBySurname_WITHOUT_COMPANY_REDUCED() {
+        storeThenQueryThenCheckMatch(false, new String[]{"Schmidt", "Schmitt", "Schmand", "Schand"},
             "Schm", new String[]{"Schmidt", "Schmitt", "Schmand"});
     }
 
     @Test
     @Transactional
-    public void whenSavingEntity_checkThatItIsFoundBySurname_PHONETIC() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.PHONETIC, new String[]{"Scholten", "Schulten", "Gulten"},
-            "Scholten", new String[]{"Scholten", "Schulten"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.PHONETIC, new String[]{"Scholten", "Schulten", "Gulten"},
-            "Scholten", new String[]{"Scholten", "Schulten"});
+    public void whenSavingEntity_checkThatItIsFoundBySurname_WITH_COMPANY_REDUCED() {
+        storeThenQueryThenCheckMatch(true, new String[]{"Schmidt", "Schmitt", "Schmand", "Schand"},
+            "Schm", new String[]{"Schmidt", "Schmitt", "Schmand"});
     }
 
     @Test
     @Transactional
-    public void whenSavingEntityWithCombinedName_checkThatItIsFound_LOWERCASE1() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.LOWERCASE, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
+    public void whenSavingEntity_checkThatItIsFoundBySurname_WITHOUT_COMPANY_PHONETIC() {
+        storeThenQueryThenCheckMatch(false, new String[]{"Scholten", "Schulten", "Gulten"},
+            "Scholten", true, new String[]{"Scholten", "Schulten"});
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntity_checkThatItIsFoundBySurname_WITH_COMPANY_PHONETIC() {
+        storeThenQueryThenCheckMatch(true, new String[]{"Scholten", "Schulten", "Gulten"},
+            "Scholten", true, new String[]{"Scholten", "Schulten"});
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITHOUT_COMPANY() {
+        storeThenQueryThenCheckMatch(false, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
             "Huber", new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber"});
     }
 
     @Test
     @Transactional
-    public void whenSavingEntityWithCombinedName_checkThatItIsFound_LOWERCASE2() {
-        storeThenQueryThenCheckMatch(true, StringSearchMode.LOWERCASE, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITH_COMPANY() {
+        storeThenQueryThenCheckMatch(true, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
             "Schmidt", new String[]{"Schmidt-Huber", "Huber-Schmidt", "Schmidt"});
     }
 
     @Test
     @Transactional
-    public void whenSavingEntityWithCombinedName_checkThatItIsFound_PREFIX_REDUCED1() {
-        storeThenQueryThenCheckMatch(false, StringSearchMode.PREFIX_REDUCED, new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier", "Schmidt"},
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITHOUT_COMPANY_2() {
+        storeThenQueryThenCheckMatch(false, new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier", "Schmidt"},
             "Meier", new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier"});
     }
 
     @Test
     @Transactional
-    public void whenSavingEntityWithCombinedName_checkThatItIsFound_PREFIX_REDUCED2() {
-        storeThenQueryThenCheckMatch(true, StringSearchMode.PREFIX_REDUCED, new String[]{"Schmidt-Mayer", "Mayer-Schmidt", "Mayer", "Schmied"},
+    public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITH_COMPANY_2() {
+        storeThenQueryThenCheckMatch(true, new String[]{"Schmidt-Mayer", "Mayer-Schmidt", "Mayer", "Schmied"},
             "Schmitt", new String[]{"Schmidt-Mayer", "Mayer-Schmidt", "Schmied"});
     }
 
     @Test
     @Transactional
     public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound() {
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Schmidt - Mayer"},
+        storeThenQueryThenCheckMatch(true, new String[]{"Schmidt-Mayer"},
             "Schmidt-Mayer", new String[]{"Schmidt-Mayer"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"Wagner- Mayer"},
+        storeThenQueryThenCheckMatch(true, new String[]{"Wagner-Mayer"},
             "Wagner-Mayer", new String[]{"Wagner-Mayer"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{"von der  Tann"},
+        storeThenQueryThenCheckMatch(true, new String[]{"von der Tann"},
             "von der Tann", new String[]{"von der Tann"});
-        storeThenQueryThenCheckMatch(true, StringSearchMode.EXACT, new String[]{" von der  Weide- Zaun "},
+        storeThenQueryThenCheckMatch(true, new String[]{"von der Weide- Zaun"},
             "von der Weide-Zaun", new String[]{"von der Weide-Zaun"});
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private void storeThenQueryThenCheckMatch(boolean withCompany, StringSearchMode stringSearchMode,
-                                              String[] storedSurnames, String filter, String[] matchingSurnames) {
+    private void storeThenQueryThenCheckMatch(boolean withCompany, String[] storedSurnames,
+                                              String filter, String[] matchingSurnames) {
+        storeThenQueryThenCheckMatch(withCompany, storedSurnames, filter, false, matchingSurnames);
+    }
+
+    private void storeThenQueryThenCheckMatch(boolean withCompany, String[] storedSurnames,
+                                              String filter, boolean phonetic, String[] matchingSurnames) {
 
         // arrange
         for (String surname : storedSurnames) {
@@ -215,16 +183,20 @@ public class EmployeeServiceExtensionsIntTest {
 
         // act
         String companyExternalId = withCompany ? company.getExternalId() : null;
-        PersonFilter personFilter = new PersonFilter(filter);
+        PersonFilter personFilter = new PersonFilter(filter, phonetic);
         Pageable pageable = PageRequest.of(0, 10);
-        Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(companyExternalId, personFilter, pageable);
+        Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(
+            companyExternalId, personFilter, pageable);
 
         // assert
         assertTrue(result.isPresent());
         assertThat(result.get().getTotalElements()).isGreaterThan(0);
         assertThat(result.get().getTotalPages()).isGreaterThan(0);
-        assertThat(result.get().getContent()).isNotEmpty();
+
         System.out.println(String.format("%d employees found in query", result.get().getContent().size()));
+        result.get().getContent().forEach(
+            matchingEmployee -> System.out.println(" - " + matchingEmployee));
+        assertThat(result.get().getContent().size()).isEqualTo(matchingSurnames.length);
         result.get().getContent().forEach(
             matchingEmployee -> assertThat(matchingEmployee.getSurname()).isIn(Arrays.asList(matchingSurnames)));
     }

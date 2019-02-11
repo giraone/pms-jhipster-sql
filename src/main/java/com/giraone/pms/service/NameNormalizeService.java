@@ -24,7 +24,19 @@ public interface NameNormalizeService {
      */
     String normalize(String input);
 
-    String reduceSimplePhonetic(String name);
+    /**
+     * Apply simple phonetic reduction on top of normalization
+     *
+     * @param input The input string, that must be already normalized
+     * @return the phonetic reduced string or null, if the input is null or contains only whitespaces
+     */
+    String reduceSimplePhonetic(String input);
 
-    String phonetic(String name);
+    /**
+     * Apply double metaphone algorithm on top of normalization
+     *
+     * @param input The input string, that must be already normalized
+     * @return the double metaphone string or null, if the input is null or contains only whitespaces
+     */
+    String phonetic(String input);
 }

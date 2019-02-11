@@ -18,10 +18,10 @@ public class NameNormalizeServiceImplTest {
     public void split() {
 
         assertEquals(Arrays.asList("schmidt", "wagner"), nameNormalizeService.split("Schmidt-Wagner"));
-        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl-Heinz"));
-        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl- Heinz"));
-        assertEquals(Arrays.asList("karl", "heinz"), nameNormalizeService.split("Karl - Heinz"));
-        assertEquals(Arrays.asList("dr", "wegner"), nameNormalizeService.split("Dr. Wegner"));
+        assertEquals(Arrays.asList("heinz", "karl"), nameNormalizeService.split("Karl-Heinz"));
+        assertEquals(Arrays.asList("heinz", "karl"), nameNormalizeService.split("Karl- Heinz"));
+        assertEquals(Arrays.asList("heinz", "karl"), nameNormalizeService.split("Karl - Heinz"));
+        assertEquals(Arrays.asList("wegner"), nameNormalizeService.split("Dr. Wegner"));
         assertEquals(Arrays.asList("vierer", "zwei"), nameNormalizeService.split("Ein Zwei Li Vierer"));
         assertEquals(Arrays.asList("zwei"), nameNormalizeService.split("X1 Zwei X3"));
     }
