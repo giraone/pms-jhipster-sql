@@ -175,6 +175,8 @@ order by count desc
 
 ### Redundant storage of "normalized" and "phonetic names"
 
+-   All queries on names are peformed on the `EntityName` table, so the master table `Employee`is accessed only, when
+    employees are filtered by the exact date of birth.
 -   The used SQL table `EntityName` has no object id. It is managed by JPA and its
     primary key is a composite key of all 3 columns (`owner_id`, `name_key`, `name_value`).
 -   Due to the fact, that a surname may consist of multiple values, the `name_value` must be part of the primary key.
