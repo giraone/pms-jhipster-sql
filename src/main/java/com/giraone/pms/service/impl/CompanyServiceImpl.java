@@ -166,4 +166,26 @@ public class CompanyServiceImpl implements CompanyService {
         final Optional<Company> company = companyRepository.findOneByIdAndUsersLogin(companyId, userLogin);
         return company.isPresent();
     }
+
+    /**
+     * Return all users of a company
+     *
+     * @param companyId the id of the company
+     * @return true, if the user is assigned to the company
+     */
+    @Override
+    public Page<User> findAlllUserInCompany(long companyId, Pageable pageable) {
+        return companyRepository.findUsersOfCompanyByCompanyId(companyId, pageable);
+    }
+
+    /**
+     * Return all users of a company
+     *
+     * @param @param companyExternalId the externalId of the company
+     * @return true, if the user is assigned to the company
+     */
+    @Override
+    public Page<User> findAlllUserInCompany(String companyExternalId, Pageable pageable) {
+        return companyRepository.findUsersOfCompanyByCompanyExternalId(companyExternalId, pageable);
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = PmssqlApp.class)
 @Transactional
+@ActiveProfiles("test")
 public class EmployeeServiceExtensionsIntTest {
 
     @Autowired
@@ -96,6 +98,20 @@ public class EmployeeServiceExtensionsIntTest {
 
     @Test
     @Transactional
+    public void whenSavingEntity_checkThatItIsFoundByDateOfBirth_WITHOUT_COMPANY() {
+        storeThenQueryThenCheckDate(false, new LocalDate[]{ LocalDate.of(1977, Month.DECEMBER, 1)},
+            "01.12.1977", LocalDate.of(1977, Month.DECEMBER, 1));
+    }
+
+    @Test
+    @Transactional
+    public void whenSavingEntity_checkThatItIsFoundByDateOfBirth_WITH_COMPANY() {
+        storeThenQueryThenCheckDate(true, new LocalDate[]{ LocalDate.of(1977, Month.DECEMBER, 1)},
+            "01.12.1977", LocalDate.of(1977, Month.DECEMBER, 1));
+    }
+
+    @Test
+    @Transactional
     public void whenSavingEntity_checkThatItIsFoundBySurname_WITHOUT_COMPANY_REDUCED() {
         storeThenQueryThenCheckMatch(false, new String[]{"Schmidt", "Schmitt", "Schmand", "Schand"},
             "Schm", new String[]{"Schmidt", "Schmitt", "Schmand"});
@@ -154,16 +170,47 @@ public class EmployeeServiceExtensionsIntTest {
     @Transactional
     public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound() {
         storeThenQueryThenCheckMatch(true, new String[]{"Schmidt-Mayer"},
-            "Schmidt-Mayer", new String[]{"Schmidt-Mayer"});
+            "\"Schmidt-Mayer\"", new String[]{"Schmidt-Mayer"});
         storeThenQueryThenCheckMatch(true, new String[]{"Wagner-Mayer"},
-            "Wagner-Mayer", new String[]{"Wagner-Mayer"});
+            "\"Wagner-Mayer\"", new String[]{"Wagner-Mayer"});
         storeThenQueryThenCheckMatch(true, new String[]{"von der Tann"},
-            "von der Tann", new String[]{"von der Tann"});
+            "\"von der Tann\"", new String[]{"von der Tann"});
         storeThenQueryThenCheckMatch(true, new String[]{"von der Weide- Zaun"},
-            "von der Weide-Zaun", new String[]{"von der Weide-Zaun"});
+            "\"von der Weide-Zaun\"", new String[]{"von der Weide-Zaun"});
     }
 
     //------------------------------------------------------------------------------------------------------------------
+
+    private void storeThenQueryThenCheckDate(boolean withCompany, LocalDate[] dates,
+                                              String filter, LocalDate matchingDate) {
+
+        // arrange
+        for (LocalDate dateOfBirth : dates) {
+            EmployeeDTO employee = new EmployeeDTO();
+            employee.setCompanyId(this.company.getId());
+            employee.setSurname("Date " + dateOfBirth);
+            employee.setDateOfBirth(dateOfBirth);
+            employeeService.save(employee);
+        }
+
+        // act
+        String companyExternalId = withCompany ? company.getExternalId() : null;
+        PersonFilter personFilter = new PersonFilter(filter, false);
+        Pageable pageable = PageRequest.of(0, 10);
+        Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(
+            companyExternalId, personFilter, pageable);
+
+        // assert
+        assertTrue(result.isPresent());
+        assertThat(result.get().getTotalElements()).isGreaterThan(0);
+        assertThat(result.get().getTotalPages()).isGreaterThan(0);
+
+        System.out.println(String.format("%d employees found in query", result.get().getContent().size()));
+        result.get().getContent().forEach(
+            matchingEmployee -> System.out.println(" - " + matchingEmployee));
+        result.get().getContent().forEach(
+            matchingEmployee -> assertThat(matchingEmployee.getDateOfBirth()).isEqualTo(matchingDate));
+    }
 
     private void storeThenQueryThenCheckMatch(boolean withCompany, String[] storedSurnames,
                                               String filter, String[] matchingSurnames) {

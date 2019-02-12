@@ -21,12 +21,11 @@ public class PersonFilter {
     @Autowired
     NameNormalizeService nameNormalizeService = new NameNormalizeServiceImpl();
 
-    private static final Pattern DATE_PATTERN = Pattern.compile("([0-3]?[0-9])[\\./]([0-1]?[0-9])[\\./]((19[0-9]{2})|(20[0-9]{2}))");
+    private static final Pattern DATE_PATTERN = Pattern.compile("([0-3]?[0-9])[./]([0-1]?[0-9])[./]((19[0-9]{2})|(20[0-9]{2}))");
     private static final Pattern EXACT_NAME_PATTERN = Pattern.compile("\"[^\"]\"");
 
 
-    private List<String> exactNames = new ArrayList<>();
-    private List<String> weakMatchingNames = new ArrayList<>();
+    private List<EmployeeNameFilter> names = new ArrayList<>();
     private boolean phonetic = false;
     private LocalDate dateOfBirth;
 
@@ -41,41 +40,15 @@ public class PersonFilter {
     }
 
     public boolean hasNames() {
-        return !exactNames.isEmpty() || !weakMatchingNames.isEmpty();
+        return !names.isEmpty();
     }
 
-    public boolean hasExactNames() {
-        return !exactNames.isEmpty();
-    }
-
-    public List<String> getExactNames() {
-        return exactNames;
-    }
-
-    public boolean hasWeakMatchingNames() {
-        return !weakMatchingNames.isEmpty();
-    }
-
-    public List<String> getWeakMatchingNames() {
-        return weakMatchingNames;
+    public List<EmployeeNameFilter> getNames() {
+        return names;
     }
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
-    }
-
-    public boolean isPhonetic() {
-        return phonetic;
-    }
-
-    public EmployeeFilterPair buildQueryValueSingleName() {
-
-        if (exactNames.isEmpty()) {
-            return null;
-        }
-        String input = this.exactNames.get(0);
-        return new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(),
-            nameNormalizeService.normalize(input) + "%");
     }
 
     private void buildFromInput(String input) {
@@ -120,11 +93,18 @@ public class PersonFilter {
 
         final Matcher matcher = EXACT_NAME_PATTERN.matcher(input);
         // is there sth. like an exact name in the input?
+        boolean first = true;
         while (matcher.find()) {
             log.debug(String.format("Exact name found in \"%s\"", input));
             final String exactName = input.substring(matcher.start() + 1, matcher.end() - 1);
-            this.exactNames.add(exactName);
-            log.debug(String.format("Exact name was \"%s\"", exactName));
+            if (first) {
+                this.names.add(new EmployeeNameFilter(EmployeeNameFilterKey.SL.name(), exactName));
+                first = false;
+                log.debug(String.format("Exact surname was \"%s\"", exactName));
+            } else {
+                this.names.add(new EmployeeNameFilter(EmployeeNameFilterKey.GL.name(), exactName));
+                log.debug(String.format("Exact givenName was \"%s\"", exactName));
+            }
             // now combine the rest without the match
             if (matcher.start() == 0) {
                 if (matcher.end() < input.length()) {
@@ -143,24 +123,33 @@ public class PersonFilter {
 
     private void extractWeakNames(String input) {
 
-        final List<String> nameList = this.nameNormalizeService.split(input)
+        final boolean[] first = new boolean[] { true };
+        final List<EmployeeNameFilter> nameList = this.nameNormalizeService.split(input)
             .stream()
             .map(name -> this.nameNormalizeService.normalize(name))
             .map(name -> this.phonetic ?
                 this.nameNormalizeService.phonetic(name) : this.nameNormalizeService.reduceSimplePhonetic(name))
-            .map(name -> name + "%")
+            .map(name -> {
+                EmployeeNameFilterKey key;
+                if (first[0]) {
+                    key = phonetic ? EmployeeNameFilterKey.SP : EmployeeNameFilterKey.SN;
+                    first[0] = false;
+                } else {
+                    key = phonetic ? EmployeeNameFilterKey.GP : EmployeeNameFilterKey.GN;
+                }
+                return new EmployeeNameFilter(key.name(), name + "%");
+            })
             .collect(Collectors.toList());
         if (nameList.size() > 0) {
             log.debug(String.format("Name list found with %d elements: %s", nameList.size(), nameList.toString()));
         }
-        this.weakMatchingNames.addAll(nameList);
+        this.names.addAll(nameList);
     }
 
     @Override
     public String toString() {
         return "PersonFilter{" +
-            "exactNames=" + exactNames +
-            ", weakMatchingNames=" + weakMatchingNames +
+            "names=" + names +
             ", phonetic=" + phonetic +
             ", dateOfBirth=" + dateOfBirth +
             '}';

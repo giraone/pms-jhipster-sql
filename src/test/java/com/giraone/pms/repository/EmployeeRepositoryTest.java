@@ -91,7 +91,9 @@ public class EmployeeRepositoryTest {
         assertThat(result.size()).isEqualTo(6);
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
-            assertThat(employeeName.getId().getNameKey()).isIn("SL", "SN", "SP", "GL", "GN", "GP");
+            assertThat(employeeName.getId().getNameKey()).isIn(
+                EmployeeNameFilterKey.SL, EmployeeNameFilterKey.SN, EmployeeNameFilterKey.SP,
+                EmployeeNameFilterKey.GL, EmployeeNameFilterKey.GN, EmployeeNameFilterKey.GP);
             assertThat(employeeName.getId().getNameValue()).isIn(
                 "schmitt", "smit", "XMT",
                 "thomas", "tomas", "TMS");
@@ -113,7 +115,9 @@ public class EmployeeRepositoryTest {
         assertThat(result.size()).isEqualTo(8);
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
-            assertThat(employeeName.getId().getNameKey()).isIn("SL", "SN", "SP", "GL", "GN", "GP");
+            assertThat(employeeName.getId().getNameKey()).isIn(
+                EmployeeNameFilterKey.SL, EmployeeNameFilterKey.SN, EmployeeNameFilterKey.SP,
+                EmployeeNameFilterKey.GL, EmployeeNameFilterKey.GN, EmployeeNameFilterKey.GP);
             assertThat(employeeName.getId().getNameValue()).isIn(
                 "schmidt-wagner", "smit", "XMT", "wagner", "AKNR",
                 "thomas", "tomas", "TMS"

@@ -1,5 +1,6 @@
 package com.giraone.pms.service;
 
+import com.giraone.pms.domain.User;
 import com.giraone.pms.service.dto.CompanyDTO;
 
 import org.springframework.data.domain.Page;
@@ -84,4 +85,22 @@ public interface CompanyService {
      * @return true, if the user is assigned to the company
      */
     boolean isUserInCompany(long companyId, String userLogin);
+
+    /**
+     * Return all users of a company
+     *
+     * @param companyId the id of the company
+     * @param pageable the pagination information
+     * @return true, if the user is assigned to the company
+     */
+    Page<User> findAlllUserInCompany(long companyId, Pageable pageable);
+
+    /**
+     * Return all users of a company
+     *
+     * @param @param companyExternalId the externalId of the company
+     * @param pageable the pagination information
+     * @return true, if the user is assigned to the company
+     */
+    Page<User> findAlllUserInCompany(String companyExternalId, Pageable pageable);
 }

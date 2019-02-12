@@ -124,7 +124,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
                 }
             }
         });
-        return this.employeeRepository.saveAll(employees).size();
+        return this.employeeRepository.saveAllCustom(employees).size();
     }
 
     @Timed

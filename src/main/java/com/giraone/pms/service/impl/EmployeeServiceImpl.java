@@ -1,9 +1,6 @@
 package com.giraone.pms.service.impl;
 
-import com.giraone.pms.domain.Company;
-import com.giraone.pms.domain.Employee;
-import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
-import com.giraone.pms.domain.filter.EmployeeFilterPair;
+import com.giraone.pms.domain.*;
 import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.repository.CompanyRepository;
 import com.giraone.pms.repository.EmployeeRepository;
@@ -16,12 +13,22 @@ import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Service Implementation for managing Employee.
@@ -38,19 +45,22 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeMapper employeeMapper;
 
     // Extensions
+    private final EntityManager em;
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper employeeMapper,
-                               CompanyRepository companyRepository, CompanyMapper companyMapper) {
+                               EntityManager em, CompanyRepository companyRepository, CompanyMapper companyMapper) {
         this.employeeRepository = employeeRepository;
         this.employeeMapper = employeeMapper;
+        this.em = em;
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
     }
 
     /**
      * Save an employee.
+     *
      * @param employeeDTO the entity to save
      * @return the persisted entity
      */
@@ -109,8 +119,8 @@ public class EmployeeServiceImpl implements EmployeeService {
      * Query the employees of a company.
      *
      * @param companyExternalId restrict the query to employees of this company, if null no restrictions are applied
-     * @param personFilter restrict the query to employees matching this filter
-     * @param pageable the pagination information
+     * @param personFilter      restrict the query to employees matching this filter
+     * @param pageable          the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
      */
     @Timed
@@ -130,14 +140,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             company = Optional.empty();
         }
 
-        Page<Employee> page;
-        if (company.isPresent()) {
-            // USER with access to only one company
-            page = getEmployees(personFilter, pageable, company.get());
-        } else {
-            // ADMIN with full access to all companies
-            page = getEmployees(personFilter, pageable);
-        }
+        Page<Employee> page = getEmployees(personFilter, pageable, company.orElse(null));
 
         return Optional.of(page.map(employeeMapper::toDto));
     }
@@ -145,6 +148,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * Get a list of companies to which a user has access
+     *
      * @param userLogin login of the user
      * @return the list of companies
      */
@@ -157,103 +161,82 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private Page<Employee> getEmployees(PersonFilter personFilter, Pageable pageable) {
-        Page<Employee> page;
-        if (personFilter.getDateOfBirth() != null) {
-            if (personFilter.hasNames()) {
-                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
-                if (personFilter.hasExactNames()) {
-                    if (personFilter.getExactNames().size() > 1) {
-                        page = employeeRepository.findAllBySurnameAndGivenNameAndDateOfBirth(
-                            personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), personFilter.getDateOfBirth(), pageable);
-                    } else {
-                        page = employeeRepository.findAllBySurnameAndDateOfBirth(
-                            personFilter.getExactNames().get(0), personFilter.getDateOfBirth(), pageable);
-                    }
-                } else {
-                    page = employeeRepository.findAllByKeyPairLike(
-                        personFilter.isPhonetic() ? EmployeeNameFilterKey.SP.toString() : EmployeeNameFilterKey.SN.toString(),
-                        personFilter.getWeakMatchingNames().get(0), pageable);
-                }
-            } else {
-                page = employeeRepository.findAll(pageable);
-            }
-        } else {
-            if (personFilter.hasNames()) {
-                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
-                if (personFilter.hasExactNames()) {
-                    if (personFilter.getExactNames().size() > 1) {
-                        page = employeeRepository.findAllBySurnameAndGivenName(
-                            personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), pageable);
-                    } else {
-                        page = employeeRepository.findAllBySurname(personFilter.getExactNames().get(0), pageable);
-                    }
-                } else {
-                    page = employeeRepository.findAllByKeyPairLike(
-                        personFilter.isPhonetic() ? EmployeeNameFilterKey.SP.toString() : EmployeeNameFilterKey.SN.toString(),
-                        personFilter.getWeakMatchingNames().get(0), pageable);
-                }
-            } else {
-                page = employeeRepository.findAll(pageable);
-            }
-        }
-        return page;
+    /*
+    static Specification<Employee> ofCompany(Company company) {
+        return (employee, cq, cb) -> cb.equal(employee.get(Employee_.company), company);
     }
 
+    static Specification<Employee> hasDateOfBirth(LocalDate dateOfBirth) {
+        return (employee, cq, cb) -> cb.equal(employee.get(Employee_.dateOfBirth), dateOfBirth);
+    }
+    */
+
     private Page<Employee> getEmployees(PersonFilter personFilter, Pageable pageable, Company company) {
-        Page<Employee> page;
-        if (personFilter.getDateOfBirth() != null) {
-            if (personFilter.hasNames()) {
-                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
-                if (personFilter.hasExactNames()) {
-                    if (personFilter.getExactNames().size() > 1) {
-                        log.debug(String.format("findAllByCompanyAndSurnameAndGivenNameAndDateOfBirth %s %s %s %s",
-                            company.getExternalId(), personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), personFilter.getDateOfBirth()));
-                        page = employeeRepository.findAllByCompanyAndSurnameAndGivenNameAndDateOfBirth(
-                            company, personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), personFilter.getDateOfBirth(), pageable);
-                    } else {
-                        log.debug(String.format("findAllByCompanyAndSurnameAndDateOfBirth %s %s %s",
-                            company.getExternalId(), personFilter.getExactNames().get(0), personFilter.getDateOfBirth()));
-                        page = employeeRepository.findAllByCompanyAndSurnameAndDateOfBirth(company, personFilter.getExactNames().get(0), personFilter.getDateOfBirth(), pageable);
-                    }
-                } else {
-                    log.debug(String.format("findAllByCompanyAndKeyPairLike %s %s %s",
-                        company.getExternalId(), personFilter.getWeakMatchingNames().get(0), personFilter.getDateOfBirth()));
-                    page = employeeRepository.findAllByCompanyAndDateOfBirthAndKeyPairLike(
-                        company, personFilter.getDateOfBirth(),
-                        personFilter.isPhonetic() ? EmployeeNameFilterKey.SP.toString() : EmployeeNameFilterKey.SN.toString(),
-                        personFilter.getWeakMatchingNames().get(0), pageable);
-                }
-            } else {
-                log.debug(String.format("findAllByCompanyAndDateOfBirth %s %s", company.getExternalId(), personFilter.getDateOfBirth()));
-                page = employeeRepository.findAllByCompanyAndDateOfBirth(company, personFilter.getDateOfBirth(), pageable);
-            }
-        } else {
-            if (personFilter.hasNames()) {
-                final EmployeeFilterPair pair = personFilter.buildQueryValueSingleName();
-                if (personFilter.hasExactNames()) {
-                    if (personFilter.getExactNames().size() > 1) {
-                        log.debug(String.format("findAllByCompanyAndSurnameAndGivenName %s %s %s",
-                            company.getExternalId(), personFilter.getExactNames().get(0), personFilter.getExactNames().get(1)));
-                        page = employeeRepository.findAllByCompanyAndSurnameAndGivenName(
-                            company, personFilter.getExactNames().get(0), personFilter.getExactNames().get(1), pageable);
-                    } else {
-                        log.debug(String.format("findAllByCompanyAndSurname %s %s",
-                            company.getExternalId(), personFilter.getExactNames().get(0)));
-                        page = employeeRepository.findAllByCompanyAndSurname(company, personFilter.getExactNames().get(0), pageable);
-                    }
-                } else {
-                    log.debug(String.format("findAllByCompanyAndKeyPairLike %s %s",
-                        company.getExternalId(), personFilter.getWeakMatchingNames().get(0)));
-                    page = employeeRepository.findAllByCompanyAndKeyPairLike(
-                        company, personFilter.isPhonetic() ? EmployeeNameFilterKey.SP.toString() : EmployeeNameFilterKey.SN.toString(),
-                        personFilter.getWeakMatchingNames().get(0), pageable);
-                }
-            } else {
-                log.debug(String.format("findAllByCompany %s", company.getExternalId()));
-                page = employeeRepository.findAllByCompany(company, pageable);
-            }
+
+        log.debug("getEmployees company={}, personFilter={}", company == null ? "" : company.getExternalId(), personFilter);
+
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<Employee> cq = cb.createQuery(Employee.class);
+        final Root<Employee> employeeTable = cq.from(Employee.class);
+        //employeeTable.alias("e");
+
+        final List<Predicate> predicates = new ArrayList<>();
+        if (company != null) {
+            predicates.add(cb.equal(employeeTable.get(Employee_.company), company));
         }
-        return page;
+        if (personFilter.getDateOfBirth() != null) {
+            predicates.add(cb.equal(employeeTable.get(Employee_.dateOfBirth), personFilter.getDateOfBirth()));
+        }
+
+        if (personFilter.hasNames()) {
+            //final AtomicInteger en = new AtomicInteger();
+            personFilter.getNames().forEach(nameFilter -> {
+                final Root<EmployeeName> employeeNameTable = cq.from(EmployeeName.class);
+                //employeeNameTable.alias("en" + en.getAndIncrement());
+                predicates.add(
+                    cb.and(
+                        cb.equal(employeeNameTable.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeTable.get(Employee_.id)),
+                        cb.equal(employeeNameTable.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
+                        cb.like(employeeNameTable.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
+                    // TODO: equal instead of like when SL, GL
+                );
+            });
+        }
+
+        final Predicate[] predicatesArray = predicates.toArray(new Predicate[]{});
+
+        // SELECT COUNT
+        /*
+        final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        countQuery.where(predicatesArray);
+        final Root<Employee> employeeCountTable = countQuery.from(Employee.class);
+        employeeCountTable.alias("e");
+        countQuery.select(cb.count(employeeCountTable));
+        final long count = em.createQuery(countQuery).getSingleResult();
+        */
+        final long count = 4711;
+
+        // SELECT employee
+        cq.select(employeeTable);
+        cq.where(predicatesArray);
+        cq.distinct(true);
+        defineOrder(employeeTable, cq, cb, pageable);
+        final TypedQuery<Employee> typedQuery = em.createQuery(cq);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        final List<Employee> pageList = typedQuery.getResultList();
+
+
+        return new PageImpl<>(pageList, pageable, count);
+    }
+
+    private void defineOrder(Root<Employee> table, CriteriaQuery cq, CriteriaBuilder cb, Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) return;
+        Sort.Order order = pageable.getSort().iterator().next();
+        if (order.isAscending()) {
+            cb.asc(table.get(order.getProperty()));
+        } else {
+            cb.desc(table.get(order.getProperty()));
+        }
     }
 }

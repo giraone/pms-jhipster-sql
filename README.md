@@ -142,9 +142,11 @@ order by count desc
 > "440"	"Schneider"
 
 # all users of a company
-select u.login from company_user cu, jhi_user u
-where cu.users_id = u.id
-and cu.companies_id = 1001
+SELECT u.login
+FROM jhi_user u, company_user cu, company c
+WHERE u.id = cu.user_id
+AND cu.company_id = c.id
+AND c.external_id = 'm-00000776';
 
 # distribution of employee lookup names per owner
 select count(owner_id) as count, owner_id

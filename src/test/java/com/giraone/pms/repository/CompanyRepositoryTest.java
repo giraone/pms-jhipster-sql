@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -66,19 +68,13 @@ public class CompanyRepositoryTest {
     public void save_existingCompany_throwsException() {
 
         // arrange
-        Company company1 = new Company();
-        company1.setName("Test-Company");
-        company1.setExternalId("test1");
-        companyRepository.save(company1);
-        testEntityManager.flush();
+        Company company1 = this.saveCompany("test1");
 
         expectedException.expect(DataIntegrityViolationException.class);
         expectedException.expectMessage("could not execute statement; SQL [n/a]; constraint");
 
         // act
-        Company company2 = new Company();
-        company2.setName("Test-Company");
-        company2.setExternalId("test1"); // same external ID, where there is a unique constraint
+        Company company2 = this.saveCompany("test1"); // same external ID, where there is a unique constraint
 
         companyRepository.save(company2);
 
@@ -89,10 +85,7 @@ public class CompanyRepositoryTest {
     public void savedCompany_isFoundByExternalId() {
 
         // arrange
-        Company company = new Company();
-        company.setName("Test-Company");
-        company.setExternalId("test1");
-        company = companyRepository.save(company);
+        Company company = saveCompany("test1");
 
         // act
         Optional<Company> result = companyRepository.findOneByExternalId("test1");
@@ -107,15 +100,7 @@ public class CompanyRepositoryTest {
     public void savedCompany_isFoundByExternalIdAndUsersLogin() {
 
         // arrange
-        Company company = new Company();
-        company.setName("Test-Company");
-        company.setExternalId("test1");
-        Set<User> users = new HashSet<>();
-        Optional<User> user = userRepository.findOneByLogin("user");
-        assertTrue(user.isPresent());
-        users.add(user.get());
-        company.setUsers(users);
-        company = companyRepository.save(company);
+        Company company = saveCompanyWithUser();
 
         // act
         Optional<Company> result = companyRepository.findOneByExternalIdAndUsersLogin("test1", "user");
@@ -130,6 +115,56 @@ public class CompanyRepositoryTest {
     public void savedCompany_isFoundByIdAndUsersLogin() {
 
         // arrange
+        Company company = saveCompanyWithUser();
+
+        // act
+        Optional<Company> result = companyRepository.findOneByIdAndUsersLogin(company.getId(), "user");
+
+        // assert
+        assertTrue(result.isPresent());
+        assertThat(result.get().getId()).isEqualTo(company.getId());
+        assertThat(result.get().getExternalId()).isEqualTo(company.getExternalId());
+    }
+
+    @Test
+    public void savedCompany_findUsersByCompanyId() {
+
+        // arrange
+        Company company = saveCompanyWithUser();
+
+        // act
+        Page<User> result = companyRepository.findUsersOfCompanyByCompanyId(company.getId(), PageRequest.of(0, 10));
+
+        // assert
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getLogin()).isEqualTo("user");
+    }
+
+    @Test
+    public void savedCompany_findUsersByCompanyExternalId() {
+
+        // arrange
+        Company company = saveCompanyWithUser();
+
+        // act
+        Page<User> result = companyRepository.findUsersOfCompanyByCompanyExternalId(company.getExternalId(), PageRequest.of(0, 10));
+
+        // assert
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getLogin()).isEqualTo("user");
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private Company saveCompany(String externalId) {
+        Company company = new Company();
+        company.setName("Test-Company " + externalId);
+        company.setExternalId(externalId);
+        company = companyRepository.save(company);
+        return company;
+    }
+
+    private Company saveCompanyWithUser() {
         Company company = new Company();
         company.setName("Test-Company");
         company.setExternalId("test1");
@@ -139,13 +174,6 @@ public class CompanyRepositoryTest {
         users.add(user.get());
         company.setUsers(users);
         company = companyRepository.save(company);
-
-        // act
-        Optional<Company> result = companyRepository.findOneByIdAndUsersLogin(company.getId(), "user");
-
-        // assert
-        assertTrue(result.isPresent());
-        assertThat(result.get().getId()).isEqualTo(company.getId());
-        assertThat(result.get().getExternalId()).isEqualTo(company.getExternalId());
+        return company;
     }
 }

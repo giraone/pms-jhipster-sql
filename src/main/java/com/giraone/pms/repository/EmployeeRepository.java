@@ -6,6 +6,7 @@ import io.micrometer.core.annotation.Timed;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,7 +24,8 @@ import java.util.List;
 @SuppressWarnings("unused")
 @Repository
 @Transactional(propagation = Propagation.MANDATORY)
-public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom<Employee> {
+public interface EmployeeRepository
+    extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom<Employee>, JpaSpecificationExecutor<Employee> {
 
     // --- QUERIES WITH COMPANY ----------------------------------------------------------------------------------------
 

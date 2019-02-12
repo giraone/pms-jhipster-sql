@@ -1,9 +1,12 @@
 package com.giraone.pms.domain.filter;
 
+import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
 import org.junit.Test;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,46 +19,46 @@ public class PersonFilterTest {
         {
             PersonFilter personFilter = new PersonFilter("");
             assertThat(personFilter.getDateOfBirth()).isNull();
-            assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(0);
+            assertThat(personFilter.getNames().size()).isEqualTo(0);
         }
 
         {
             PersonFilter personFilter = new PersonFilter(" ");
             assertThat(personFilter.getDateOfBirth()).isNull();
-            assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(0);
+            assertThat(personFilter.getNames().size()).isEqualTo(0);
         }
 
         {
             PersonFilter personFilter = new PersonFilter(" 12");
             assertThat(personFilter.getDateOfBirth()).isNull();
-            assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(0);
+            assertThat(personFilter.getNames().size()).isEqualTo(0);
         }
 
         {
             PersonFilter personFilter = new PersonFilter(" 12 13 1X ");
             assertThat(personFilter.getDateOfBirth()).isNull();
-            assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(0);
+            assertThat(personFilter.getNames().size()).isEqualTo(0);
         }
     }
 
     @Test
     public void buildFromInput_singleExactNameOnly() {
 
-        expectSingleWeakMatchingName("\"Li\"", "li");
-        expectSingleWeakMatchingName("\"Müller\"", "mueller");
-        expectSingleWeakMatchingName(" \"Müller\" ", "mueller");
-        expectSingleWeakMatchingName(" \"Müller\" 1", "mueller");
-        expectSingleWeakMatchingName(" \"Müller\" X1 1X ", "mueller");
+        expectSingleExactMatchingName("\"Li\"", "li");
+        expectSingleExactMatchingName("\"Müller\"", "mueller");
+        expectSingleExactMatchingName(" \"Müller\" ", "mueller");
+        expectSingleExactMatchingName(" \"Müller\" 1", "mueller");
+        expectSingleExactMatchingName(" \"Müller\" X1 1X ", "mueller");
     }
 
     @Test
     public void buildFromInput_singleWeakMatchingNameOnly() {
 
-        expectSingleWeakMatchingName("Li", "li");
-        expectSingleWeakMatchingName("Müller", "mueller");
-        expectSingleWeakMatchingName(" Müller ", "mueller");
-        expectSingleWeakMatchingName(" Müller 1", "mueller");
-        expectSingleWeakMatchingName(" Müller X1 1X ", "mueller");
+        expectSingleWeakMatchingName("Li", "li%");
+        expectSingleWeakMatchingName("Müller", "mueler%");
+        expectSingleWeakMatchingName(" Müller ", "mueler%");
+        expectSingleWeakMatchingName(" Müller 1", "mueler%");
+        expectSingleWeakMatchingName(" Müller X1 1X ", "mueler%");
     }
 
     @Test
@@ -77,58 +80,75 @@ public class PersonFilterTest {
     @Test
     public void buildFromInput_dateAndSingleName() {
 
-        expectDateAndSingleName("Müller 31.12.1975", "mueller", LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndSingleName("Müller, 31.12.1975", "mueller", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleName("Müller 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleName("Müller, 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
     }
 
     @Test
     public void buildFromInput_dateAndTwoNames() {
 
-        expectDateAndTwoNames("Müller-Wagner  31.12.1975", new String[]{"mueller", "wagner"}, LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndTwoNames("Wagner-Müller, 31.12.1975", new String[]{"mueller", "wagner"}, LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndTwoNames("Müller - Wagner, 31.12.1975", new String[]{"mueller", "wagner"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoNames("Müller-Wagner  31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoNames("Wagner-Müller, 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoNames("Müller - Wagner, 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public void expectSingleWeakMatchingName(String input, String expected) {
+    private void expectSingleExactMatchingName(String input, String expected) {
 
-        PersonFilter personFilter = new PersonFilter(input);
-        assertThat(personFilter.getDateOfBirth()).isNull();
-        assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(1);
-        assertThat(personFilter.getWeakMatchingNames()).contains(expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SL.name(), expected);
+        expectSingleMatchingName(input, expectedFilter, false);
     }
 
-    public void expectSingleExactName(String input, String expected) {
+    private void expectSingleWeakMatchingName(String input, String expected) {
 
-        PersonFilter personFilter = new PersonFilter(input);
-        assertThat(personFilter.getDateOfBirth()).isNull();
-        assertThat(personFilter.getExactNames().size()).isEqualTo(1);
-        assertThat(personFilter.getExactNames()).contains(expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), expected);
+        expectSingleMatchingName(input, expectedFilter, false);
     }
 
-    public void expectDate(String input, LocalDate expected) {
+    private void expectSingleMatchingName(String input, EmployeeNameFilter expected, boolean phonetic) {
+
+        PersonFilter personFilter = new PersonFilter(input, phonetic);
+        assertThat(personFilter.getDateOfBirth()).isNull();
+        assertThat(personFilter.getNames().size()).isEqualTo(1);
+        assertThat(personFilter.getNames()).contains(expected);
+    }
+
+    private void expectDate(String input, LocalDate expected) {
 
         PersonFilter personFilter = new PersonFilter(input);
         assertThat(personFilter.getDateOfBirth()).isEqualTo(expected);
-        assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(0);
+        assertThat(personFilter.getNames().size()).isEqualTo(0);
     }
 
+    private void expectDateAndSingleName(String input, String expected, LocalDate expectedDate) {
 
-    public void expectDateAndSingleName(String input, String expectedName, LocalDate expectedDate) {
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), expected);
+        expectDateAndSingleName(input, expectedFilter, expectedDate);
+    }
+
+    private void expectDateAndSingleName(String input, EmployeeNameFilter expected, LocalDate expectedDate) {
 
         PersonFilter personFilter = new PersonFilter(input);
         assertThat(personFilter.getDateOfBirth()).isEqualTo(expectedDate);
-        assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(1);
-        assertThat(personFilter.getWeakMatchingNames()).contains(expectedName);
+        assertThat(personFilter.getNames().size()).isEqualTo(1);
+        assertThat(personFilter.getNames()).contains(expected);
     }
 
-    public void expectDateAndTwoNames(String input, String[] expectedNames, LocalDate expectedDate) {
+    private void expectDateAndTwoNames(String input, String[] expectedNames, LocalDate expectedDate) {
+
+        EmployeeNameFilter[] expectedFilters = Arrays.asList(expectedNames).stream()
+            .map(s -> new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), s))
+            .collect(Collectors.toList()).toArray(new EmployeeNameFilter[0]);
+        expectDateAndTwoNames(input, expectedFilters, expectedDate);
+    }
+
+    private void expectDateAndTwoNames(String input, EmployeeNameFilter[] expectedNames, LocalDate expectedDate) {
 
         PersonFilter personFilter = new PersonFilter(input);
         assertThat(personFilter.getDateOfBirth()).isEqualTo(expectedDate);
-        assertThat(personFilter.getWeakMatchingNames().size()).isEqualTo(2);
-        assertThat(personFilter.getWeakMatchingNames().get(0)).isIn(expectedNames);
-        assertThat(personFilter.getWeakMatchingNames().get(1)).isIn(expectedNames);
+        assertThat(personFilter.getNames().size()).isEqualTo(2);
+        assertThat(personFilter.getNames().get(0)).isIn(expectedNames);
+        assertThat(personFilter.getNames().get(1)).isIn(expectedNames);
     }
 }

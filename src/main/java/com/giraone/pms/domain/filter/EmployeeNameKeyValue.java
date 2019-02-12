@@ -1,11 +1,11 @@
 package com.giraone.pms.domain.filter;
 
-public class EmployeeFilterPair {
+public class EmployeeNameKeyValue {
 
     private String key;
     private String value;
 
-    public EmployeeFilterPair(String key, String value) {
+    public EmployeeNameKeyValue(String key, String value) {
         this.key = key;
         this.value = value;
     }
@@ -20,7 +20,7 @@ public class EmployeeFilterPair {
 
     @Override
     public String toString() {
-        return "EmployeeFilterPair{" +
+        return "EmployeeNameKeyValue{" +
             "key='" + key + '\'' +
             ", value='" + value + '\'' +
             '}';

@@ -1,6 +1,7 @@
 package com.giraone.pms.repository;
 
 import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -36,6 +37,12 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     Optional<Company> findOneByExternalIdAndUsersLogin(String externalId, String login);
 
-    @Query("select distinct c from Company c join c.users u where u.login = :login")
+    @Query("select distinct c from Company c inner join c.users u where u.login = :login")
     Page<Company> findCompaniesOfUser(@Param("login") String login, Pageable pageable);
+
+    @Query("select distinct u from User u inner join u.companies c where c.id = :companyId")
+    Page<User> findUsersOfCompanyByCompanyId(@Param("companyId") long companyId, Pageable pageable);
+
+    @Query("select distinct u from User u inner join u.companies c where c.externalId = :companyExternalId")
+    Page<User> findUsersOfCompanyByCompanyExternalId(@Param("companyExternalId") String companyExternalId, Pageable pageable);
 }

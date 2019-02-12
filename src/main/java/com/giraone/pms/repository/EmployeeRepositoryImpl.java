@@ -3,7 +3,7 @@ package com.giraone.pms.repository;
 import com.giraone.pms.domain.Employee;
 import com.giraone.pms.domain.EmployeeName;
 import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
-import com.giraone.pms.domain.filter.EmployeeFilterPair;
+import com.giraone.pms.domain.filter.EmployeeNameKeyValue;
 import com.giraone.pms.service.NameNormalizeService;
 import com.giraone.pms.service.impl.NameNormalizeServiceImpl;
 import com.google.common.collect.Lists;
@@ -46,7 +46,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom<Employee
     public Employee save(Employee employee) {
 
         if (log.isDebugEnabled()) {
-            log.debug("EmployeeRepositoryImpl " + employee.getId() + " " + employee.getSurname());
+            log.debug("EmployeeRepositoryImpl.save " + employee.getId() + " " + employee.getSurname());
         }
 
         if (employee.getId() == null) {
@@ -64,6 +64,26 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom<Employee
         employeeNameRepository.saveAll(employeeNames);
 
         return employee;
+    }
+
+    /**
+     * Customized saveAll method.
+     * Saves all given entities.
+     *
+     * @param employees must not be {@literal null}.
+     * @return the saved entities will never be {@literal null}.
+     * @throws IllegalArgumentException in case the given entity is {@literal null}.
+     */
+    @Override
+    public List<Employee> saveAllCustom(Iterable<Employee> employees) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("EmployeeRepositoryImpl.saveAll");
+        }
+
+        final List<Employee> ret = new ArrayList<>();
+        employees.forEach(e -> ret.add(this.save(e)));
+        return ret;
     }
 
     /**
@@ -108,28 +128,28 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom<Employee
         return names;
     }
 
-    private Set<EmployeeFilterPair> buildName(Employee employee) {
+    private Set<EmployeeNameKeyValue> buildName(Employee employee) {
 
-        final Set<EmployeeFilterPair> ret = new HashSet<>();
+        final Set<EmployeeNameKeyValue> ret = new HashSet<>();
 
         final String originalSurname = employee.getSurname();
         final String normalizedSurname = nameNormalizeService.normalize(originalSurname);
         if (normalizedSurname != null) {
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SL.toString(), normalizedSurname));
+            ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.SL.toString(), normalizedSurname));
             final List<String> surNames = nameNormalizeService.split(normalizedSurname);
             for (String name : surNames) {
-                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
             }
         }
         final String originalGivenName = employee.getGivenName();
         final String normalizedGivenName = nameNormalizeService.normalize(originalGivenName);
         if (normalizedGivenName != null) {
-            ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GL.toString(), normalizedGivenName));
+            ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.GL.toString(), normalizedGivenName));
             final List<String> givenNames = nameNormalizeService.split(normalizedGivenName);
             for (String name : givenNames) {
-                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-                ret.add(new EmployeeFilterPair(EmployeeNameFilterKey.GP.toString(), nameNormalizeService.phonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.GN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.GP.toString(), nameNormalizeService.phonetic(name)));
             }
         }
         return ret;

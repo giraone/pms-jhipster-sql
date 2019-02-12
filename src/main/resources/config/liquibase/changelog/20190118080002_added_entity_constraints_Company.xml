@@ -7,7 +7,7 @@
         Added the constraints for entity Company.
     -->
     <changeSet id="20190118080002-2" author="jhipster">
-        
+        <validCheckSum>ANY</validCheckSum>
         <addForeignKeyConstraint baseColumnNames="company_id"
                                  baseTableName="company_user"
                                  constraintName="fk_company_user_company_id"
