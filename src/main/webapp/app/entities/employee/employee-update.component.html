@@ -63,7 +63,7 @@
                     <label class="form-control-label" jhiTranslate="pmssqlApp.employee.company" for="field_company">Company</label>
                     <select class="form-control" id="field_company" name="company" [(ngModel)]="employee.companyId"  required>
                         <option *ngIf="!editForm.value.company" [ngValue]="null" selected></option>
-                        <option [ngValue]="companyOption.id" *ngFor="let companyOption of companies; trackBy: trackCompanyById">{{companyOption.id}}</option>
+                        <option [ngValue]="companyOption.id" *ngFor="let companyOption of companies; trackBy: trackCompanyById">{{ displayName(companyOption) }}</option>
                     </select>
                 </div>
                 <div [hidden]="!(editForm.controls.company?.dirty && editForm.controls.company?.invalid)">

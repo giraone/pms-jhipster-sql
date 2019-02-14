@@ -131,13 +131,14 @@ public class CompanyRepositoryTest {
 
         // arrange
         Company company = saveCompanyWithUser();
+        String userLogin = company.getUsers().iterator().next().getLogin();
 
         // act
         Page<User> result = companyRepository.findUsersOfCompanyByCompanyId(company.getId(), PageRequest.of(0, 10));
 
         // assert
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).getLogin()).isEqualTo("user");
+        assertThat(result.getContent().get(0).getLogin()).isEqualTo(userLogin);
     }
 
     @Test
@@ -145,13 +146,32 @@ public class CompanyRepositoryTest {
 
         // arrange
         Company company = saveCompanyWithUser();
+        String userLogin = company.getUsers().iterator().next().getLogin();
 
         // act
         Page<User> result = companyRepository.findUsersOfCompanyByCompanyExternalId(company.getExternalId(), PageRequest.of(0, 10));
 
         // assert
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).getLogin()).isEqualTo("user");
+        assertThat(result.getContent().get(0).getLogin()).isEqualTo(userLogin);
+    }
+
+    @Test
+    public void savedCompany_findCompaniesOfUserByUserId() {
+
+        // arrange
+        Company company = saveCompanyWithUser();
+        long userId = company.getUsers().iterator().next().getId();
+
+        // act
+        Page<Company> result = companyRepository.findCompaniesOfUserByUserId(userId, PageRequest.of(0, 10));
+
+        // assert
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getExternalId()).isEqualTo(company.getExternalId());
+        assertThat(result.getContent().get(0).getUsers()).isNotNull();
+        assertThat(result.getContent().get(0).getUsers()).isNotEmpty();
+        assertThat(result.getContent().get(0).getUsers().iterator().next().getId()).isEqualTo(userId);
     }
 
     //------------------------------------------------------------------------------------------------------------------

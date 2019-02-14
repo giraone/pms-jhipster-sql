@@ -5,9 +5,8 @@ import { UserRouteAccessService } from '../../core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Employee } from '../../shared/model/employee.model';
-import { EmployeeService } from './employee.service';
+import { EmployeeService } from '../../entities/employee/employee.service';
 import { EmployeeComponent } from './employee.component';
-import { EmployeeDetailComponent } from './employee-detail.component';
 import { IEmployee } from '../../shared/model/employee.model';
 
 @Injectable({ providedIn: 'root' })
@@ -33,18 +32,6 @@ export const employeeRoute: Routes = [
         data: {
             authorities: ['ROLE_USER'],
             pageTitle: 'pmssqlApp.query.pageTitleMain'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'employee-query/:id/view',
-        component: EmployeeDetailComponent,
-        resolve: {
-            employee: EmployeeResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'pmssqlApp.query.pageTitleDetail'
         },
         canActivate: [UserRouteAccessService]
     }

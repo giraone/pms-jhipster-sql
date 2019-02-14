@@ -2,9 +2,15 @@
     "pmssqlApp": {
         "GenderType": {
             "null": "",
-            "UNKNOWN": "UNKNOWN",
-            "MALE": "MALE",
-            "FEMALE": "FEMALE"
+            "UNKNOWN": "unbekannt",
+            "MALE": "männlich",
+            "FEMALE": "weiblich"
+        },
+        "GenderTypeShort": {
+            "null": "",
+            "UNKNOWN": "u",
+            "MALE": "m",
+            "FEMALE": "w"
         }
     }
 }

@@ -99,7 +99,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     // This mapping is only needed to formulate queries in JPQL, therefore we have also no getter/setter
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "users")
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @SuppressWarnings("unused")
     private Set<Company> companies = new HashSet<>(); // user is member of these companies
 

@@ -1,4 +1,6 @@
 package com.giraone.pms.web.rest;
+import com.giraone.pms.security.AuthoritiesConstants;
+import com.giraone.pms.security.SecurityUtils;
 import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
 import com.giraone.pms.web.rest.util.HeaderUtil;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -47,10 +50,12 @@ public class CompanyResource {
      */
     @PostMapping("/companies")
     public ResponseEntity<CompanyDTO> createCompany(@Valid @RequestBody CompanyDTO companyDTO) throws URISyntaxException {
+
         log.debug("REST request to save Company : {}", companyDTO);
         if (companyDTO.getId() != null) {
             throw new BadRequestAlertException("A new company cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         CompanyDTO result = companyService.save(companyDTO);
         return ResponseEntity.created(new URI("/api/companies/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
@@ -87,6 +92,7 @@ public class CompanyResource {
      */
     @GetMapping("/companies")
     public ResponseEntity<List<CompanyDTO>> getAllCompanies(Pageable pageable, @RequestParam(required = false, defaultValue = "false") boolean eagerload) {
+
         log.debug("REST request to get a page of Companies");
         Page<CompanyDTO> page;
         if (eagerload) {

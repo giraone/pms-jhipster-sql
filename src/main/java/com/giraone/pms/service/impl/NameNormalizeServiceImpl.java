@@ -26,10 +26,11 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
      * Split a given string into name pairs, e.g. spit double names like "Wagner-Schmidt", "von der Tann"
      *
      * @param input The input string
+     * @param minLength minimal length of string to be accepted
      * @return list of names, that have at least 2 characters, which is sorted by string length descending and
      * which has a maximum of 2 entries.
      */
-    public List<String> split(String input) {
+    public List<String> split(String input, int minLength) {
 
         List<String> ret = new ArrayList<>();
         input = normalize(input);
@@ -42,8 +43,10 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
             //log.debug("split " + part);
             if (part.length() > 1) { // single characters are not accepted
                 if (part.charAt(0) < '0' || part.charAt(0) > '9') { // skip words starting with a leading digit
-                    //log.debug("add " + part);
-                    ret.add(part);
+                    if (part.length() > minLength) {
+                        //log.debug("add " + part);
+                        ret.add(part);
+                    }
                 }
             }
         }
@@ -59,6 +62,17 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
             }
         }
         return ret;
+    }
+    /**
+     * Split a given string into name pairs, e.g. spit double names like "Wagner-Schmidt", "von der Tann"
+     *
+     * @param input The input string
+     * @return list of names, that have at least 2 characters, which is sorted by string length descending and
+     * which has a maximum of 2 entries.
+     */
+    public List<String> split(String input) {
+
+       return split(input, 2);
     }
 
     /**

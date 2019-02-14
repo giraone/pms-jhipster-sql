@@ -111,8 +111,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/employees/**").hasAnyAuthority(AuthoritiesConstants.USER, AuthoritiesConstants.ADMIN) // (hs) - added
             .antMatchers("/api/companies/**").hasAnyAuthority(AuthoritiesConstants.USER, AuthoritiesConstants.ADMIN) // (hs) - added
 
-            .antMatchers("/domain-api/**").authenticated() // (hs) - added
-            .antMatchers("/domain-api/**").hasAnyAuthority(AuthoritiesConstants.USER, AuthoritiesConstants.ADMIN) // (hs) - added
+            .antMatchers("/bulk-api/**").authenticated() // (hs) - added
+            .antMatchers("/bulk-api/**").hasAnyAuthority(AuthoritiesConstants.ADMIN) // (hs) - added
 
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()

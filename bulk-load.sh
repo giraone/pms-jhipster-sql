@@ -17,13 +17,19 @@ while (( d < 10 )); do
   while (( f < 1000 )); do
     file=$(printf "%s/%s/f-%08d.json" "${ROOT_DATA_DIR}" "${dir}" $f)
     echo "${file}"
+    typeset -i start=$(date +%s)
     count=$(curl "${BASE_URL}/domain-api/employee-list" -s -H 'Accept: application/json' -H 'Content-Type: application/json' \
      -H "Authorization: Bearer ${token}" -X PUT  --data "@${file}")
     if [[ $? != 0 || $count != 1000 ]]; then
       exit 1
     fi
+    typeset -i end=$(date +%s)
+    let secs=$end-$start
+    echo " processing time was ${secs} seconds"
     let f+=1
   done
+
+  sleep 5
   let d+=1
 done
 

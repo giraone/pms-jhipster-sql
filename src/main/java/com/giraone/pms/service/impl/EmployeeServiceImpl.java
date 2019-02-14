@@ -4,6 +4,7 @@ import com.giraone.pms.domain.*;
 import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.repository.CompanyRepository;
 import com.giraone.pms.repository.EmployeeRepository;
+import com.giraone.pms.service.AuthorizationService;
 import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,6 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Service Implementation for managing Employee.
@@ -41,21 +42,23 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final Logger log = LoggerFactory.getLogger(EmployeeServiceImpl.class);
 
     private final EmployeeRepository employeeRepository;
-
     private final EmployeeMapper employeeMapper;
 
     // Extensions
     private final EntityManager em;
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
+    private final AuthorizationService authorizationService;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeMapper employeeMapper,
-                               EntityManager em, CompanyRepository companyRepository, CompanyMapper companyMapper) {
+                               EntityManager em, CompanyRepository companyRepository,
+                               CompanyMapper companyMapper, AuthorizationService authorizationService) {
         this.employeeRepository = employeeRepository;
         this.employeeMapper = employeeMapper;
         this.em = em;
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
+        this.authorizationService = authorizationService;
     }
 
     /**
@@ -66,27 +69,27 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Transactional
     public EmployeeDTO save(EmployeeDTO employeeDTO) {
-        log.debug("Request to save Employee : {}", employeeDTO);
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to save Employee admin={} employee={}", isAdmin, employeeDTO);
         Employee employee = employeeMapper.toEntity(employeeDTO);
         employee.normalizeAndTrim(); // remove unnecessary stuff like white spaces
+
+        if (employee.getCompany() == null || employee.getCompany().getId() == null) {
+            throw new IllegalArgumentException("companyId of employee may not be null!");
+        }
+
+        // Fetch the company fresh from the database, because the DTO contains only the ID
+        employee.setCompany(companyRepository.getOne(employee.getCompany().getId()));
+
+        if (!isAdmin && !authorizationService.check(employee.getCompany())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%s tries to store employee %s into company id=%s without access rights!",
+                    authorizationService.getCurrentUserLogin(), employee, employee.getCompany().getExternalId()));
+        }
         employee = employeeRepository.save(employee);
         return employeeMapper.toDto(employee);
     }
-
-    /**
-     * Get all the employees.
-     *
-     * @param pageable the pagination information
-     * @return the list of entities
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<EmployeeDTO> findAllByFilter(Pageable pageable) {
-        log.debug("Request to get all Employees");
-        return employeeRepository.findAll(pageable)
-            .map(employeeMapper::toDto);
-    }
-
 
     /**
      * Get one employee by id.
@@ -96,10 +99,23 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Optional<EmployeeDTO> findOne(Long id) {
-        log.debug("Request to get Employee : {}", id);
-        return employeeRepository.findById(id)
-            .map(employeeMapper::toDto);
+    public Optional<EmployeeDTO> findOne(long id) {
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get employee admin={} id={}", isAdmin, id);
+
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if (!employee.isPresent()) {
+            log.warn("find employee id={} NOT FOUND!", id);
+            return Optional.empty();
+        }
+
+        if (!isAdmin && !authorizationService.check(employee.get().getCompany())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%s tries to find employee %d of company id=%s without access rights!",
+                    authorizationService.getCurrentUserLogin(), id, employee.get().getCompany().getExternalId()));
+        }
+        return employee.map(employeeMapper::toDto);
     }
 
     /**
@@ -108,8 +124,22 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param id the id of the entity
      */
     @Override
-    public void delete(Long id) {
-        log.debug("Request to delete Employee : {}", id);
+    public void delete(long id) {
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to delete employee admin={} id={}", isAdmin, id);
+
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if (!employee.isPresent()) {
+            log.warn("delete employee id={} NOT FOUND!", id);
+            return;
+        }
+
+        if (!isAdmin && !authorizationService.check(employee.get().getCompany())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%d tries to delete employee %d of company id=%s without access rights!",
+                    authorizationService.getCurrentUserId(), id, employee.get().getCompany().getExternalId()));
+        }
         employeeRepository.deleteById(id);
     }
 
@@ -156,7 +186,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<CompanyDTO> getAllCompaniesOfEmployee(String userLogin) {
 
         log.debug("getAllCompaniesOfEmployee userLogin={}", userLogin);
-        return this.companyRepository.findCompaniesOfUser(userLogin, Pageable.unpaged()).map(companyMapper::toDto).getContent();
+        return this.companyRepository.findCompaniesOfUserByLogin(userLogin, Pageable.unpaged()).map(companyMapper::toDto).getContent();
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -176,56 +206,65 @@ public class EmployeeServiceImpl implements EmployeeService {
         log.debug("getEmployees company={}, personFilter={}", company == null ? "" : company.getExternalId(), personFilter);
 
         final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<Employee> cq = cb.createQuery(Employee.class);
-        final Root<Employee> employeeTable = cq.from(Employee.class);
-        //employeeTable.alias("e");
 
-        final List<Predicate> predicates = new ArrayList<>();
+        final CriteriaQuery<Employee> fetchQuery = cb.createQuery(Employee.class);
+        final Root<Employee> employeeFetchTable = fetchQuery.from(Employee.class);
+
+        final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        final Root<Employee> employeeCountTable = countQuery.from(Employee.class);
+
+        final List<Predicate> fetchPredicates = new ArrayList<>();
+        final List<Predicate> countPredicates = new ArrayList<>();
+
         if (company != null) {
-            predicates.add(cb.equal(employeeTable.get(Employee_.company), company));
+            fetchPredicates.add(cb.equal(employeeFetchTable.get(Employee_.company), company));
+            countPredicates.add(cb.equal(employeeCountTable.get(Employee_.company), company));
         }
-        if (personFilter.getDateOfBirth() != null) {
-            predicates.add(cb.equal(employeeTable.get(Employee_.dateOfBirth), personFilter.getDateOfBirth()));
-        }
+        if (personFilter != null) {
+            if (personFilter.getDateOfBirth() != null) {
+                fetchPredicates.add(cb.equal(employeeFetchTable.get(Employee_.dateOfBirth), personFilter.getDateOfBirth()));
+                countPredicates.add(cb.equal(employeeCountTable.get(Employee_.dateOfBirth), personFilter.getDateOfBirth()));
+            }
 
-        if (personFilter.hasNames()) {
-            //final AtomicInteger en = new AtomicInteger();
-            personFilter.getNames().forEach(nameFilter -> {
-                final Root<EmployeeName> employeeNameTable = cq.from(EmployeeName.class);
-                //employeeNameTable.alias("en" + en.getAndIncrement());
-                predicates.add(
-                    cb.and(
-                        cb.equal(employeeNameTable.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeTable.get(Employee_.id)),
-                        cb.equal(employeeNameTable.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
-                        cb.like(employeeNameTable.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
-                    // TODO: equal instead of like when SL, GL
-                );
-            });
+            if (personFilter.hasNames()) {
+                //final AtomicInteger en = new AtomicInteger();
+                personFilter.getNames().forEach(nameFilter -> {
+                    final Root<EmployeeName> employeeNameTableFetch = fetchQuery.from(EmployeeName.class);
+                    final Root<EmployeeName> employeeNameTableCount = countQuery.from(EmployeeName.class);
+                    //employeeNameTable.alias("en" + en.getAndIncrement());
+                    fetchPredicates.add(
+                        cb.and(
+                            cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeFetchTable.get(Employee_.id)),
+                            cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
+                            cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
+                        // TODO: equal instead of like when SL, GL
+                    );
+                    countPredicates.add(
+                        cb.and(
+                            cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeCountTable.get(Employee_.id)),
+                            cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
+                            cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
+                        // TODO: equal instead of like when SL, GL
+                    );
+                });
+            }
         }
-
-        final Predicate[] predicatesArray = predicates.toArray(new Predicate[]{});
 
         // SELECT COUNT
-        /*
-        final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        countQuery.where(predicatesArray);
-        final Root<Employee> employeeCountTable = countQuery.from(Employee.class);
-        employeeCountTable.alias("e");
-        countQuery.select(cb.count(employeeCountTable));
-        final long count = em.createQuery(countQuery).getSingleResult();
-        */
-        final long count = 4711;
+        countQuery.select(cb.countDistinct(employeeCountTable));
+        countQuery.where(countPredicates.toArray(new Predicate[]{}));
+        final TypedQuery<Long> typedCountQuery = em.createQuery(countQuery);
+        final long count = typedCountQuery.getSingleResult();
 
         // SELECT employee
-        cq.select(employeeTable);
-        cq.where(predicatesArray);
-        cq.distinct(true);
-        defineOrder(employeeTable, cq, cb, pageable);
-        final TypedQuery<Employee> typedQuery = em.createQuery(cq);
+        fetchQuery.select(employeeFetchTable);
+        fetchQuery.where(fetchPredicates.toArray(new Predicate[]{}));
+        fetchQuery.distinct(true);
+        defineOrder(employeeFetchTable, fetchQuery, cb, pageable);
+        final TypedQuery<Employee> typedQuery = em.createQuery(fetchQuery);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
         final List<Employee> pageList = typedQuery.getResultList();
-
 
         return new PageImpl<>(pageList, pageable, count);
     }

@@ -75,4 +75,8 @@ export class EmployeeUpdateComponent implements OnInit {
     trackCompanyById(index: number, item: ICompany) {
         return item.id;
     }
+
+    displayName(company: ICompany): string {
+        return '"' + company.name + '" (' + company.externalId + '/' + company.id + ')';
+    }
 }

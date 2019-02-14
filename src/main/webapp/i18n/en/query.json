@@ -8,9 +8,9 @@
                 "admin": "of all companies",
                 "user": "of company"
             },
-            "count": "Count",
+            "count": "Count = ",
             "filter": {
-                "placeholder": "Type surname of employee"
+                "placeholder": "Filter by surname or date of birth"
             }
         }
     }

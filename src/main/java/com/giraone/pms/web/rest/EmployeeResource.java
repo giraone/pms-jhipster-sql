@@ -1,22 +1,29 @@
 package com.giraone.pms.web.rest;
+
+import com.giraone.pms.domain.filter.PersonFilter;
+import com.giraone.pms.service.AuthorizationService;
 import com.giraone.pms.service.EmployeeService;
+import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.dto.EmployeeDTO;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
 import com.giraone.pms.web.rest.util.HeaderUtil;
 import com.giraone.pms.web.rest.util.PaginationUtil;
-import com.giraone.pms.service.dto.EmployeeDTO;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,9 +39,11 @@ public class EmployeeResource {
     private static final String ENTITY_NAME = "employee";
 
     private final EmployeeService employeeService;
+    private final AuthorizationService authorizationService;
 
-    public EmployeeResource(EmployeeService employeeService) {
+    public EmployeeResource(EmployeeService employeeService, AuthorizationService authorizationService) {
         this.employeeService = employeeService;
+        this.authorizationService = authorizationService;
     }
 
     /**
@@ -45,6 +54,7 @@ public class EmployeeResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/employees")
+    @Timed
     public ResponseEntity<EmployeeDTO> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) throws URISyntaxException {
         log.debug("REST request to save Employee : {}", employeeDTO);
         if (employeeDTO.getId() != null) {
@@ -63,10 +73,10 @@ public class EmployeeResource {
      * @return the ResponseEntity with status 200 (OK) and with body the updated employeeDTO,
      * or with status 400 (Bad Request) if the employeeDTO is not valid,
      * or with status 500 (Internal Server Error) if the employeeDTO couldn't be updated
-     * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/employees")
-    public ResponseEntity<EmployeeDTO> updateEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) throws URISyntaxException {
+    @Timed
+    public ResponseEntity<EmployeeDTO> updateEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
         log.debug("REST request to update Employee : {}", employeeDTO);
         if (employeeDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
@@ -80,13 +90,61 @@ public class EmployeeResource {
     /**
      * GET  /employees : get all the employees.
      *
-     * @param pageable the pagination information
+     * @param companyExternalId restrict the query to employees of this company
+     * @param filter            restrict the output to employees matching this free form filter
+     * @param pageable          the pagination information
      * @return the ResponseEntity with status 200 (OK) and the list of employees in body
+     * or status 404 (NOT FOUND), if the companyExternalId is invalid.
      */
+    /*
+    @PreAuthorize("(hasRole(\"" + AuthoritiesConstants.USER + "\") and "
+        + "authorizationService.check(#companyExternalId, authentication.principal.username))"
+        + "or hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.USER + "\") or hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
+    */
     @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(Pageable pageable) {
-        log.debug("REST request to get a page of Employees");
-        Page<EmployeeDTO> page = employeeService.findAllByFilter(pageable);
+    @Timed
+    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(
+        @RequestParam(required = false) String companyExternalId,
+        @RequestParam(required = false) String filter,
+        Pageable pageable) {
+
+        boolean isAdmin = authorizationService.isAdmin();
+        log.debug("REST request to query employees isAdmin={}, companyExternalId={}, filter={}", isAdmin, companyExternalId, filter);
+
+        Optional<Page<EmployeeDTO>> result;
+        if (!isAdmin) {
+            Optional<String> userLogin = authorizationService.getCurrentUserLogin();
+            if (!userLogin.isPresent()) {
+                throw new AccessDeniedException("Cannot obtain user login!");
+            }
+            if (companyExternalId == null) {
+                log.debug("Attempt by user {} to query without companyExternalId!", userLogin.get());
+                List<CompanyDTO> companies = employeeService.getAllCompaniesOfEmployee(userLogin.get());
+                if (companies.isEmpty()) {
+                    return ResponseEntity.ok().body(new ArrayList<>());
+                } else {
+                    companyExternalId = companies.get(0).getExternalId();
+                }
+            }
+
+            if (!this.authorizationService.check(companyExternalId)) {
+                log.warn("Attempt by user {} to query company {} without access rights!",
+                    userLogin.get(), companyExternalId);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
+        PersonFilter personFilter = new PersonFilter(filter);
+
+        result = employeeService.findAllByFilter(companyExternalId, personFilter, pageable);
+        if (!result.isPresent()) {
+            log.debug("- companyExternalId {} is invalid!", companyExternalId);
+            return ResponseEntity.notFound().build();
+        }
+
+        Page<EmployeeDTO> page = result.get();
+        log.debug("- size={}, totalElements={}", page.getContent().size(), page.getTotalElements());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -97,11 +155,32 @@ public class EmployeeResource {
      * @param id the id of the employeeDTO to retrieve
      * @return the ResponseEntity with status 200 (OK) and with body the employeeDTO, or with status 404 (Not Found)
      */
+    //@PreAuthorize("hasRole(\"" + AuthoritiesConstants.USER + "\") or hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
+    //@PostAuthorize("returnObject.body == null || authorizationService.check(#returnObject.body.companyId, authentication.principal.username)")
     @GetMapping("/employees/{id}")
+    @Timed
     public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable Long id) {
-        log.debug("REST request to get Employee : {}", id);
+
+        boolean isAdmin = authorizationService.isAdmin();
+        log.debug("REST request to get Employee : isAdmin={} id={}", isAdmin, id);
+
         Optional<EmployeeDTO> employeeDTO = employeeService.findOne(id);
+
         return ResponseUtil.wrapOrNotFound(employeeDTO);
+    }
+
+    @GetMapping("/companies-of-employee")
+    @Timed
+    public ResponseEntity<List<CompanyDTO>> getAllCompaniesOfEmployee() {
+
+        boolean isAdmin = authorizationService.isAdmin();
+        log.debug("REST request to query companies of employee isAdmin={}", isAdmin);
+        final String userLogin = authorizationService.getCurrentUserLogin().orElseThrow(
+            () -> new AccessDeniedException("Current user login not found!"));
+        log.debug("- by user {}", userLogin);
+
+        List<CompanyDTO> result = employeeService.getAllCompaniesOfEmployee(userLogin);
+        return ResponseEntity.ok().body(result);
     }
 
     /**
@@ -111,8 +190,11 @@ public class EmployeeResource {
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/employees/{id}")
+    @Timed
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        log.debug("REST request to delete Employee : {}", id);
+
+        boolean isAdmin = authorizationService.isAdmin();
+        log.debug("REST request to delete Employee : isAdmin={} id={}", isAdmin, id);
         employeeService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }

@@ -77,18 +77,18 @@ The first PUT call uses data from [the testdata-generator project on GitHub](htt
 
 ```
 
-curl "${BASE_URL}/domain-api/employee-list" -k -H 'Accept: application/json' -H 'Content-Type: application/json' \
+curl "${BASE_URL}/api/employees" -k -H 'Accept: application/json' -H 'Content-Type: application/json' \
  -H "Authorization: Bearer ${token}" -X PUT  --data @../data-10M/d-00000000/f-00000000.json
 
-curl "${BASE_URL}/domain-api/employees?companyExternalId=l-00000060&surnamePrefix=A&page=0&size=20&sort=id,asc" \
+curl "${BASE_URL}/api/employees?companyExternalId=l-00000060&surnamePrefix=A&page=0&size=20&sort=id,asc" \
  -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
-curl "${BASE_URL}/domain-api/employees?companyExternalId=l-00000060&surnamePrefix=Ar&page=0&size=20&sort=id,asc" \
- -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
-
-curl "${BASE_URL}/domain-api/employees?surnamePrefix=X&page=0&size=20&externalCompanyId=l-00000060&sort=id,asc \
+curl "${BASE_URL}/api/employees?companyExternalId=l-00000060&surnamePrefix=Ar&page=0&size=20&sort=id,asc" \
  -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 
-curl "${BASE_URL}/domain-api/re-index?clear=false" -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+curl "${BASE_URL}/api/employees?surnamePrefix=X&page=0&size=20&externalCompanyId=l-00000060&sort=id,asc \
+ -k -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
+
+curl "${BASE_URL}/bulk-api/re-index?clear=false" -H 'Accept: application/json' -H "Authorization: Bearer ${token}"
 ```
 
 ## Performance of bulk load
@@ -171,6 +171,65 @@ order by count desc
 > "wagner"
 > "sulz"
 > "beker"
+
+# search for one surname
+
+select e.*
+from employee e, employee_name en
+where e.company_id = 1518
+and e.id = en.owner_id
+and en.name_key = 'SN'
+and en.name_value LIKE 'mue%'
+limit 100
+
+==> 160 msecs
+
+# search for dateOfBirth
+
+select e.*
+from employee e
+where e.company_id = 1518
+and e.date_of_birth = '1964-06-03'
+limit 100
+
+==> 50 msecs
+
+# search for one surname plus dateOfBirth
+
+select e.*
+from employee e, employee_name en
+where e.company_id = 1518
+and e.date_of_birth = '1964-06-03'
+and e.id = en.owner_id
+and en.name_key = 'SN'
+and en.name_value LIKE 'mue%'
+limit 100
+
+==> 50 msecs
+
+# search for one surname and one givenName
+select e.*
+from employee e, employee_name en1, employee_name en2
+where e.company_id = 1518
+and e.id = en1.owner_id and e.id = en2.owner_id
+and en1.name_key = 'SN' and en1.name_value LIKE 'mue%'
+and en2.name_key = 'GN' and en2.name_value LIKE 'tomas%'
+limit 100
+
+==> 600 msecs
+
+# search for one surname, one givenName and dateOfBirth
+select e.*
+from employee e, employee_name en1, employee_name en2
+where e.company_id = 1518
+and e.date_of_birth = '1964-06-03'
+and e.id = en1.owner_id and e.id = en2.owner_id
+and en1.name_key = 'SN' and en1.name_value LIKE 'mue%'
+and en2.name_key = 'GN' and en2.name_value LIKE 'tomas%'
+limit 100
+
+
+==> 50 msecs
 ```
 
 ## Some design decisions

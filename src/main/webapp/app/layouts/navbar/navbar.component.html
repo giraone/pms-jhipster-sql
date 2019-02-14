@@ -27,20 +27,20 @@
                     </span>
                 </a>
                 <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="entity-menu">
-                    <li *jhiHasAnyAuthority="'ROLE_ADMIN'">
+                    <li *jhiHasAnyAuthority="['ROLE_ADMIN', 'ROLE_USER']">
                         <a class="dropdown-item" routerLink="company" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
                             <fa-icon icon="asterisk" fixedWidth="true"></fa-icon>
                             <span jhiTranslate="global.menu.entities.company">Company</span>
                         </a>
                     </li>
-                    <li *jhiHasAnyAuthority="'ROLE_ADMIN'">
+                    <li *jhiHasAnyAuthority="['ROLE_ADMIN', 'ROLE_USER']">
                         <a class="dropdown-item" routerLink="employee" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
                             <fa-icon icon="asterisk" fixedWidth="true"></fa-icon>
                             <span jhiTranslate="global.menu.entities.employee">Employee</span>
                         </a>
                     </li>
                     <!-- jhipster-needle-add-entity-to-menu - JHipster will add entities to the menu here -->
-                    <li>
+                    <li *jhiHasAnyAuthority="['ROLE_ADMIN', 'ROLE_USER']">
                         <a class="dropdown-item" routerLink="employee-query" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
                             <fa-icon icon="asterisk" fixedWidth="true"></fa-icon>
                             <span jhiTranslate="pmssqlApp.query.menu">Search employees</span>

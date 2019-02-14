@@ -136,7 +136,7 @@ public class EmployeesBulkServiceImpl implements EmployeeBulkService {
         int ret = 0;
         do {
             final long start = System.currentTimeMillis();
-            pages = this.employeeService.findAllByFilter(pageable);
+            pages = this.employeeService.findAllByFilter(null, null, pageable).get();
 
             ret += reIndex(pages.getNumber(), pages.getContent().stream(), clearFirst);
             pageable = pageable.next();

@@ -44,7 +44,7 @@
                 <div class="form-group">
                     <label jhiTranslate="pmssqlApp.company.user" for="field_user">User</label>
                     <select class="form-control" id="field_user" multiple name="user" [(ngModel)]="company.users">
-                        <option [ngValue]="getSelected(company.users, userOption)" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.id}}</option>
+                        <option [ngValue]="getSelected(company.users, userOption)" *ngFor="let userOption of users; trackBy: trackUserById">{{displayName(userOption)}}</option>
                     </select>
                 </div>
             </div>

@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared';
 import { IEmployee } from 'app/shared/model/employee.model';
+import { ICompany } from '../../shared/model/company.model';
 
 type EntityResponseType = HttpResponse<IEmployee>;
 type EntityArrayResponseType = HttpResponse<IEmployee[]>;
@@ -15,6 +16,7 @@ type EntityArrayResponseType = HttpResponse<IEmployee[]>;
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
     public resourceUrl = SERVER_API_URL + 'api/employees';
+    public resourceUrl2 = SERVER_API_URL + 'api/companies-of-employee';
 
     constructor(protected http: HttpClient) {}
 
@@ -47,6 +49,11 @@ export class EmployeeService {
 
     delete(id: number): Observable<HttpResponse<any>> {
         return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+    }
+
+    findCompanies(req?: any): Observable<EntityArrayResponseType> {
+        const options = createRequestOption(req);
+        return this.http.get<ICompany[]>(this.resourceUrl2, { params: options, observe: 'response' });
     }
 
     protected convertDateFromClient(employee: IEmployee): IEmployee {

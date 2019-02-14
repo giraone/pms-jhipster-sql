@@ -69,7 +69,7 @@ public class EmployeeBulkServiceTest {
         assertThat(company.get().getExternalId()).isEqualTo(TEST_COMPANY_EXTERNAL_ID);
 
         // does the company has an initial user?
-        Page<User> users = this.companyService.findAlllUserInCompany(TEST_COMPANY_EXTERNAL_ID, PageRequest.of(0, 10));
+        Page<User> users = this.companyService.findAllUserInCompany(TEST_COMPANY_EXTERNAL_ID, PageRequest.of(0, 10));
         assertThat(users.getTotalElements()).isEqualTo(1);
 
         // can the employees be found by a filter query?

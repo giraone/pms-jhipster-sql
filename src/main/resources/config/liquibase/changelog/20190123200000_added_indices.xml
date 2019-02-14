@@ -45,4 +45,15 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="20190123200000-5" author="hs">
+        <validCheckSum>ANY</validCheckSum>
+
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="employee_dob_index" /></not>
+        </preConditions>
+        <createIndex tableName="employee" indexName="employee_dob_index">
+            <column name="date_of_birth" />
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

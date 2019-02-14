@@ -28,7 +28,7 @@
                 <dt><span jhiTranslate="pmssqlApp.company.user">User</span></dt>
                 <dd>
                     <span *ngFor="let user of company.users; let last = last">
-                        {{user.id}}{{last ? '' : ', '}}
+                        {{displayName(user)}}{{last ? '' : ', '}}
                     </span>
                 </dd>
             </dl>

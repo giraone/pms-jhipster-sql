@@ -3,12 +3,12 @@ import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/ht
 import { Subscription, Subject } from 'rxjs';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 
-import { IEmployee } from 'app/shared/model/employee.model';
+import { IEmployee } from '../../shared/model/employee.model';
 import { ICompany } from '../../shared/model/company.model';
 import { AccountService } from '../../core';
 
 import { ITEMS_PER_PAGE } from '../../shared';
-import { EmployeeService } from './employee.service';
+import { EmployeeService } from '../../entities/employee/employee.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -22,6 +22,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     currentAccount: any;
     currentAccountIsAdmin: boolean;
     currentCompanies: ICompany[];
+    currentCompany: ICompany;
     eventSubscriber: Subscription;
     itemsPerPage: number;
     links: any;
@@ -41,6 +42,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         this.input = '';
         this.employees = [];
         this.currentCompanies = [];
+        this.currentCompany = null;
         this.itemsPerPage = ITEMS_PER_PAGE;
         this.page = 0;
         this.links = {
@@ -109,6 +111,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         this.employeeService.findCompanies().subscribe(
             (res: HttpResponse<ICompany[]>) => {
                 this.currentCompanies = res.body;
+                this.currentCompany = this.currentCompanies.length > 0 ? this.currentCompanies[0] : null;
                 this.load();
             },
             (res: HttpErrorResponse) => this.onError(res.message)
@@ -157,9 +160,9 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     }
 
     protected getExternalCompanyId() {
-        if (this.currentCompanies == null || this.currentCompanies.length === 0) {
+        if (this.currentCompany == null) {
             return null;
         }
-        return this.currentCompanies[0].externalId;
+        return this.currentCompany.externalId;
     }
 }

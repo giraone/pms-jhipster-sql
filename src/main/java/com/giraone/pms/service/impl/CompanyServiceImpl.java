@@ -1,20 +1,21 @@
 package com.giraone.pms.service.impl;
 
-import com.giraone.pms.domain.User;
-import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.User;
 import com.giraone.pms.repository.CompanyRepository;
-import com.giraone.pms.service.UserService;
+import com.giraone.pms.service.AuthorizationService;
+import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.mapper.CompanyMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,12 +30,13 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
-    private final UserService userService;
+    private final AuthorizationService authorizationService;
 
-    public CompanyServiceImpl(CompanyRepository companyRepository, CompanyMapper companyMapper, UserService userService) {
+    public CompanyServiceImpl(CompanyRepository companyRepository, CompanyMapper companyMapper,
+                              AuthorizationService authorizationService) {
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
-        this.userService = userService;
+        this.authorizationService = authorizationService;
     }
 
     /**
@@ -45,8 +47,22 @@ public class CompanyServiceImpl implements CompanyService {
      */
     @Override
     public CompanyDTO save(CompanyDTO companyDTO) {
-        log.debug("Request to save Company : {}", companyDTO);
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to save Company admin={} company={}", isAdmin, companyDTO);
         Company company = companyMapper.toEntity(companyDTO);
+        if (company.getUsers() == null) {
+            company.setUsers(new HashSet<>());
+        }
+        if (!isAdmin && !authorizationService.check(company)) {
+            Optional<User> currentUser = authorizationService.getCurrentUser();
+            if (!currentUser.isPresent()) {
+                throw new AccessDeniedException(
+                    String.format("SECURITY-WARNING: Anonymous user tries to save company %s!", company.getExternalId()));
+            }
+            log.debug("Adding user {} to new company {}", currentUser.get().getLogin(), company.getExternalId());
+            company.getUsers().add(currentUser.get());
+        }
         company = companyRepository.save(company);
         return companyMapper.toDto(company);
     }
@@ -60,9 +76,16 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     @Transactional(readOnly = true)
     public Page<CompanyDTO> findAll(Pageable pageable) {
-        log.debug("Request to get all Companies");
-        return companyRepository.findAll(pageable)
-            .map(companyMapper::toDto);
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get all Companies admin={}", isAdmin);
+        Page<Company> page;
+        if (isAdmin) {
+            page = companyRepository.findAll(pageable);
+        } else {
+            page = companyRepository.findCompaniesOfUserByUserId(authorizationService.getCurrentUserId(), pageable);
+        }
+        return page.map(companyMapper::toDto);
     }
 
     /**
@@ -72,7 +95,16 @@ public class CompanyServiceImpl implements CompanyService {
      */
     @Override
     public Page<CompanyDTO> findAllWithEagerRelationships(Pageable pageable) {
-        return companyRepository.findAllWithEagerRelationships(pageable).map(companyMapper::toDto);
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get all Companies with eager relationships admin={}", isAdmin);
+        Page<Company> page;
+        if (isAdmin) {
+            page = companyRepository.findAllWithEagerRelationships(pageable);
+        } else {
+            page = companyRepository.findCompaniesOfUserByUserId(authorizationService.getCurrentUserId(), pageable);
+        }
+        return page.map(companyMapper::toDto);
     }
 
 
@@ -84,10 +116,20 @@ public class CompanyServiceImpl implements CompanyService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Optional<CompanyDTO> findOne(Long id) {
-        log.debug("Request to get Company : {}", id);
-        return companyRepository.findOneWithEagerRelationships(id)
-            .map(companyMapper::toDto);
+    public Optional<CompanyDTO> findOne(long id) {
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get company admin={} id={}", isAdmin, id);
+        Optional<Company> company = companyRepository.findOneWithEagerRelationships(id);
+        if (!company.isPresent()) {
+            return Optional.empty();
+        }
+        if (!isAdmin && !authorizationService.check(company.get())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%d tries to access company %s without access rights!",
+                    authorizationService.getCurrentUserId(), company.get().getExternalId()));
+        }
+        return company.map(companyMapper::toDto);
     }
 
     /**
@@ -99,9 +141,20 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     @Transactional(readOnly = true)
     public Optional<CompanyDTO> findOneByExternalId(String externalId) {
-        log.debug("Request to get company by externalId : {}", externalId);
-        return companyRepository.findOneByExternalId(externalId)
-            .map(companyMapper::toDto);
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get company by externalId admin={} externalId={}", externalId);
+
+        Optional<Company> company = companyRepository.findOneByExternalId(externalId);
+        if (!company.isPresent()) {
+            return Optional.empty();
+        }
+        if (!isAdmin && !authorizationService.check(company.get())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%d tries to access company externalId=%s without access rights!",
+                    authorizationService.getCurrentUserId(), externalId));
+        }
+        return company.map(companyMapper::toDto);
     }
 
     /**
@@ -110,8 +163,21 @@ public class CompanyServiceImpl implements CompanyService {
      * @param id the id of the entity
      */
     @Override
-    public void delete(Long id) {
-        log.debug("Request to delete Company : {}", id);        companyRepository.deleteById(id);
+    public void delete(long id) {
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to delete Company : admin={} id={}", id);
+        Optional<Company> company = companyRepository.findOneWithEagerRelationships(id);
+        if (!company.isPresent()) {
+            log.warn("Deletion of company id=%d requested, which is not stored!", id);
+            return;
+        }
+        if (!isAdmin && !authorizationService.check(company.get())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%d tries to delete company externalId=%s without access rights!",
+                    authorizationService.getCurrentUserId(), company.get().getExternalId()));
+        }
+        companyRepository.deleteById(id);
     }
 
     /**
@@ -123,16 +189,28 @@ public class CompanyServiceImpl implements CompanyService {
      */
     @Override
     public boolean addUserToCompany(String companyExternalId, String userLogin) {
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to addUserToCompany : admin={} companyExternalId={} userLogin={}", isAdmin, companyExternalId, userLogin);
+
         Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
         if (!company.isPresent()) {
             return false;
         }
-        Optional<User> user = userService.getUserWithAuthoritiesByLogin(userLogin);
+        Optional<User> user = authorizationService.getCurrentUser();
         if (!user.isPresent()) {
             return false;
         }
+
+        // Only users, that are already part of a company can add other users to the company
+        if (!isAdmin && !authorizationService.check(company.get())) {
+            throw new AccessDeniedException(
+                String.format("SECURITY-WARNING: User with id=%d tries to addUserToCompany externalId=%s without access rights!",
+                    authorizationService.getCurrentUserId(), company.get().getExternalId()));
+        }
+
         Set<User> users = company.get().getUsers();
-        if (!users.contains(user)) {
+        if (!users.contains(user.get())) {
             users.add(user.get());
             companyRepository.save(company.get());
         }
@@ -147,6 +225,7 @@ public class CompanyServiceImpl implements CompanyService {
      * @return true, if the user is assigned to the company
      */
     @Override
+    @Transactional(readOnly = true)
     public boolean isUserInCompany(String companyExternalId, String userLogin) {
 
         final Optional<Company> company = companyRepository.findOneByExternalIdAndUsersLogin(companyExternalId, userLogin);
@@ -161,6 +240,7 @@ public class CompanyServiceImpl implements CompanyService {
      * @return true, if the user is assigned to the company
      */
     @Override
+    @Transactional(readOnly = true)
     public boolean isUserInCompany(long companyId, String userLogin) {
 
         final Optional<Company> company = companyRepository.findOneByIdAndUsersLogin(companyId, userLogin);
@@ -174,18 +254,20 @@ public class CompanyServiceImpl implements CompanyService {
      * @return true, if the user is assigned to the company
      */
     @Override
-    public Page<User> findAlllUserInCompany(long companyId, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<User> findAllUserInCompany(long companyId, Pageable pageable) {
         return companyRepository.findUsersOfCompanyByCompanyId(companyId, pageable);
     }
 
     /**
      * Return all users of a company
      *
-     * @param @param companyExternalId the externalId of the company
+     * @param companyExternalId the externalId of the company
      * @return true, if the user is assigned to the company
      */
     @Override
-    public Page<User> findAlllUserInCompany(String companyExternalId, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<User> findAllUserInCompany(String companyExternalId, Pageable pageable) {
         return companyRepository.findUsersOfCompanyByCompanyExternalId(companyExternalId, pageable);
     }
 }

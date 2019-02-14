@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ICompany } from 'app/shared/model/company.model';
+import { IUser } from 'app/core/user/user.model';
 
 @Component({
     selector: 'jhi-company-detail',
@@ -20,5 +21,9 @@ export class CompanyDetailComponent implements OnInit {
 
     previousState() {
         window.history.back();
+    }
+
+    displayName(user: IUser): string {
+        return '"' + user.lastName + ' ' + user.firstName + '" (' + user.login + ')';
     }
 }

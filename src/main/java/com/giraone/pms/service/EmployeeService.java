@@ -23,28 +23,19 @@ public interface EmployeeService {
     EmployeeDTO save(EmployeeDTO employeeDTO);
 
     /**
-     * Get all the employees.
-     *
-     * @param pageable the pagination information
-     * @return the list of entities
-     */
-    Page<EmployeeDTO> findAllByFilter(Pageable pageable);
-
-
-    /**
      * Get the "id" employee.
      *
      * @param id the id of the entity
      * @return the entity
      */
-    Optional<EmployeeDTO> findOne(Long id);
+    Optional<EmployeeDTO> findOne(long id);
 
     /**
      * Delete the "id" employee.
      *
      * @param id the id of the entity
      */
-    void delete(Long id);
+    void delete(long id);
 
     //-- Extensions ----------------------------------------------------------------------------------------------------
 

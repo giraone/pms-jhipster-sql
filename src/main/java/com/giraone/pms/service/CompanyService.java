@@ -42,7 +42,7 @@ public interface CompanyService {
      * @param id the id of the entity
      * @return the entity
      */
-    Optional<CompanyDTO> findOne(Long id);
+    Optional<CompanyDTO> findOne(long id);
 
     /**
      * Get the "externalId" company.
@@ -57,7 +57,7 @@ public interface CompanyService {
      *
      * @param id the id of the entity
      */
-    void delete(Long id);
+    void delete(long id);
 
     /**
      * Assign an user to a company.
@@ -93,7 +93,7 @@ public interface CompanyService {
      * @param pageable the pagination information
      * @return true, if the user is assigned to the company
      */
-    Page<User> findAlllUserInCompany(long companyId, Pageable pageable);
+    Page<User> findAllUserInCompany(long companyId, Pageable pageable);
 
     /**
      * Return all users of a company
@@ -102,5 +102,5 @@ public interface CompanyService {
      * @param pageable the pagination information
      * @return true, if the user is assigned to the company
      */
-    Page<User> findAlllUserInCompany(String companyExternalId, Pageable pageable);
+    Page<User> findAllUserInCompany(String companyExternalId, Pageable pageable);
 }

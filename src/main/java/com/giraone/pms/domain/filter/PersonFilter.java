@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class PersonFilter {
     NameNormalizeService nameNormalizeService = new NameNormalizeServiceImpl();
 
     private static final Pattern DATE_PATTERN = Pattern.compile("([0-3]?[0-9])[./]([0-1]?[0-9])[./]((19[0-9]{2})|(20[0-9]{2}))");
-    private static final Pattern EXACT_NAME_PATTERN = Pattern.compile("\"[^\"]\"");
+    private static final Pattern EXACT_NAME_PATTERN = Pattern.compile("(\"[^\"]*\")");
 
 
     private List<EmployeeNameFilter> names = new ArrayList<>();
@@ -53,9 +54,14 @@ public class PersonFilter {
 
     private void buildFromInput(String input) {
 
+        if (input == null) {
+            return;
+        }
+        input = input.toLowerCase();
         input = this.extractDateOfBirth(input);
         input = this.extractExactNames(input);
         this.extractWeakNames(input);
+
     }
 
     private String extractDateOfBirth(String input) {
@@ -67,7 +73,9 @@ public class PersonFilter {
             log.debug(String.format("Date found in \"%s\"", input));
             // extract day, month, year
             final String dayString = matcher.group(1).replaceFirst("^0", "");
+            if ("".equals(dayString)) { return input; } // day was 0.XX.XXXX
             final String monthString = matcher.group(2).replaceFirst("^0", "");
+            if ("".equals(monthString)) { return input; } // day was 0.XX.XXXX
             final String yearString = matcher.group(3);
             // log.debug(String.format("Extracted d=\"%s\" m=\"%s\" y=\"%s\"", dayString, monthString, yearString));
             // now combine the rest without the match
@@ -123,8 +131,9 @@ public class PersonFilter {
 
     private void extractWeakNames(String input) {
 
+        Optional<Integer> minLength = this.names.stream().map(e -> e.getValue().length()).max(Integer::compareTo);
         final boolean[] first = new boolean[] { true };
-        final List<EmployeeNameFilter> nameList = this.nameNormalizeService.split(input)
+        final List<EmployeeNameFilter> nameList = this.nameNormalizeService.split(input, minLength.orElse(1))
             .stream()
             .map(name -> this.nameNormalizeService.normalize(name))
             .map(name -> this.phonetic ?

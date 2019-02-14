@@ -1,20 +1,22 @@
 <div>
-    <h3 id="page-heading">
-        <span jhiTranslate="pmssqlApp.query.title.main">Employees</span>
-        <span *ngIf="isAdmin()" jhiTranslate="pmssqlApp.query.title.admin"></span>
-        <span *ngIf="!isAdmin()">
-            <span jhiTranslate="pmssqlApp.query.title.user"></span>
-            <span>&nbsp;</span>
-            <span *ngFor="let company of currentCompanies">
-                <i>"{{company.name}} ({{company.externalId}}, {{company.id}})"&nbsp;</i>
-            </span>
-        </span>
-        <span>&nbsp;-&nbsp;</span>
-        <span jhiTranslate="pmssqlApp.query.count">Count = </span>
-        <span>{{totalItems}}</span>   
-    </h3>
-    <input type="text" [(ngModel)]="input" (ngModelChange)="filterChanged($event)"
-        placeholder="{{'pmssqlApp.query.filter.placeholder' | translate}}" size="60" />
+    <h4 id="page-heading">
+        <div class="divLeft" jhiTranslate="pmssqlApp.query.title.main">Employees</div>
+        <div class="divLeft" *ngIf="isAdmin()" jhiTranslate="pmssqlApp.query.title.admin"></div>
+        <div class="divLeft" *ngIf="!isAdmin()">
+            <div class="divLeft" jhiTranslate="pmssqlApp.query.title.user">of company:</div>
+            <div class="divLeft" >
+                <select class="form-control" style="height: calc(1.5rem + 2px); padding-top: 1px; padding-bottom: 1px;" id="userCompany" name="userCompany" [(ngModel)]="currentCompany">
+                    <option *ngFor="let company of currentCompanies" [ngValue]="company">{{company.externalId}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="divLeftWide" jhiTranslate="pmssqlApp.query.count">Count = </div>
+        <div class="divLeft">{{totalItems}}</div>   
+    </h4>
+    <div class="divNewLine">
+        <input type="text" [(ngModel)]="input" (ngModelChange)="filterChanged($event)"
+            placeholder="{{'pmssqlApp.query.filter.placeholder' | translate}}" size="60" />
+    </div>
     <jhi-alert></jhi-alert>
     <br/>
     <div class="table-responsive" *ngIf="employees">
@@ -45,14 +47,29 @@
                     <div *ngIf="employee.companyId">
                         <a [routerLink]="['../company', employee.companyId , 'view' ]" >{{employee.companyId}}</a>
                     </div>
+                    
                 </td>
                 <td class="text-right">
                     <div class="btn-group flex-btn-group-container">
                         <button type="submit"
-                                [routerLink]="['/employee-query', employee.id, 'view' ]"
+                                [routerLink]="['/employee', employee.id, 'view' ]"
                                 class="btn btn-info btn-sm">
                             <fa-icon [icon]="'eye'"></fa-icon>
                             <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/employee', employee.id, 'edit']"
+                                class="btn btn-primary btn-sm">
+                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', 'employee', { outlets: { popup: employee.id + '/delete'} }]"
+                                replaceUrl="true"
+                                queryParamsHandling="merge"
+                                class="btn btn-danger btn-sm">
+                            <fa-icon [icon]="'times'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
                         </button>
                     </div>
                 </td>

@@ -45,10 +45,10 @@ public class PersonFilterTest {
     public void buildFromInput_singleExactNameOnly() {
 
         expectSingleExactMatchingName("\"Li\"", "li");
-        expectSingleExactMatchingName("\"Müller\"", "mueller");
-        expectSingleExactMatchingName(" \"Müller\" ", "mueller");
-        expectSingleExactMatchingName(" \"Müller\" 1", "mueller");
-        expectSingleExactMatchingName(" \"Müller\" X1 1X ", "mueller");
+        expectSingleExactMatchingName("\"Müller\"", "müller");
+        expectSingleExactMatchingName(" \"Müller\" ", "müller");
+        expectSingleExactMatchingName(" \"Müller\" 1", "müller");
+        expectSingleExactMatchingName(" \"Müller\" X1 1X ", "müller");
     }
 
     @Test
@@ -85,11 +85,11 @@ public class PersonFilterTest {
     }
 
     @Test
-    public void buildFromInput_dateAndTwoNames() {
+    public void buildFromInput_dateAndTwoSurnames() {
 
-        expectDateAndTwoNames("Müller-Wagner  31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoNames("Müller-Wagner 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoNames("Wagner-Müller 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
         expectDateAndTwoNames("Wagner-Müller, 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndTwoNames("Müller - Wagner, 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -104,6 +104,12 @@ public class PersonFilterTest {
 
         EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), expected);
         expectSingleMatchingName(input, expectedFilter, false);
+    }
+
+    private void expectSinglePhoneticMatchingName(String input, String expected) {
+
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SP.name(), expected);
+        expectSingleMatchingName(input, expectedFilter, true);
     }
 
     private void expectSingleMatchingName(String input, EmployeeNameFilter expected, boolean phonetic) {
@@ -148,7 +154,7 @@ public class PersonFilterTest {
         PersonFilter personFilter = new PersonFilter(input);
         assertThat(personFilter.getDateOfBirth()).isEqualTo(expectedDate);
         assertThat(personFilter.getNames().size()).isEqualTo(2);
-        assertThat(personFilter.getNames().get(0)).isIn(expectedNames);
-        assertThat(personFilter.getNames().get(1)).isIn(expectedNames);
+        assertThat(personFilter.getNames().get(0)).isIn((Object[]) expectedNames);
+        assertThat(personFilter.getNames().get(1)).isIn((Object[]) expectedNames);
     }
 }

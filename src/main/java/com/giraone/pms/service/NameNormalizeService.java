@@ -11,6 +11,16 @@ public interface NameNormalizeService {
      * Split a given string into name pairs, e.g. spit double names like "Wagner-Schmidt", "von der Tann"
      *
      * @param input The input string
+     * @param minLength minimal length of string to be accepted
+     * @return list of names, that have at least 2 characters, which is sorted by string length descending and
+     * which has a maximum of 2 entries.
+     */
+    List<String> split(String input, int minLength);
+
+    /**
+     * Split a given string into name pairs, e.g. spit double names like "Wagner-Schmidt", "von der Tann"
+     *
+     * @param input The input string
      * @return list of names, that have at least 2 characters, which is sorted by string length descending and
      * which has a maximum of 2 entries.
      */
