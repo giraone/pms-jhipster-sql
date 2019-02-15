@@ -237,14 +237,14 @@ public class EmployeeServiceImpl implements EmployeeService {
                             cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeFetchTable.get(Employee_.id)),
                             cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
                             cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
-                        // TODO: equal instead of like when SL, GL
+                        // TODO: equal instead of like when LS, LG
                     );
                     countPredicates.add(
                         cb.and(
                             cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeCountTable.get(Employee_.id)),
                             cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
                             cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
-                        // TODO: equal instead of like when SL, GL
+                        // TODO: equal instead of like when LS, LG
                     );
                 });
             }

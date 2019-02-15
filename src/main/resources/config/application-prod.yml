@@ -16,7 +16,7 @@
 logging:
     level:
         ROOT: INFO
-        com.giraone.pms: DEBUG
+        com.giraone.pms: INFO
         io.github.jhipster: INFO
         org.springframework.orm.jpa: INFO
         org.springframework.transaction: INFO

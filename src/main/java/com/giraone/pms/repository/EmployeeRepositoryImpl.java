@@ -135,21 +135,21 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom<Employee
         final String originalSurname = employee.getSurname();
         final String normalizedSurname = nameNormalizeService.normalize(originalSurname);
         if (normalizedSurname != null) {
-            ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.SL.toString(), normalizedSurname));
+            ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.LS.toString(), normalizedSurname));
             final List<String> surNames = nameNormalizeService.split(normalizedSurname);
             for (String name : surNames) {
-                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.SN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.SP.toString(), nameNormalizeService.phonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.NS.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.PS.toString(), nameNormalizeService.phonetic(name)));
             }
         }
         final String originalGivenName = employee.getGivenName();
         final String normalizedGivenName = nameNormalizeService.normalize(originalGivenName);
         if (normalizedGivenName != null) {
-            ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.GL.toString(), normalizedGivenName));
+            ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.LG.toString(), normalizedGivenName));
             final List<String> givenNames = nameNormalizeService.split(normalizedGivenName);
             for (String name : givenNames) {
-                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.GN.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
-                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.GP.toString(), nameNormalizeService.phonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.NG.toString(), nameNormalizeService.reduceSimplePhonetic(name)));
+                ret.add(new EmployeeNameKeyValue(EmployeeNameFilterKey.PG.toString(), nameNormalizeService.phonetic(name)));
             }
         }
         return ret;

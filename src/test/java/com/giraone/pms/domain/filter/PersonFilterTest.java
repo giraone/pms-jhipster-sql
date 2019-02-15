@@ -96,19 +96,19 @@ public class PersonFilterTest {
 
     private void expectSingleExactMatchingName(String input, String expected) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SL.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.LS.name(), expected);
         expectSingleMatchingName(input, expectedFilter, false);
     }
 
     private void expectSingleWeakMatchingName(String input, String expected) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.NS.name(), expected);
         expectSingleMatchingName(input, expectedFilter, false);
     }
 
     private void expectSinglePhoneticMatchingName(String input, String expected) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SP.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.PS.name(), expected);
         expectSingleMatchingName(input, expectedFilter, true);
     }
 
@@ -129,7 +129,7 @@ public class PersonFilterTest {
 
     private void expectDateAndSingleName(String input, String expected, LocalDate expectedDate) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.NS.name(), expected);
         expectDateAndSingleName(input, expectedFilter, expectedDate);
     }
 
@@ -144,7 +144,7 @@ public class PersonFilterTest {
     private void expectDateAndTwoNames(String input, String[] expectedNames, LocalDate expectedDate) {
 
         EmployeeNameFilter[] expectedFilters = Arrays.asList(expectedNames).stream()
-            .map(s -> new EmployeeNameFilter(EmployeeNameFilterKey.SN.name(), s))
+            .map(s -> new EmployeeNameFilter(EmployeeNameFilterKey.NS.name(), s))
             .collect(Collectors.toList()).toArray(new EmployeeNameFilter[0]);
         expectDateAndTwoNames(input, expectedFilters, expectedDate);
     }

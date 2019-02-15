@@ -92,8 +92,8 @@ public class EmployeeRepositoryTest {
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
             assertThat(employeeName.getId().getNameKey()).isIn(
-                EmployeeNameFilterKey.SL, EmployeeNameFilterKey.SN, EmployeeNameFilterKey.SP,
-                EmployeeNameFilterKey.GL, EmployeeNameFilterKey.GN, EmployeeNameFilterKey.GP);
+                EmployeeNameFilterKey.LS, EmployeeNameFilterKey.NS, EmployeeNameFilterKey.PS,
+                EmployeeNameFilterKey.LG, EmployeeNameFilterKey.NG, EmployeeNameFilterKey.PG);
             assertThat(employeeName.getId().getNameValue()).isIn(
                 "schmitt", "smit", "XMT",
                 "thomas", "tomas", "TMS");
@@ -116,8 +116,8 @@ public class EmployeeRepositoryTest {
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
             assertThat(employeeName.getId().getNameKey()).isIn(
-                EmployeeNameFilterKey.SL, EmployeeNameFilterKey.SN, EmployeeNameFilterKey.SP,
-                EmployeeNameFilterKey.GL, EmployeeNameFilterKey.GN, EmployeeNameFilterKey.GP);
+                EmployeeNameFilterKey.LS, EmployeeNameFilterKey.NS, EmployeeNameFilterKey.PS,
+                EmployeeNameFilterKey.LG, EmployeeNameFilterKey.NG, EmployeeNameFilterKey.PG);
             assertThat(employeeName.getId().getNameValue()).isIn(
                 "schmidt-wagner", "smit", "XMT", "wagner", "AKNR",
                 "thomas", "tomas", "TMS"
@@ -275,7 +275,7 @@ public class EmployeeRepositoryTest {
 
         // act
         Page<Employee> page = employeeRepository.findAllByKeyPairLike(
-            EmployeeNameFilterKey.SL.name(), "schmi%", PageRequest.of(0, 10));
+            EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);
@@ -290,7 +290,7 @@ public class EmployeeRepositoryTest {
 
         // act
         Page<Employee> page = employeeRepository.findAllByDateOfBirthAndKeyPairLike(
-            TEST_DATE_OF_BIRTH, EmployeeNameFilterKey.SL.name(), "schmi%", PageRequest.of(0, 10));
+            TEST_DATE_OF_BIRTH, EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);
@@ -305,7 +305,7 @@ public class EmployeeRepositoryTest {
 
         // act
         Page<Employee> page = employeeRepository.findAllByCompanyAndKeyPairLike(
-            this.company, EmployeeNameFilterKey.SL.name(), "schmi%", PageRequest.of(0, 10));
+            this.company, EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);
@@ -321,7 +321,7 @@ public class EmployeeRepositoryTest {
         // act
         Page<Employee> page = employeeRepository.findAllByCompanyAndDateOfBirthAndKeyPairLike(
             this.company,  TEST_DATE_OF_BIRTH,
-            EmployeeNameFilterKey.SL.name(), "schmi%", PageRequest.of(0, 10));
+            EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);

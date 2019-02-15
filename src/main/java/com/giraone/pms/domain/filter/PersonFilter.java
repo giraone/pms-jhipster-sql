@@ -106,11 +106,11 @@ public class PersonFilter {
             log.debug(String.format("Exact name found in \"%s\"", input));
             final String exactName = input.substring(matcher.start() + 1, matcher.end() - 1);
             if (first) {
-                this.names.add(new EmployeeNameFilter(EmployeeNameFilterKey.SL.name(), exactName));
+                this.names.add(new EmployeeNameFilter(EmployeeNameFilterKey.LS.name(), exactName));
                 first = false;
                 log.debug(String.format("Exact surname was \"%s\"", exactName));
             } else {
-                this.names.add(new EmployeeNameFilter(EmployeeNameFilterKey.GL.name(), exactName));
+                this.names.add(new EmployeeNameFilter(EmployeeNameFilterKey.LG.name(), exactName));
                 log.debug(String.format("Exact givenName was \"%s\"", exactName));
             }
             // now combine the rest without the match
@@ -141,10 +141,10 @@ public class PersonFilter {
             .map(name -> {
                 EmployeeNameFilterKey key;
                 if (first[0]) {
-                    key = phonetic ? EmployeeNameFilterKey.SP : EmployeeNameFilterKey.SN;
+                    key = phonetic ? EmployeeNameFilterKey.PS : EmployeeNameFilterKey.NS;
                     first[0] = false;
                 } else {
-                    key = phonetic ? EmployeeNameFilterKey.GP : EmployeeNameFilterKey.GN;
+                    key = phonetic ? EmployeeNameFilterKey.PG : EmployeeNameFilterKey.NG;
                 }
                 return new EmployeeNameFilter(key.name(), name + "%");
             })
