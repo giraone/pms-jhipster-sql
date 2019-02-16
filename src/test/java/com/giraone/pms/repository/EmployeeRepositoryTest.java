@@ -92,8 +92,8 @@ public class EmployeeRepositoryTest {
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
             assertThat(employeeName.getId().getNameKey()).isIn(
-                EmployeeNameFilterKey.LS, EmployeeNameFilterKey.NS, EmployeeNameFilterKey.PS,
-                EmployeeNameFilterKey.LG, EmployeeNameFilterKey.NG, EmployeeNameFilterKey.PG);
+                EmployeeNameFilterKey.LS.name(), EmployeeNameFilterKey.NS.name(), EmployeeNameFilterKey.PS.name(),
+                EmployeeNameFilterKey.LG.name(), EmployeeNameFilterKey.NG.name(), EmployeeNameFilterKey.PG.name());
             assertThat(employeeName.getId().getNameValue()).isIn(
                 "schmitt", "smit", "XMT",
                 "thomas", "tomas", "TMS");
@@ -116,8 +116,8 @@ public class EmployeeRepositoryTest {
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
             assertThat(employeeName.getId().getNameKey()).isIn(
-                EmployeeNameFilterKey.LS, EmployeeNameFilterKey.NS, EmployeeNameFilterKey.PS,
-                EmployeeNameFilterKey.LG, EmployeeNameFilterKey.NG, EmployeeNameFilterKey.PG);
+                EmployeeNameFilterKey.LS.name(), EmployeeNameFilterKey.NS.name(), EmployeeNameFilterKey.PS.name(),
+                EmployeeNameFilterKey.LG.name(), EmployeeNameFilterKey.NG.name(), EmployeeNameFilterKey.PG.name());
             assertThat(employeeName.getId().getNameValue()).isIn(
                 "schmidt-wagner", "smit", "XMT", "wagner", "AKNR",
                 "thomas", "tomas", "TMS"

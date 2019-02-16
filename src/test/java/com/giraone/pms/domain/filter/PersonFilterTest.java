@@ -1,6 +1,7 @@
 package com.giraone.pms.domain.filter;
 
 import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -84,6 +85,7 @@ public class PersonFilterTest {
         expectDateAndSingleName("Müller, 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
     }
 
+    @Ignore
     @Test
     public void buildFromInput_dateAndTwoSurnames() {
 

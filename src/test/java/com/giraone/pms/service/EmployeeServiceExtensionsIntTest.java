@@ -108,7 +108,9 @@ public class EmployeeServiceExtensionsIntTest {
     public void findAllByFilter_checkThatCompanyFilterWorks() {
 
         // arrange
-        employeeService.save(getEmployeeSample());
+        EmployeeDTO employee = getEmployeeSample();
+        employeeService.save(employee);
+        long companyId = employee.getCompanyId();
 
         // act
         Pageable pageable = PageRequest.of(0, 10);
@@ -116,7 +118,7 @@ public class EmployeeServiceExtensionsIntTest {
 
         // assert
         assertTrue(page.isPresent());
-        assertThat(page.get().getContent().get(0).getCompanyId()).isEqualTo(COMPANY_ID);
+        assertThat(page.get().getContent().get(0).getCompanyId()).isEqualTo(companyId);
     }
 
     @Test
@@ -201,13 +203,25 @@ public class EmployeeServiceExtensionsIntTest {
     }
 
     @Test
-    public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound() {
+    public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound_1() {
         storeThenQueryThenCheckMatch(true, new String[]{"Schmidt-Mayer"},
             "\"Schmidt-Mayer\"", new String[]{"Schmidt-Mayer"});
+    }
+
+    @Test
+    public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound_2() {
         storeThenQueryThenCheckMatch(true, new String[]{"Wagner-Mayer"},
             "\"Wagner-Mayer\"", new String[]{"Wagner-Mayer"});
+    }
+
+    @Test
+    public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound_3() {
         storeThenQueryThenCheckMatch(true, new String[]{"von der Tann"},
             "\"von der Tann\"", new String[]{"von der Tann"});
+    }
+
+    @Test
+    public void whenSavingEntityWithSpecialCharacters_checkThatItIsFound_4() {
         storeThenQueryThenCheckMatch(true, new String[]{"von der Weide- Zaun"},
             "\"von der Weide-Zaun\"", new String[]{"von der Weide-Zaun"});
     }

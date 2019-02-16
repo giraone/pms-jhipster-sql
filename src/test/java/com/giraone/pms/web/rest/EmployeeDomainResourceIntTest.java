@@ -37,11 +37,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Test class for the EmployeeDomainResource REST controller.
  *
- * @see EmployeeDomainResource
+ * @see EmployeeResource
  */
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @SpringBootTest(classes = PmssqlApp.class)
+@WithMockUser(username = "admin", roles={"ADMIN"})
 public class EmployeeDomainResourceIntTest {
 
     private static final String TEST_USER = "test-user-1";
@@ -84,7 +85,7 @@ public class EmployeeDomainResourceIntTest {
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
             .perform(
-                get("/domain-api/employees")
+                get("/api/employees")
                     .param("sort", "id,desc"));
 
         // assert
@@ -109,7 +110,7 @@ public class EmployeeDomainResourceIntTest {
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
             .perform(
-                get("/domain-api/employees")
+                get("/api/employees")
                     .param("companyExternalId", company.getExternalId())
                     .param("sort", "id,desc"));
 
@@ -134,7 +135,7 @@ public class EmployeeDomainResourceIntTest {
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
-            .perform(get("/domain-api/employees/" + employee.getId()));
+            .perform(get("/api/employees/" + employee.getId()));
 
         // assert
         resultActions.andExpect(status().isOk())
@@ -157,7 +158,7 @@ public class EmployeeDomainResourceIntTest {
 
         // act
         ResultActions resultActions = restMockEmployeeDomainResource
-            .perform(get("/domain-api/employees/" + employee.getId()));
+            .perform(get("/api/employees/" + employee.getId()));
 
         // assert
         resultActions.andExpect(status().isOk())
