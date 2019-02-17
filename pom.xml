@@ -4,7 +4,7 @@
 
     <groupId>com.giraone.pms</groupId>
     <artifactId>pmssql</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Pmssql</name>
 
@@ -896,7 +896,7 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
                             <mainClass>${start-class}</mainClass>
-                            <executable>true</executable>
+                            <executable>true</executable> <!-- Set to false for AWS BeanStalk deployment -->
                         </configuration>
                         <executions>
                             <execution>
