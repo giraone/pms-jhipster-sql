@@ -210,6 +210,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         final CriteriaQuery<Employee> fetchQuery = cb.createQuery(Employee.class);
         final Root<Employee> employeeFetchTable = fetchQuery.from(Employee.class);
+        employeeFetchTable.fetch(Employee_.company); // fetch also the company information without need for additional queries
 
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<Employee> employeeCountTable = countQuery.from(Employee.class);

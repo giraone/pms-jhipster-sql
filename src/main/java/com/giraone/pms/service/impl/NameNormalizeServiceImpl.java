@@ -32,6 +32,7 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
      */
     public List<String> split(String input, int minLength) {
 
+        log.debug("NameNormalizeServiceImpl.split input={}, minLength={}", input, minLength);
         List<String> ret = new ArrayList<>();
         input = normalize(input);
         if (input == null) {
@@ -40,7 +41,7 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         // Split a all non word characters (this includes digits!)
         String[] parts = input.split("[^\\p{L}\\p{Nd}]+");
         for (String part : parts) {
-            //log.debug("split " + part);
+            log.debug(" - split " + part);
             if (part.length() > 1) { // single characters are not accepted
                 if (part.charAt(0) < '0' || part.charAt(0) > '9') { // skip words starting with a leading digit
                     if (part.length() > minLength) {
@@ -63,6 +64,7 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         }
         return ret;
     }
+
     /**
      * Split a given string into name pairs, e.g. spit double names like "Wagner-Schmidt", "von der Tann"
      *

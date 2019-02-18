@@ -61,7 +61,6 @@ public class PersonFilter {
         input = this.extractDateOfBirth(input);
         input = this.extractExactNames(input);
         this.extractWeakNames(input);
-
     }
 
     private String extractDateOfBirth(String input) {
