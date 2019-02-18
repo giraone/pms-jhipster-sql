@@ -120,7 +120,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         this.employeeService.findCompanies().subscribe(
             (res: HttpResponse<ICompany[]>) => {
                 this.currentCompanies = res.body;
-                this.currentCompany = this.currentAccountIsAdmin || this.currentCompanies.length == 0 ? null : this.currentCompanies[0];
+                this.currentCompany = this.currentAccountIsAdmin || this.currentCompanies.length === 0 ? null : this.currentCompanies[0];
                 this.load();
             },
             (res: HttpErrorResponse) => this.onError(res.message)
