@@ -31,7 +31,7 @@
                 <td><a [routerLink]="['/employee', employee.id, 'view' ]">{{employee.id}}</a></td>
                 <td>{{employee.surname}}</td>
                 <td>{{employee.givenName}}</td>
-                <td>{{employee.dateOfBirth | date:'mediumDate'}}</td>
+                <td>{{employee.dateOfBirth | date:'shortDate':null:languageKey}}</td>
                 <td jhiTranslate="{{'pmssqlApp.GenderTypeShort.' + employee.gender}}">{{employee.gender}}</td>
                 <td>{{employee.postalCode}}</td>
                 <td>{{employee.city}}</td>

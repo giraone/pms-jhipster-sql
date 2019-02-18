@@ -1,6 +1,6 @@
 <div>
     <h4 id="page-heading">
-        <div class="divLeft" jhiTranslate="pmssqlApp.query.title.main">Employees</div>
+        <div class="divLeft" jhiTranslate="pmssqlApp.query.title.main">Employees {{languageKey}}</div>
         <div class="divLeft" *ngIf="isAdmin()" jhiTranslate="pmssqlApp.query.title.admin"></div>
         <div class="divLeft" *ngIf="!isAdmin()">
             <div class="divLeft" jhiTranslate="pmssqlApp.query.title.user">of company:</div>
@@ -39,7 +39,7 @@
                 <td><a [routerLink]="['/employee', employee.id, 'view' ]">{{employee.id}}</a></td>
                 <td>{{employee.surname}}</td>
                 <td>{{employee.givenName}}</td>
-                <td>{{employee.dateOfBirth | date:'mediumDate'}}</td>
+                <td>{{employee.dateOfBirth | date:'shortDate':null:languageKey}}</td>
                 <td>{{employee.postalCode}}</td>
                 <td>{{employee.city}}</td>
                 <td>{{employee.streetAddress}}</td>

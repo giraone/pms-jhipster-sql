@@ -6,6 +6,7 @@ import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 import { IEmployee } from '../../shared/model/employee.model';
 import { ICompany } from '../../shared/model/company.model';
 import { AccountService } from '../../core';
+import { JhiLanguageHelper } from '../../core';
 
 import { ITEMS_PER_PAGE } from '../../shared';
 import { EmployeeService } from '../../entities/employee/employee.service';
@@ -31,13 +32,15 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     queryCount: any;
     reverse: any;
     totalItems: number;
+    languageKey: string;
 
     constructor(
         protected employeeService: EmployeeService,
         protected jhiAlertService: JhiAlertService,
         protected eventManager: JhiEventManager,
         protected parseLinks: JhiParseLinks,
-        protected accountService: AccountService
+        protected accountService: AccountService,
+        protected languageHelper: JhiLanguageHelper
     ) {
         this.input = '';
         this.employees = [];
@@ -51,6 +54,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         this.predicate = 'id';
         this.reverse = true;
         this.totalItems = 0;
+
+        this.languageKey = 'de';
+        this.languageHelper.language.subscribe((languageKey: string) => {
+            this.languageKey = languageKey;
+        });
+
         this.inputSubject
             .pipe(
                 debounceTime(200),

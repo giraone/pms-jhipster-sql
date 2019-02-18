@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
+import { JhiLanguageHelper } from '../../core';
 
 import { IEmployee } from 'app/shared/model/employee.model';
 import { AccountService } from 'app/core';
@@ -29,6 +30,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     predicate: any;
     previousPage: any;
     reverse: any;
+    languageKey: string;
 
     constructor(
         protected employeeService: EmployeeService,
@@ -37,7 +39,8 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         protected accountService: AccountService,
         protected activatedRoute: ActivatedRoute,
         protected router: Router,
-        protected eventManager: JhiEventManager
+        protected eventManager: JhiEventManager,
+        protected languageHelper: JhiLanguageHelper
     ) {
         this.itemsPerPage = ITEMS_PER_PAGE;
         this.routeData = this.activatedRoute.data.subscribe(data => {
@@ -45,6 +48,10 @@ export class EmployeeComponent implements OnInit, OnDestroy {
             this.previousPage = data.pagingParams.page;
             this.reverse = data.pagingParams.ascending;
             this.predicate = data.pagingParams.predicate;
+        });
+        this.languageKey = 'de';
+        this.languageHelper.language.subscribe((languageKey: string) => {
+            this.languageKey = languageKey;
         });
     }
 
