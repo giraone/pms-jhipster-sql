@@ -112,6 +112,7 @@ select count(company_id) as count, company_id
 from employee
 group by company_id
 order by count desc
+limit 10
 
 > "39714"	"1727"
 > "39688"	"1534"
@@ -122,6 +123,7 @@ select count(company_id) as count, company_id
 from employee
 group by company_id
 order by count asc
+limit 10
 
 > "303"	"76917"
 > "303"	"46415"
@@ -133,6 +135,7 @@ from employee
 where company_id = 1727
 group by surname
 order by count desc
+limit 10
 
 > "935"	"Müller"
 > "674"	"Schmidt"
@@ -150,81 +153,87 @@ select count(owner_id) as count, owner_id
 from employee_name
 group by owner_id
 order by count desc
+limit 10
 
-# distribution of employee lookup names per occurence
+# distribution of employee lookup names (surname, normalized) per occurence
 select count(name_value) as count, name_value
 from employee_name
-where name_key ='SN'
+where name_key ='NS'
 group by name_value
 order by count desc
+limit 10
 
-> "smit"
-> "mueler"
-> "meir"
-> "sneiter"
-> "hofman"
-> "fiser"
-> "weber"
-> "wagner"
-> "sulz"
-> "beker"
+# search for one surname (exact) within a company
 
-# search for one surname
-
-select e.*
-from employee e, employee_name en
+select e.surname, e.given_name, e.date_of_birth, c.external_id
+from employee e, employee_name en, company c
 where e.company_id = 1518
+and c.id = e.company_id
 and e.id = en.owner_id
-and en.name_key = 'SN'
-and en.name_value LIKE 'mue%'
+and en.name_key = 'LS'
+and en.name_value = 'mueller'
+limit 100
+
+# search for one surname within a company
+
+select e.surname, e.given_name, e.date_of_birth, c.external_id
+from employee e, employee_name en, company c
+where e.company_id = 1518
+and c.id = e.company_id
+and e.id = en.owner_id
+and en.name_key = 'NS'
+and en.name_value like 'mue%'
 limit 100
 
 ==> 160 msecs
 
-# search for dateOfBirth
+# search for dateOfBirth within a company
 
-select e.*
-from employee e
+select e.surname, e.given_name, e.date_of_birth, c.external_id
+from employee e, company c
 where e.company_id = 1518
+and c.id = e.company_id
 and e.date_of_birth = '1964-06-03'
 limit 100
 
 ==> 50 msecs
 
-# search for one surname plus dateOfBirth
+# search for one surname plus dateOfBirth within a company
 
-select e.*
-from employee e, employee_name en
+select e.surname, e.given_name, e.date_of_birth, c.external_id
+from employee e, employee_name en, company c
 where e.company_id = 1518
+and c.id = e.company_id
 and e.date_of_birth = '1964-06-03'
 and e.id = en.owner_id
-and en.name_key = 'SN'
-and en.name_value LIKE 'mue%'
+and en.name_key = 'NS'
+and en.name_value like 'mue%'
 limit 100
 
 ==> 50 msecs
 
 # search for one surname and one givenName
-select e.*
-from employee e, employee_name en1, employee_name en2
+
+select e.surname, e.given_name, e.date_of_birth, c.external_id
+from employee e, employee_name en1, employee_name en2, company c
 where e.company_id = 1518
+and c.id = e.company_id
 and e.id = en1.owner_id and e.id = en2.owner_id
-and en1.name_key = 'SN' and en1.name_value LIKE 'mue%'
-and en2.name_key = 'GN' and en2.name_value LIKE 'tomas%'
+and en1.name_key = 'NS' and en1.name_value like 'mue%'
+and en2.name_key = 'NG' and en2.name_value like 'tomas%'
 limit 100
 
 ==> 600 msecs
 
 # search for one surname, one givenName and dateOfBirth
-select e.*
+select e.surname, e.given_name, e.date_of_birth, c.external_id
 from employee e, employee_name en1, employee_name en2
 where e.company_id = 1518
 and e.date_of_birth = '1964-06-03'
 and e.id = en1.owner_id and e.id = en2.owner_id
-and en1.name_key = 'SN' and en1.name_value LIKE 'mue%'
-and en2.name_key = 'GN' and en2.name_value LIKE 'tomas%'
+and en1.name_key = 'SN' and en1.name_value like 'mue%'
+and en2.name_key = 'GN' and en2.name_value like 'tomas%'
 limit 100
-
 
 ==> 50 msecs
 ```
