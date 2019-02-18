@@ -8,10 +8,10 @@
                 "admin": "von allen Unternehmen",
                 "user": "des Unternehmens"
             },
-            "count": "Anzahl = "
-        },
-        "filter": {
-            "placeholder": "Filterung über Nachname oder Geburtsdatum"
+            "count": "Anzahl = ",
+            "filter": {
+                "placeholder": "Filterung über Nachname oder Geburtsdatum"
+            }
         }
     }
 }
