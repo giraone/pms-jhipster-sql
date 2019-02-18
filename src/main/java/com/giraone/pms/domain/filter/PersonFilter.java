@@ -22,7 +22,7 @@ public class PersonFilter {
     @Autowired
     NameNormalizeService nameNormalizeService = new NameNormalizeServiceImpl();
 
-    private static final Pattern DATE_PATTERN = Pattern.compile("([0-3]?[0-9])[./]([0-1]?[0-9])[./]((19[0-9]{2})|(20[0-9]{2}))");
+    private static final Pattern DATE_PATTERN = Pattern.compile("([0-3]?[0-9])[./]([0-1]?[0-9])[./]((19[0-9]{2})|(20[0-9]{2})|([0-9]{2}))");
     private static final Pattern EXACT_NAME_PATTERN = Pattern.compile("(\"[^\"]*\")");
 
 
@@ -76,7 +76,13 @@ public class PersonFilter {
             final String monthString = matcher.group(2).replaceFirst("^0", "");
             if ("".equals(monthString)) { return input; } // day was 0.XX.XXXX
             final String yearString = matcher.group(3);
-            // log.debug(String.format("Extracted d=\"%s\" m=\"%s\" y=\"%s\"", dayString, monthString, yearString));
+            int year = Integer.parseInt(yearString);
+            if (year < 19) {
+                year+=2000;
+            } else if (year < 100) {
+                year+=1900;
+            }
+            //log.debug(String.format("Extracted d=\"%s\" m=\"%s\" y=\"%s\"", dayString, monthString, yearString));
             // now combine the rest without the match
             if (matcher.start() == 0) {
                 if (matcher.end() < input.length()) {
@@ -89,7 +95,7 @@ public class PersonFilter {
             } else {
                 input = input.substring(0, matcher.start() - 1) + input.substring(matcher.end());
             }
-            this.dateOfBirth = LocalDate.of(Integer.parseInt(yearString), Integer.parseInt(monthString), Integer.parseInt(dayString));
+            this.dateOfBirth = LocalDate.of(year, Integer.parseInt(monthString), Integer.parseInt(dayString));
             log.debug(String.format("Date was %s - rest is \"%s\"", this.dateOfBirth.toString(), input));
         }
 

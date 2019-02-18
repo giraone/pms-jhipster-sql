@@ -83,6 +83,10 @@ public class PersonFilterTest {
 
         expectDateAndSingleName("Müller 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
         expectDateAndSingleName("Müller, 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleName("Müller 31.12.75", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleName("Müller, 31.12.75", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleName("Müller 31.12.05", "mueler%", LocalDate.of(2005, Month.DECEMBER, 31));
+        expectDateAndSingleName("Müller, 31.12.05", "mueler%", LocalDate.of(2005, Month.DECEMBER, 31));
     }
 
     @Ignore
