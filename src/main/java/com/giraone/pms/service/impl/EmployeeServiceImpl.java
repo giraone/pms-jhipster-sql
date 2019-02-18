@@ -157,7 +157,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional(readOnly = true)
     public Optional<Page<EmployeeDTO>> findAllByFilter(String companyExternalId, PersonFilter personFilter, Pageable pageable) {
 
-        log.debug("Service request to query employees companyExternalId={}, personFilter={}", companyExternalId, personFilter);
+        log.debug("Service request to query employees companyExternalId={}, personFilter={}, pageable={}",
+            companyExternalId, personFilter, pageable);
 
         Optional<Company> company;
         if (companyExternalId != null) {
@@ -270,12 +271,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private void defineOrder(Root<Employee> table, CriteriaQuery cq, CriteriaBuilder cb, Pageable pageable) {
+
         if (pageable.getSort().isUnsorted()) return;
         Sort.Order order = pageable.getSort().iterator().next();
+        log.debug("defineOrder pageable={} => order={}", pageable, order);
         if (order.isAscending()) {
-            cb.asc(table.get(order.getProperty()));
+            cq.orderBy(cb.asc(table.get(order.getProperty())));
         } else {
-            cb.desc(table.get(order.getProperty()));
+            cq.orderBy(cb.desc(table.get(order.getProperty())));
         }
     }
 }

@@ -110,7 +110,8 @@ public class EmployeeResource {
         Pageable pageable) {
 
         boolean isAdmin = authorizationService.isAdmin();
-        log.debug("REST request to query employees isAdmin={}, companyExternalId={}, filter={}", isAdmin, companyExternalId, filter);
+        log.debug("REST request to query employees isAdmin={}, companyExternalId={}, filter={}, pageable={}",
+            isAdmin, companyExternalId, filter, pageable);
 
         Optional<Page<EmployeeDTO>> result;
         if (!isAdmin) {
