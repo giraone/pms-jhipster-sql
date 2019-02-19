@@ -3,7 +3,7 @@
         <div class="divLeft" jhiTranslate="pmssqlApp.query.title.main">Employees of company:</div>
         <div class="divLeft" >
             <select class="form-control" style="height: calc(1.5rem + 2px); padding-top: 1px; padding-bottom: 1px;"
-                id="userCompany" name="userCompany" [(ngModel)]="currentCompany" (ngModelChange)="filterChanged()">
+                id="userCompany" name="userCompany" [(ngModel)]="currentCompany" (ngModelChange)="reset()">
                 <option *ngFor="let company of currentCompanies" [ngValue]="company">{{company.name + '(' + company.externalId + ')'}}</option>
             </select>
         </div>

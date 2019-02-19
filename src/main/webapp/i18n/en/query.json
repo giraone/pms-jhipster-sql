@@ -2,7 +2,7 @@
     "pmssqlApp": {
         "query": {
             "menu": "Query for employees",
-            "subtitle": "... bei der Testanwendung",
+            "pageTitleMain": "Query for employees",
             "title": {
                 "main": "Employees of company:"
             },
