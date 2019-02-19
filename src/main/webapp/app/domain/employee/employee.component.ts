@@ -33,6 +33,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     reverse: any;
     totalItems: number;
     languageKey: string;
+    lastTimer: number;
 
     constructor(
         protected employeeService: EmployeeService,
@@ -59,6 +60,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         this.languageHelper.language.subscribe((languageKey: string) => {
             this.languageKey = languageKey;
         });
+        this.lastTimer = 0;
 
         this.inputSubject
             .pipe(
@@ -71,34 +73,33 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     }
 
     load() {
+        console.log('load ' + this.getExternalCompanyId() + ' "' + this.input + '"');
         const filterValue = this.input.trim();
-        let params;
-        if (this.getExternalCompanyId()) {
-            params = {
-                companyExternalId: this.getExternalCompanyId(),
-                filter: filterValue,
-                page: this.page,
-                size: this.itemsPerPage,
-                sort: this.sort()
-            };
-        } else {
-            params = {
-                filter: filterValue,
-                page: this.page,
-                size: this.itemsPerPage,
-                sort: this.sort()
-            };
-        }
-        this.employeeService
-            .query(params)
-            .subscribe(
-                (res: HttpResponse<IEmployee[]>) => this.paginateEmployees(res.body, res.headers),
-                (res: HttpErrorResponse) => this.onError(res.message)
-            );
+        const params = {
+            companyExternalId: this.getExternalCompanyId(),
+            filter: filterValue,
+            page: this.page,
+            size: this.itemsPerPage,
+            sort: this.sort()
+        };
+        this.employeeService.query(params).subscribe(
+            (res: HttpResponse<IEmployee[]>) => {
+                const timer = parseInt(res.headers.get('X-Timer'), 10);
+                if (!isNaN(timer)) {
+                    if (this.lastTimer > timer) {
+                        console.log('Skipped older request!');
+                        return;
+                    }
+                    this.lastTimer = timer;
+                }
+                this.paginateEmployees(res.body, res.headers);
+            },
+            (res: HttpErrorResponse) => this.onError(res.message)
+        );
     }
 
-    filterChanged(event) {
-        this.inputSubject.next(event);
+    filterChanged() {
+        this.inputSubject.next(this.input);
     }
 
     reset() {
@@ -120,7 +121,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
         this.employeeService.findCompanies().subscribe(
             (res: HttpResponse<ICompany[]>) => {
                 this.currentCompanies = res.body;
-                this.currentCompany = this.currentAccountIsAdmin || this.currentCompanies.length === 0 ? null : this.currentCompanies[0];
+                this.currentCompany = this.currentCompanies.length === 0 ? null : this.currentCompanies[0];
                 this.load();
             },
             (res: HttpErrorResponse) => this.onError(res.message)
@@ -170,7 +171,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
     protected getExternalCompanyId() {
         if (this.currentCompany == null) {
-            return null;
+            return 'NO-COMPANY';
         }
         return this.currentCompany.externalId;
     }

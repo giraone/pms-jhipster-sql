@@ -1,11 +1,13 @@
 package com.giraone.pms.service;
 
 import com.giraone.pms.domain.User;
+import com.giraone.pms.service.dto.CompanyBasicInfoDTO;
 import com.giraone.pms.service.dto.CompanyDTO;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,6 +30,12 @@ public interface CompanyService {
      * @return the list of entities
      */
     Page<CompanyDTO> findAll(Pageable pageable);
+
+    /**
+     * Get all the companies of a user with minimal information
+     * @return the list of companies the user has access to
+     */
+    List<CompanyBasicInfoDTO> findAllOfUserWithBasicInfosOnly();
 
     /**
      * Get all the Company with eager load of many-to-many relationships.

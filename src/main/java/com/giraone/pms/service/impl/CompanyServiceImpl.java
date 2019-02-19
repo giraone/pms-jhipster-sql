@@ -1,23 +1,30 @@
 package com.giraone.pms.service.impl;
 
 import com.giraone.pms.domain.Company;
+import com.giraone.pms.domain.Company_;
 import com.giraone.pms.domain.User;
 import com.giraone.pms.repository.CompanyRepository;
 import com.giraone.pms.service.AuthorizationService;
 import com.giraone.pms.service.CompanyService;
+import com.giraone.pms.service.dto.CompanyBasicInfoDTO;
 import com.giraone.pms.service.dto.CompanyDTO;
+import com.giraone.pms.service.mapper.CompanyBasicInfoMapper;
 import com.giraone.pms.service.mapper.CompanyMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing Company.
@@ -30,12 +37,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
+    private final CompanyBasicInfoMapper companyBasicInfoMapper;
     private final AuthorizationService authorizationService;
 
     public CompanyServiceImpl(CompanyRepository companyRepository, CompanyMapper companyMapper,
-                              AuthorizationService authorizationService) {
+                              CompanyBasicInfoMapper companyBasicInfoMapper, AuthorizationService authorizationService) {
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
+        this.companyBasicInfoMapper = companyBasicInfoMapper;
         this.authorizationService = authorizationService;
     }
 
@@ -49,7 +58,7 @@ public class CompanyServiceImpl implements CompanyService {
     public CompanyDTO save(CompanyDTO companyDTO) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to save Company admin={} company={}", isAdmin, companyDTO);
+        log.debug("Request to save Company isAdmin={} company={}", isAdmin, companyDTO);
         Company company = companyMapper.toEntity(companyDTO);
         if (company.getUsers() == null) {
             company.setUsers(new HashSet<>());
@@ -78,7 +87,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Page<CompanyDTO> findAll(Pageable pageable) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to get all Companies admin={}", isAdmin);
+        log.debug("Request to get all Companies isAdmin={}", isAdmin);
         Page<Company> page;
         if (isAdmin) {
             page = companyRepository.findAll(pageable);
@@ -86,6 +95,27 @@ public class CompanyServiceImpl implements CompanyService {
             page = companyRepository.findCompaniesOfUserByUserId(authorizationService.getCurrentUserId(), pageable);
         }
         return page.map(companyMapper::toDto);
+    }
+
+    /**
+     * Get all the companies of a user with minimal information
+     * @return the list of companies the user has access to
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompanyBasicInfoDTO> findAllOfUserWithBasicInfosOnly() {
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get all Companies isAdmin={}", isAdmin);
+        List<Company> list;
+        // TOOD: a fix hard limit for 1000 companies only for admin display
+        Pageable pageable = PageRequest.of(0, 1000, Sort.by(Company_.name.getName()));
+        if (isAdmin) {
+            list = companyRepository.findAll(pageable).getContent();
+        } else {
+            list = companyRepository.findCompaniesOfUserByUserId(
+                authorizationService.getCurrentUserId(), pageable).getContent();
+        }
+        return list.stream().map(companyBasicInfoMapper::toDto).collect(Collectors.toList());
     }
 
     /**
@@ -97,7 +127,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Page<CompanyDTO> findAllWithEagerRelationships(Pageable pageable) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to get all Companies with eager relationships admin={}", isAdmin);
+        log.debug("Request to get all Companies with eager relationships isAdmin={}", isAdmin);
         Page<Company> page;
         if (isAdmin) {
             page = companyRepository.findAllWithEagerRelationships(pageable);
@@ -119,7 +149,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Optional<CompanyDTO> findOne(long id) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to get company admin={} id={}", isAdmin, id);
+        log.debug("Request to get company isAdmin={} id={}", isAdmin, id);
         Optional<Company> company = companyRepository.findOneWithEagerRelationships(id);
         if (!company.isPresent()) {
             return Optional.empty();
@@ -143,7 +173,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Optional<CompanyDTO> findOneByExternalId(String externalId) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to get company by externalId admin={} externalId={}", externalId);
+        log.debug("Request to get company by externalId isAdmin={} externalId={}", externalId);
 
         Optional<Company> company = companyRepository.findOneByExternalId(externalId);
         if (!company.isPresent()) {
@@ -166,7 +196,7 @@ public class CompanyServiceImpl implements CompanyService {
     public void delete(long id) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to delete Company : admin={} id={}", id);
+        log.debug("Request to delete Company : isAdmin={} id={}", id);
         Optional<Company> company = companyRepository.findOneWithEagerRelationships(id);
         if (!company.isPresent()) {
             log.warn("Deletion of company id=%d requested, which is not stored!", id);
@@ -191,7 +221,7 @@ public class CompanyServiceImpl implements CompanyService {
     public boolean addUserToCompany(String companyExternalId, String userLogin) {
 
         final boolean isAdmin = authorizationService.isAdmin();
-        log.debug("Request to addUserToCompany : admin={} companyExternalId={} userLogin={}", isAdmin, companyExternalId, userLogin);
+        log.debug("Request to addUserToCompany : isAdmin={} companyExternalId={} userLogin={}", isAdmin, companyExternalId, userLogin);
 
         Optional<Company> company = companyRepository.findOneByExternalId(companyExternalId);
         if (!company.isPresent()) {

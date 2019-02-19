@@ -2,7 +2,9 @@ package com.giraone.pms.web.rest;
 
 import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.service.AuthorizationService;
+import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.service.EmployeeService;
+import com.giraone.pms.service.dto.CompanyBasicInfoDTO;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import com.giraone.pms.web.rest.errors.BadRequestAlertException;
@@ -39,10 +41,13 @@ public class EmployeeResource {
     private static final String ENTITY_NAME = "employee";
 
     private final EmployeeService employeeService;
+    private final CompanyService companyService;
     private final AuthorizationService authorizationService;
 
-    public EmployeeResource(EmployeeService employeeService, AuthorizationService authorizationService) {
+    public EmployeeResource(EmployeeService employeeService, CompanyService companyService,
+                            AuthorizationService authorizationService) {
         this.employeeService = employeeService;
+        this.companyService = companyService;
         this.authorizationService = authorizationService;
     }
 
@@ -110,6 +115,7 @@ public class EmployeeResource {
         Pageable pageable) {
 
         boolean isAdmin = authorizationService.isAdmin();
+        long timer = System.currentTimeMillis();
         log.debug("REST request to query employees isAdmin={}, companyExternalId={}, filter={}, pageable={}",
             isAdmin, companyExternalId, filter, pageable);
 
@@ -147,6 +153,7 @@ public class EmployeeResource {
         Page<EmployeeDTO> page = result.get();
         log.debug("- size={}, totalElements={}", page.getContent().size(), page.getTotalElements());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees");
+        headers.add("X-Timer", Long.toString(timer));
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
@@ -172,7 +179,7 @@ public class EmployeeResource {
 
     @GetMapping("/companies-of-employee")
     @Timed
-    public ResponseEntity<List<CompanyDTO>> getAllCompaniesOfEmployee() {
+    public ResponseEntity<List<CompanyBasicInfoDTO>> getAllCompaniesOfEmployee() {
 
         boolean isAdmin = authorizationService.isAdmin();
         log.debug("REST request to query companies of employee isAdmin={}", isAdmin);
@@ -180,7 +187,7 @@ public class EmployeeResource {
             () -> new AccessDeniedException("Current user login not found!"));
         log.debug("- by user {}", userLogin);
 
-        List<CompanyDTO> result = employeeService.getAllCompaniesOfEmployee(userLogin);
+        List<CompanyBasicInfoDTO> result = companyService.findAllOfUserWithBasicInfosOnly();
         return ResponseEntity.ok().body(result);
     }
 

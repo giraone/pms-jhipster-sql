@@ -4,10 +4,9 @@
             "menu": "Suche nach Mitarbeitern",
             "subtitle": "Suche nach Mitarbeitern",
             "title": {
-                "main": "Mitarbeiter",
-                "admin": "von allen Unternehmen",
-                "user": "des Unternehmens"
+                "main": "Mitarbeiter des Unternehmens:"
             },
+            "all_companies": "Mitarbeiter von allen Unternehmen",
             "count": "Anzahl = ",
             "filter": {
                 "placeholder": "Filterung über Nachname oder Geburtsdatum"

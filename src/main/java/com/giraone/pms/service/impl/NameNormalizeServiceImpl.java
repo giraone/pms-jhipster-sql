@@ -42,8 +42,8 @@ public class NameNormalizeServiceImpl implements NameNormalizeService {
         String[] parts = input.split("[^\\p{L}\\p{Nd}]+");
         for (String part : parts) {
             log.debug(" - split " + part);
-            if (part.length() > 1) { // single characters are not accepted
-                if (part.charAt(0) < '0' || part.charAt(0) > '9') { // skip words starting with a leading digit
+            if (part.length() > 0) { // empty strings are not accepted
+                if (part.charAt(0) < '0' || part.charAt(0) > '9') { // skip words starting with a leading digit (dates)
                     if (part.length() > minLength) {
                         //log.debug("add " + part);
                         ret.add(part);

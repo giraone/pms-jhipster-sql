@@ -4,10 +4,9 @@
             "menu": "Query for employees",
             "subtitle": "... bei der Testanwendung",
             "title": {
-                "main": "Employees",
-                "admin": "of all companies",
-                "user": "of company"
+                "main": "Employees of company:"
             },
+            "all_companies": "Employees of all companies",
             "count": "Count = ",
             "filter": {
                 "placeholder": "Filter by surname or date of birth"

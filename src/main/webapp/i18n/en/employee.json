@@ -18,6 +18,7 @@
             "surname": "Surname",
             "givenName": "Given Name",
             "dateOfBirth": "Date Of Birth",
+            "dateOfBirthShort": "DoB",
             "gender": "Gender",
             "postalCode": "Postal Code",
             "city": "City",

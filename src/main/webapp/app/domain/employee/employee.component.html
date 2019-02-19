@@ -1,20 +1,17 @@
 <div>
     <h4 id="page-heading">
-        <div class="divLeft" jhiTranslate="pmssqlApp.query.title.main">Employees {{languageKey}}</div>
-        <div class="divLeft" *ngIf="isAdmin()" jhiTranslate="pmssqlApp.query.title.admin"></div>
-        <div class="divLeft" *ngIf="!isAdmin()">
-            <div class="divLeft" jhiTranslate="pmssqlApp.query.title.user">of company:</div>
-            <div class="divLeft" >
-                <select class="form-control" style="height: calc(1.5rem + 2px); padding-top: 1px; padding-bottom: 1px;" id="userCompany" name="userCompany" [(ngModel)]="currentCompany">
-                    <option *ngFor="let company of currentCompanies" [ngValue]="company">{{company.externalId}}</option>
-                </select>
-            </div>
+        <div class="divLeft" jhiTranslate="pmssqlApp.query.title.main">Employees of company:</div>
+        <div class="divLeft" >
+            <select class="form-control" style="height: calc(1.5rem + 2px); padding-top: 1px; padding-bottom: 1px;"
+                id="userCompany" name="userCompany" [(ngModel)]="currentCompany" (ngModelChange)="filterChanged()">
+                <option *ngFor="let company of currentCompanies" [ngValue]="company">{{company.name + '(' + company.externalId + ')'}}</option>
+            </select>
         </div>
         <div class="divLeftWide" jhiTranslate="pmssqlApp.query.count">Count = </div>
         <div class="divLeft">{{totalItems}}</div>   
     </h4>
     <div class="divNewLine">
-        <input type="text" [(ngModel)]="input" (ngModelChange)="filterChanged($event)"
+        <input type="text" [(ngModel)]="input" (ngModelChange)="filterChanged()"
             placeholder="{{'pmssqlApp.query.filter.placeholder' | translate}}" size="60" />
     </div>
     <jhi-alert></jhi-alert>
@@ -26,7 +23,7 @@
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="surname"><span jhiTranslate="pmssqlApp.employee.surname">Surname</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="givenName"><span jhiTranslate="pmssqlApp.employee.givenName">Given Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="dateOfBirth"><span jhiTranslate="pmssqlApp.employee.dateOfBirth">Date Of Birth</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="dateOfBirth"><span jhiTranslate="pmssqlApp.employee.dateOfBirthShort">DoB</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="postalCode"><span jhiTranslate="pmssqlApp.employee.postalCode">Postal Code</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="city"><span jhiTranslate="pmssqlApp.employee.city">City</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="streetAddress"><span jhiTranslate="pmssqlApp.employee.streetAddress">Street Address</span> <fa-icon [icon]="'sort'"></fa-icon></th>
