@@ -6,6 +6,7 @@ import com.giraone.pms.domain.Employee;
 import com.giraone.pms.domain.enumeration.GenderType;
 import com.giraone.pms.repository.EmployeeRepository;
 import com.giraone.pms.service.AuthorizationService;
+import com.giraone.pms.service.CompanyService;
 import com.giraone.pms.service.EmployeeService;
 import com.giraone.pms.service.dto.EmployeeDTO;
 import com.giraone.pms.service.mapper.EmployeeMapper;
@@ -77,6 +78,9 @@ public class EmployeeResourceIntTest {
     private EmployeeService employeeService;
 
     @Autowired
+    private CompanyService companyService;
+
+    @Autowired
     private AuthorizationService authorizationService;
 
     @Autowired
@@ -101,7 +105,7 @@ public class EmployeeResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final EmployeeResource employeeResource = new EmployeeResource(employeeService, authorizationService);
+        final EmployeeResource employeeResource = new EmployeeResource(employeeService, companyService, authorizationService);
         this.restEmployeeMockMvc = MockMvcBuilders.standaloneSetup(employeeResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

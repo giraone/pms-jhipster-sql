@@ -91,6 +91,7 @@ public class EmployeeRepositoryTest {
         assertThat(result.size()).isEqualTo(6);
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
+            assertThat(employeeName.getCompany().getId()).isEqualTo(employee.getCompany().getId());
             assertThat(employeeName.getId().getNameKey()).isIn(
                 EmployeeNameFilterKey.LS.name(), EmployeeNameFilterKey.NS.name(), EmployeeNameFilterKey.PS.name(),
                 EmployeeNameFilterKey.LG.name(), EmployeeNameFilterKey.NG.name(), EmployeeNameFilterKey.PG.name());
@@ -115,6 +116,7 @@ public class EmployeeRepositoryTest {
         assertThat(result.size()).isEqualTo(8);
         result.forEach(employeeName -> {
             assertThat(employeeName.getId().getOwner().getId()).isEqualTo(employee.getId());
+            assertThat(employeeName.getCompany().getId()).isEqualTo(employee.getCompany().getId());
             assertThat(employeeName.getId().getNameKey()).isIn(
                 EmployeeNameFilterKey.LS.name(), EmployeeNameFilterKey.NS.name(), EmployeeNameFilterKey.PS.name(),
                 EmployeeNameFilterKey.LG.name(), EmployeeNameFilterKey.NG.name(), EmployeeNameFilterKey.PG.name());
@@ -164,8 +166,8 @@ public class EmployeeRepositoryTest {
         employeeRepository.save(employee);
 
         // act
-        Page<Employee> page = employeeRepository.findAllBySurname(
-            nameNormalizeService.normalize(TEST_SURNAME), PageRequest.of(0, 10));
+        Page<Employee> page = employeeRepository.findAllByCompanyAndSurname(
+            employee.getCompany(), nameNormalizeService.normalize(TEST_SURNAME), PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);
@@ -179,9 +181,9 @@ public class EmployeeRepositoryTest {
         employeeRepository.save(employee);
 
         // act
-        Page<Employee> page = employeeRepository.findAllBySurnameAndGivenName(
-            nameNormalizeService.normalize(TEST_SURNAME), nameNormalizeService.normalize(TEST_GIVEN_NAME),
-            PageRequest.of(0, 10));
+        Page<Employee> page = employeeRepository.findAllByCompanyAndSurnameAndGivenName(
+            employee.getCompany(), nameNormalizeService.normalize(TEST_SURNAME),
+            nameNormalizeService.normalize(TEST_GIVEN_NAME), PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);
@@ -195,8 +197,8 @@ public class EmployeeRepositoryTest {
         employeeRepository.save(employee);
 
         // act
-        Page<Employee> page = employeeRepository.findAllBySurnameAndDateOfBirth(
-            nameNormalizeService.normalize(TEST_SURNAME), TEST_DATE_OF_BIRTH,
+        Page<Employee> page = employeeRepository.findAllByCompanyAndSurnameAndDateOfBirth(
+            employee.getCompany(), nameNormalizeService.normalize(TEST_SURNAME), TEST_DATE_OF_BIRTH,
             PageRequest.of(0, 10));
 
         // assert
@@ -211,8 +213,9 @@ public class EmployeeRepositoryTest {
         employeeRepository.save(employee);
 
         // act
-        Page<Employee> page = employeeRepository.findAllBySurnameAndGivenNameAndDateOfBirth(
-            nameNormalizeService.normalize(TEST_SURNAME), nameNormalizeService.normalize(TEST_GIVEN_NAME), TEST_DATE_OF_BIRTH,
+        Page<Employee> page = employeeRepository.findAllByCompanyAndSurnameAndGivenNameAndDateOfBirth(
+            employee.getCompany(), nameNormalizeService.normalize(TEST_SURNAME),
+            nameNormalizeService.normalize(TEST_GIVEN_NAME), TEST_DATE_OF_BIRTH,
             PageRequest.of(0, 10));
 
         // assert
@@ -267,15 +270,15 @@ public class EmployeeRepositoryTest {
 
 
     @Test
-    public void findAllByKeyPairLike_withExistingEmployee_returnsEmployee() {
+    public void findAllByKeyPaemployeeirLike_withExistingEmployee_returnsEmployee() {
 
         // arrange
         Employee employee = getEmployeeSample();
         employeeRepository.save(employee);
 
         // act
-        Page<Employee> page = employeeRepository.findAllByKeyPairLike(
-            EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
+        Page<Employee> page = employeeRepository.findAllByCompanyAndKeyPairLike(
+            employee.getCompany(), EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);
@@ -289,8 +292,9 @@ public class EmployeeRepositoryTest {
         employeeRepository.save(employee);
 
         // act
-        Page<Employee> page = employeeRepository.findAllByDateOfBirthAndKeyPairLike(
-            TEST_DATE_OF_BIRTH, EmployeeNameFilterKey.LS.name(), "schmi%", PageRequest.of(0, 10));
+        Page<Employee> page = employeeRepository.findAllByCompanyAndDateOfBirthAndKeyPairLike(
+            employee.getCompany(), TEST_DATE_OF_BIRTH, EmployeeNameFilterKey.LS.name(),
+            "schmi%", PageRequest.of(0, 10));
 
         // assert
         assertThat(page.getTotalElements()).isEqualTo(1);

@@ -9,6 +9,7 @@ CREATE INDEX emname_name_index
     TABLESPACE pg_default;
 
 CREATE INDEX employee_dob_index
-    ON public.employee USING btree (date_of_birth)
+    ON public.employee USING btree
+    (date_of_birth)
     TABLESPACE pg_default;
 

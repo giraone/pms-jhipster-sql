@@ -32,10 +32,12 @@
             <column name="owner_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
+            <column name="company_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
             <column name="name_key" type="varchar(2)">
                 <constraints nullable="false"/>
             </column>
-
             <column name="name_value" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -49,14 +51,6 @@
                                  baseTableName="employee_name"
                                  constraintName="fk_employee_name_to_owner"
                                  onDelete="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="employee"/>
-    </changeSet>
-
-    <changeSet id="20190123183134-4" author="hs">
-        <addForeignKeyConstraint baseColumnNames="owner_id"
-                                 baseTableName="employee_name"
-                                 constraintName="fk_employee_name_owner_id"
                                  referencedColumnNames="id"
                                  referencedTableName="employee"/>
     </changeSet>

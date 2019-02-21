@@ -153,6 +153,8 @@ public class EmployeeResource {
         Page<EmployeeDTO> page = result.get();
         log.debug("- size={}, totalElements={}", page.getContent().size(), page.getTotalElements());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees");
+        // The timer is used to prevent, that earlier requests, which took longer are processed after
+        // a faster later request was already processed by the client
         headers.add("X-Timer", Long.toString(timer));
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

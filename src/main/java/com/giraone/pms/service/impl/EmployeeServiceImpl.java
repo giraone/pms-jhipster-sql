@@ -148,7 +148,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     /**
      * Query the employees of a company.
      *
-     * @param companyExternalId restrict the query to employees of this company, if null no restrictions are applied
+     * @param companyExternalId restrict the query to employees of this company, if null an empty page is returned
      * @param personFilter      restrict the query to employees matching this filter
      * @param pageable          the pagination information
      * @return the list of entities or an empty optional, if the company was invalid
@@ -164,16 +164,17 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (companyExternalId != null) {
             company = companyRepository.findOneByExternalId(companyExternalId);
             if (!company.isPresent()) {
-                log.warn("Company companyExternalId={} NOT FOUND!", companyExternalId);
+                log.warn("findAllByFilter: Company companyExternalId={} NOT FOUND!", companyExternalId);
                 return Optional.empty();
             }
         } else {
-            company = Optional.empty();
+            log.warn("findAllByFilter: Company companyExternalId was null!");
+            return Optional.empty();
         }
 
-        Page<Employee> page = getEmployees(personFilter, pageable, company.orElse(null));
+        final Page<Employee> page = getEmployees(personFilter, pageable, company.get().getId());
 
-        return Optional.of(page.map(employeeMapper::toDto));
+        return Optional.of(page.map(e -> { e.setCompany(company.get()); return e; }).map(employeeMapper::toDto));
     }
 
 
@@ -202,26 +203,28 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
     */
 
-    private Page<Employee> getEmployees(PersonFilter personFilter, Pageable pageable, Company company) {
+    private Page<Employee> getEmployees(PersonFilter personFilter, Pageable pageable, long companyId) {
 
-        log.debug("getEmployees company={}, personFilter={}", company == null ? "" : company.getExternalId(), personFilter);
+        log.debug("getEmployees companyId={}, personFilter={}", companyId, personFilter);
 
         final CriteriaBuilder cb = em.getCriteriaBuilder();
 
         final CriteriaQuery<Employee> fetchQuery = cb.createQuery(Employee.class);
         final Root<Employee> employeeFetchTable = fetchQuery.from(Employee.class);
-        employeeFetchTable.fetch(Employee_.company); // fetch also the company information without need for additional queries
+        //employeeFetchTable.fetch(Employee_.company); // fetch also the company information without need for additional queries
 
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<Employee> employeeCountTable = countQuery.from(Employee.class);
 
+        final Root<EmployeeName> employeeNameTableFetch = fetchQuery.from(EmployeeName.class);
+        final Root<EmployeeName> employeeNameTableCount = countQuery.from(EmployeeName.class);
+
         final List<Predicate> fetchPredicates = new ArrayList<>();
         final List<Predicate> countPredicates = new ArrayList<>();
 
-        if (company != null) {
-            fetchPredicates.add(cb.equal(employeeFetchTable.get(Employee_.company), company));
-            countPredicates.add(cb.equal(employeeCountTable.get(Employee_.company), company));
-        }
+        fetchPredicates.add(cb.equal(employeeNameTableFetch.get(EmployeeName_.company).get(Company_.id), companyId));
+        countPredicates.add(cb.equal(employeeNameTableCount.get(EmployeeName_.company).get(Company_.id), companyId));
+
         if (personFilter != null) {
             if (personFilter.getDateOfBirth() != null) {
                 fetchPredicates.add(cb.equal(employeeFetchTable.get(Employee_.dateOfBirth), personFilter.getDateOfBirth()));
@@ -231,22 +234,25 @@ public class EmployeeServiceImpl implements EmployeeService {
             if (personFilter.hasNames()) {
                 //final AtomicInteger en = new AtomicInteger();
                 personFilter.getNames().forEach(nameFilter -> {
-                    final Root<EmployeeName> employeeNameTableFetch = fetchQuery.from(EmployeeName.class);
-                    final Root<EmployeeName> employeeNameTableCount = countQuery.from(EmployeeName.class);
+
                     //employeeNameTable.alias("en" + en.getAndIncrement());
                     fetchPredicates.add(
                         cb.and(
                             cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeFetchTable.get(Employee_.id)),
                             cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
-                            cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
-                        // TODO: equal instead of like when LS, LG
+                            nameFilter.getKey().startsWith("L")
+                                ? cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue())
+                                : cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue() + "%")
+                        )
                     );
                     countPredicates.add(
                         cb.and(
                             cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeCountTable.get(Employee_.id)),
                             cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
-                            cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue()))
-                        // TODO: equal instead of like when LS, LG
+                            nameFilter.getKey().startsWith("L")
+                                ? cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue())
+                                : cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue() + "%")
+                        )
                     );
                 });
             }
