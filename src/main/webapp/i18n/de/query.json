@@ -7,10 +7,12 @@
                 "main": "Mitarbeiter des Unternehmens:"
             },
             "all_companies": "Mitarbeiter von allen Unternehmen",
-            "count": "Anzahl = ",
+            "count": "Anzahl = {{count}}",
             "filter": {
                 "placeholder": "Filterung über Nachname oder Geburtsdatum"
-            }
+            },
+            "search": "Suchen",
+            "useTypeAhead": "Vorschlagsuche"
         }
     }
 }

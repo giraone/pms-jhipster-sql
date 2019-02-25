@@ -34,6 +34,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     totalItems: number;
     languageKey: string;
     lastTimer: number;
+    useTypeAhead: boolean;
 
     constructor(
         protected employeeService: EmployeeService,
@@ -61,6 +62,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
             this.languageKey = languageKey;
         });
         this.lastTimer = 0;
+        this.useTypeAhead = false;
 
         this.inputSubject
             .pipe(
@@ -68,7 +70,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
                 distinctUntilChanged()
             )
             .subscribe(value => {
-                this.reset();
+                this.search();
             });
     }
 
@@ -105,7 +107,12 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     reset() {
         this.page = 0;
         this.employees = [];
+    }
+
+    search() {
+        this.reset();
         this.load();
+        return false;
     }
 
     loadPage(page) {

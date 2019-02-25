@@ -1,6 +1,7 @@
 package com.giraone.pms.service.impl;
 
 import com.giraone.pms.domain.*;
+import com.giraone.pms.domain.filter.EmployeeNameFilter;
 import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.repository.CompanyRepository;
 import com.giraone.pms.repository.EmployeeRepository;
@@ -119,6 +120,26 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
+     * Get all the employees. This method can be called by users with ADMIN role only.
+     *
+     * @param pageable the pagination information
+     * @return the list of entities
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<EmployeeDTO> findAll(Pageable pageable) {
+
+        final boolean isAdmin = authorizationService.isAdmin();
+        log.debug("Request to get all employees isAdmin={}", isAdmin);
+        if (isAdmin) {
+            Page<Employee> page = employeeRepository.findAll(pageable);
+            return page.map(employeeMapper::toDto);
+        } else {
+           throw new AccessDeniedException("Method findAll needs ADMIN role!");
+        }
+    }
+
+    /**
      * Delete the employee by id.
      *
      * @param id the id of the entity
@@ -174,7 +195,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         final Page<Employee> page = getEmployees(personFilter, pageable, company.get().getId());
 
-        return Optional.of(page.map(e -> { e.setCompany(company.get()); return e; }).map(employeeMapper::toDto));
+        return Optional.of(page.map(e -> {
+            e.setCompany(company.get());
+            return e;
+        }).map(employeeMapper::toDto));
     }
 
 
@@ -216,14 +240,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<Employee> employeeCountTable = countQuery.from(Employee.class);
 
-        final Root<EmployeeName> employeeNameTableFetch = fetchQuery.from(EmployeeName.class);
-        final Root<EmployeeName> employeeNameTableCount = countQuery.from(EmployeeName.class);
-
         final List<Predicate> fetchPredicates = new ArrayList<>();
         final List<Predicate> countPredicates = new ArrayList<>();
-
-        fetchPredicates.add(cb.equal(employeeNameTableFetch.get(EmployeeName_.company).get(Company_.id), companyId));
-        countPredicates.add(cb.equal(employeeNameTableCount.get(EmployeeName_.company).get(Company_.id), companyId));
 
         if (personFilter != null) {
             if (personFilter.getDateOfBirth() != null) {
@@ -232,29 +250,41 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
 
             if (personFilter.hasNames()) {
-                //final AtomicInteger en = new AtomicInteger();
                 personFilter.getNames().forEach(nameFilter -> {
-
-                    //employeeNameTable.alias("en" + en.getAndIncrement());
+                    final Root<EmployeeName> employeeNameTableFetch = fetchQuery.from(EmployeeName.class);
+                    final Root<EmployeeName> employeeNameTableCount = countQuery.from(EmployeeName.class);
+                    fetchPredicates.add(cb.equal(employeeNameTableFetch.get(EmployeeName_.company).get(Company_.id), companyId));
+                    countPredicates.add(cb.equal(employeeNameTableCount.get(EmployeeName_.company).get(Company_.id), companyId));
                     fetchPredicates.add(
                         cb.and(
                             cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeFetchTable.get(Employee_.id)),
-                            cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
-                            nameFilter.getKey().startsWith("L")
-                                ? cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue())
-                                : cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue() + "%")
+                            nameFilter.getKeyCompareOperation() == EmployeeNameFilter.CompareOperation.LIKE
+                                ? cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()+ "%")
+                                : cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
+                            nameFilter.getValueCompareOperation() == EmployeeNameFilter.CompareOperation.LIKE
+                                ? cb.like(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue() + "%")
+                                : cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue())
                         )
                     );
                     countPredicates.add(
                         cb.and(
                             cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeCountTable.get(Employee_.id)),
-                            cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
-                            nameFilter.getKey().startsWith("L")
-                                ? cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue())
-                                : cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue() + "%")
+                            nameFilter.getKeyCompareOperation() == EmployeeNameFilter.CompareOperation.LIKE
+                                ? cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey() + "%")
+                                : cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameKey), nameFilter.getKey()),
+                            nameFilter.getValueCompareOperation() == EmployeeNameFilter.CompareOperation.LIKE
+                                ? cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue() + "%")
+                                : cb.like(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.nameValue), nameFilter.getValue())
                         )
                     );
                 });
+            } else {
+                final Root<EmployeeName> employeeNameTableFetch = fetchQuery.from(EmployeeName.class);
+                final Root<EmployeeName> employeeNameTableCount = countQuery.from(EmployeeName.class);
+                fetchPredicates.add(cb.equal(employeeNameTableFetch.get(EmployeeName_.company).get(Company_.id), companyId));
+                countPredicates.add(cb.equal(employeeNameTableCount.get(EmployeeName_.company).get(Company_.id), companyId));
+                fetchPredicates.add(cb.equal(employeeNameTableFetch.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeFetchTable.get(Employee_.id)));
+                countPredicates.add(cb.equal(employeeNameTableCount.get(EmployeeName_.id).get(EmployeeNameCompoundKey_.owner), employeeCountTable.get(Employee_.id)));
             }
         }
 

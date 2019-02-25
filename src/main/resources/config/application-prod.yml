@@ -39,7 +39,7 @@ spring:
     jpa:
         database-platform: io.github.jhipster.domain.util.FixedPostgreSQL82Dialect
         database: POSTGRESQL
-        show-sql: false
+        show-sql: true
         properties:
             hibernate.id.new_generator_mappings: true
             # Must be false within cloud foundry environment

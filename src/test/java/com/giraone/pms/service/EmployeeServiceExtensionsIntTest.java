@@ -5,10 +5,8 @@ import com.giraone.pms.domain.enumeration.GenderType;
 import com.giraone.pms.domain.filter.PersonFilter;
 import com.giraone.pms.service.dto.CompanyDTO;
 import com.giraone.pms.service.dto.EmployeeDTO;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -17,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -27,8 +24,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 /**
  * Test class for the {@link EmployeeService} which tests the extensions, that are not
@@ -92,19 +87,6 @@ public class EmployeeServiceExtensionsIntTest {
     }
 
     @Test
-    public void findAllByFilter_checkThatNullFilterWorks() {
-
-        // arrange
-
-        // act
-        Pageable pageable = PageRequest.of(0, 10);
-        Optional<Page<EmployeeDTO>> page = employeeService.findAllByFilter(null, null, pageable);
-
-        // assert
-        assertTrue(page.isPresent());
-    }
-
-    @Test
     public void findAllByFilter_checkThatCompanyFilterWorks() {
 
         // arrange
@@ -143,21 +125,9 @@ public class EmployeeServiceExtensionsIntTest {
     }
 
     @Test
-    public void whenSavingEntity_checkThatItIsFoundByDateOfBirth_WITHOUT_COMPANY() {
-        storeThenQueryThenCheckDate(false, new LocalDate[]{ LocalDate.of(1977, Month.DECEMBER, 1)},
-            "01.12.1977", LocalDate.of(1977, Month.DECEMBER, 1));
-    }
-
-    @Test
     public void whenSavingEntity_checkThatItIsFoundByDateOfBirth_WITH_COMPANY() {
         storeThenQueryThenCheckDate(true, new LocalDate[]{ LocalDate.of(1977, Month.DECEMBER, 1)},
             "01.12.1977", LocalDate.of(1977, Month.DECEMBER, 1));
-    }
-
-    @Test
-    public void whenSavingEntity_checkThatItIsFoundBySurname_WITHOUT_COMPANY_REDUCED() {
-        storeThenQueryThenCheckMatch(false, new String[]{"Schmidt", "Schmitt", "Schmand", "Schand"},
-            "Schm", new String[]{"Schmidt", "Schmitt", "Schmand"});
     }
 
     @Test
@@ -167,33 +137,15 @@ public class EmployeeServiceExtensionsIntTest {
     }
 
     @Test
-    public void whenSavingEntity_checkThatItIsFoundBySurname_WITHOUT_COMPANY_PHONETIC() {
-        storeThenQueryThenCheckMatch(false, new String[]{"Scholten", "Schulten", "Gulten"},
-            "Scholten", true, new String[]{"Scholten", "Schulten"});
-    }
-
-    @Test
     public void whenSavingEntity_checkThatItIsFoundBySurname_WITH_COMPANY_PHONETIC() {
         storeThenQueryThenCheckMatch(true, new String[]{"Scholten", "Schulten", "Gulten"},
             "Scholten", true, new String[]{"Scholten", "Schulten"});
     }
 
     @Test
-    public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITHOUT_COMPANY() {
-        storeThenQueryThenCheckMatch(false, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
-            "Huber", new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber"});
-    }
-
-    @Test
     public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITH_COMPANY() {
         storeThenQueryThenCheckMatch(true, new String[]{"Schmidt-Huber", "Huber-Schmidt", "Huber", "Schmidt"},
             "Schmidt", new String[]{"Schmidt-Huber", "Huber-Schmidt", "Schmidt"});
-    }
-
-    @Test
-    public void whenSavingEntityWithCombinedName_checkThatItIsFound_WITHOUT_COMPANY_2() {
-        storeThenQueryThenCheckMatch(false, new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier", "Schmidt"},
-            "Meier", new String[]{"Schmidt-Mayer", "Maier-Schmidt", "Maier"});
     }
 
     @Test

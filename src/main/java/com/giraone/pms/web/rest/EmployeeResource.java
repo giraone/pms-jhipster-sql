@@ -119,7 +119,7 @@ public class EmployeeResource {
         log.debug("REST request to query employees isAdmin={}, companyExternalId={}, filter={}, pageable={}",
             isAdmin, companyExternalId, filter, pageable);
 
-        Optional<Page<EmployeeDTO>> result;
+
         if (!isAdmin) {
             Optional<String> userLogin = authorizationService.getCurrentUserLogin();
             if (!userLogin.isPresent()) {
@@ -142,15 +142,19 @@ public class EmployeeResource {
             }
         }
 
-        PersonFilter personFilter = new PersonFilter(filter);
-
-        result = employeeService.findAllByFilter(companyExternalId, personFilter, pageable);
-        if (!result.isPresent()) {
-            log.debug("- companyExternalId {} is invalid!", companyExternalId);
-            return ResponseEntity.notFound().build();
+        Page<EmployeeDTO> page;
+        if (isAdmin && companyExternalId == null) {
+            page = employeeService.findAll(pageable);
+        } else {
+            final PersonFilter personFilter = new PersonFilter(filter);
+            Optional<Page<EmployeeDTO>> result = employeeService.findAllByFilter(companyExternalId, personFilter, pageable);
+            if (!result.isPresent()) {
+                log.debug("- companyExternalId {} is invalid!", companyExternalId);
+                return ResponseEntity.notFound().build();
+            }
+            page = result.get();
         }
 
-        Page<EmployeeDTO> page = result.get();
         log.debug("- size={}, totalElements={}", page.getContent().size(), page.getTotalElements());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/employees");
         // The timer is used to prevent, that earlier requests, which took longer are processed after

@@ -31,6 +31,14 @@ public interface EmployeeService {
     Optional<EmployeeDTO> findOne(long id);
 
     /**
+     * Get all the employees. This method can be called by users with ADMIN role only.
+     *
+     * @param pageable the pagination information
+     * @return the list of entities
+     */
+    Page<EmployeeDTO> findAll(Pageable pageable);
+
+    /**
      * Delete the "id" employee.
      *
      * @param id the id of the entity

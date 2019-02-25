@@ -1,7 +1,6 @@
 package com.giraone.pms.domain.filter;
 
 import com.giraone.pms.domain.enumeration.EmployeeNameFilterKey;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -45,21 +44,34 @@ public class PersonFilterTest {
     @Test
     public void buildFromInput_singleExactNameOnly() {
 
-        expectSingleExactMatchingName("\"Li\"", "li");
-        expectSingleExactMatchingName("\"Müller\"", "müller");
-        expectSingleExactMatchingName(" \"Müller\" ", "müller");
-        expectSingleExactMatchingName(" \"Müller\" 1", "müller");
-        expectSingleExactMatchingName(" \"Müller\" X1 1X ", "müller");
+        expectSingleExactMatchingNameWithoutComma("\"Li\"", "li");
+        expectSingleExactMatchingNameWithoutComma("\"Müller\"", "müller");
+        expectSingleExactMatchingNameWithoutComma(" \"Müller\" ", "müller");
     }
 
     @Test
     public void buildFromInput_singleWeakMatchingNameOnly() {
 
-        expectSingleWeakMatchingName("Li", "li%");
-        expectSingleWeakMatchingName("Müller", "mueler%");
-        expectSingleWeakMatchingName(" Müller ", "mueler%");
-        expectSingleWeakMatchingName(" Müller 1", "mueler%");
-        expectSingleWeakMatchingName(" Müller X1 1X ", "mueler%");
+        expectSingleWeakMatchingNameWithoutComma("Li", "li");
+        expectSingleWeakMatchingNameWithoutComma("Müller", "mueler");
+        expectSingleWeakMatchingNameWithoutComma(" Müller ", "mueler");
+    }
+
+    @Test
+    public void buildFromInput_twoExactNamesWithComma() {
+
+        expectTwoExactMatchingNameWithComma("\"Li\", \"Wu\"", "li", "wu");
+        expectTwoExactMatchingNameWithComma("\"Müller\", \"René\"", "müller", "rené");
+    }
+
+    @Test
+    public void buildFromInput_twoWeakNamesWithComma() {
+
+        expectTwoWeakMatchingNameWithComma("Li,Wu", "li", "wu");
+        expectTwoWeakMatchingNameWithComma("Li, Wu", "li", "wu");
+        expectTwoWeakMatchingNameWithComma("Li,  Wu", "li", "wu");
+        expectTwoWeakMatchingNameWithComma("  Li,  Wu  ", "li", "wu");
+        expectTwoWeakMatchingNameWithComma("Müller, René", "mueler", "rene");
     }
 
     @Test
@@ -81,40 +93,102 @@ public class PersonFilterTest {
     @Test
     public void buildFromInput_dateAndSingleName() {
 
-        expectDateAndSingleName("Müller 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndSingleName("Müller, 31.12.1975", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndSingleName("Müller 31.12.75", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndSingleName("Müller, 31.12.75", "mueler%", LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndSingleName("Müller 31.12.05", "mueler%", LocalDate.of(2005, Month.DECEMBER, 31));
-        expectDateAndSingleName("Müller, 31.12.05", "mueler%", LocalDate.of(2005, Month.DECEMBER, 31));
+        expectDateAndSingleNameWithoutComma("Müller 31.12.1975", "mueler", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleNameWithoutComma("Müller 31.12.75", "mueler", LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndSingleNameWithoutComma("Müller 31.12.05", "mueler", LocalDate.of(2005, Month.DECEMBER, 31));
     }
 
-    @Ignore
+    @Test
+    public void buildFromInput_SurnamesAndGivenNamesWithComma() {
+
+        expectSuramesAndGivenNamesWithComma("Müller-Wagner, René", new String[]{"mueler", "wagner"}, new String[]{"rene"});
+        expectSuramesAndGivenNamesWithComma("Wagner-Müller, René", new String[]{"mueler", "wagner"}, new String[]{"rene"});
+        expectSuramesAndGivenNamesWithComma("Müller-Wagner, Karl-Heinz", new String[]{"mueler", "wagner"}, new String[]{"karl", "heinz"});
+        expectSuramesAndGivenNamesWithComma("Wagner-Müller, Heinz-Karl", new String[]{"mueler", "wagner"}, new String[]{"karl", "heinz"});
+    }
+
     @Test
     public void buildFromInput_dateAndTwoSurnames() {
 
-        expectDateAndTwoNames("Müller-Wagner 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndTwoNames("Wagner-Müller 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
-        expectDateAndTwoNames("Wagner-Müller, 31.12.1975", new String[]{"mueler%", "wagner%"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoSuramesWithoutComma("Müller-Wagner 31.12.1975", new String[]{"mueler", "wagner"}, LocalDate.of(1975, Month.DECEMBER, 31));
+        expectDateAndTwoSuramesWithoutComma("Wagner-Müller 31.12.1975", new String[]{"mueler", "wagner"}, LocalDate.of(1975, Month.DECEMBER, 31));
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private void expectSingleExactMatchingName(String input, String expected) {
+    private void expectSingleExactMatchingNameWithoutComma(String input, String expected) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.LS.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.LIKE, EmployeeNameFilter.CompareOperation.EQUALS,
+            "L", expected);
         expectSingleMatchingName(input, expectedFilter, false);
     }
 
-    private void expectSingleWeakMatchingName(String input, String expected) {
+    private void expectSingleWeakMatchingNameWithoutComma(String input, String expected) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.NS.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.LIKE, EmployeeNameFilter.CompareOperation.LIKE,
+            "N", expected);
         expectSingleMatchingName(input, expectedFilter, false);
+    }
+
+    private void expectTwoExactMatchingNameWithComma(String input, String expectedSurname, String expectedGivenName) {
+
+        PersonFilter personFilter = new PersonFilter(input, false);
+        assertThat(personFilter.getDateOfBirth()).isNull();
+        assertThat(personFilter.getNames().size()).isEqualTo(2);
+
+        EmployeeNameFilter expectedFilter1 = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.EQUALS,
+            EmployeeNameFilterKey.LS.name(), expectedSurname);
+        EmployeeNameFilter expectedFilter2 = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.EQUALS,
+            EmployeeNameFilterKey.LG.name(), expectedGivenName);
+        assertThat(personFilter.getNames()).contains(expectedFilter1);
+        assertThat(personFilter.getNames()).contains(expectedFilter2);
+    }
+
+    private void expectTwoWeakMatchingNameWithComma(String input, String expectedSurname, String expectedGivenName) {
+
+        PersonFilter personFilter = new PersonFilter(input, false);
+        assertThat(personFilter.getDateOfBirth()).isNull();
+        assertThat(personFilter.getNames().size()).isEqualTo(2);
+
+        EmployeeNameFilter expectedFilter1 = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.LIKE,
+            EmployeeNameFilterKey.NS.name(), expectedSurname);
+        EmployeeNameFilter expectedFilter2 = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.LIKE,
+            EmployeeNameFilterKey.NG.name(), expectedGivenName);
+        assertThat(personFilter.getNames()).contains(expectedFilter1);
+        assertThat(personFilter.getNames()).contains(expectedFilter2);
+    }
+
+    private void expectSuramesAndGivenNamesWithComma(String input, String[] expectedSurnames, String[] expectedGivenNames) {
+
+        PersonFilter personFilter = new PersonFilter(input, false);
+        assertThat(personFilter.getDateOfBirth()).isNull();
+        assertThat(personFilter.getNames().size()).isEqualTo(expectedSurnames.length + expectedGivenNames.length);
+
+        EmployeeNameFilter[] expectedFilters1 = Arrays.asList(expectedSurnames).stream()
+            .map(s -> new EmployeeNameFilter(
+                EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.LIKE,
+                EmployeeNameFilterKey.NS.name(), s))
+            .collect(Collectors.toList()).toArray(new EmployeeNameFilter[0]);
+        EmployeeNameFilter[] expectedFilters2 = Arrays.asList(expectedGivenNames).stream()
+            .map(s -> new EmployeeNameFilter(
+                EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.LIKE,
+                EmployeeNameFilterKey.NG.name(), s))
+            .collect(Collectors.toList()).toArray(new EmployeeNameFilter[0]);
+        assertThat(personFilter.getNames()).contains(expectedFilters1);
+        assertThat(personFilter.getNames()).contains(expectedFilters2);
     }
 
     private void expectSinglePhoneticMatchingName(String input, String expected) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.PS.name(), expected);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.EQUALS, EmployeeNameFilter.CompareOperation.LIKE,
+            EmployeeNameFilterKey.PS.name(), expected);
         expectSingleMatchingName(input, expectedFilter, true);
     }
 
@@ -133,13 +207,15 @@ public class PersonFilterTest {
         assertThat(personFilter.getNames().size()).isEqualTo(0);
     }
 
-    private void expectDateAndSingleName(String input, String expected, LocalDate expectedDate) {
+    private void expectDateAndSingleNameWithoutComma(String input, String expected, LocalDate expectedDate) {
 
-        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(EmployeeNameFilterKey.NS.name(), expected);
-        expectDateAndSingleName(input, expectedFilter, expectedDate);
+        EmployeeNameFilter expectedFilter = new EmployeeNameFilter(
+            EmployeeNameFilter.CompareOperation.LIKE, EmployeeNameFilter.CompareOperation.LIKE,
+            "N", expected);
+        expectDateAndSingleNameWithoutComma(input, expectedFilter, expectedDate);
     }
 
-    private void expectDateAndSingleName(String input, EmployeeNameFilter expected, LocalDate expectedDate) {
+    private void expectDateAndSingleNameWithoutComma(String input, EmployeeNameFilter expected, LocalDate expectedDate) {
 
         PersonFilter personFilter = new PersonFilter(input);
         assertThat(personFilter.getDateOfBirth()).isEqualTo(expectedDate);
@@ -147,15 +223,17 @@ public class PersonFilterTest {
         assertThat(personFilter.getNames()).contains(expected);
     }
 
-    private void expectDateAndTwoNames(String input, String[] expectedNames, LocalDate expectedDate) {
+    private void expectDateAndTwoSuramesWithoutComma(String input, String[] expectedNames, LocalDate expectedDate) {
 
         EmployeeNameFilter[] expectedFilters = Arrays.asList(expectedNames).stream()
-            .map(s -> new EmployeeNameFilter(EmployeeNameFilterKey.NS.name(), s))
+            .map(s -> new EmployeeNameFilter(
+                EmployeeNameFilter.CompareOperation.LIKE, EmployeeNameFilter.CompareOperation.LIKE,
+                "N", s))
             .collect(Collectors.toList()).toArray(new EmployeeNameFilter[0]);
-        expectDateAndTwoNames(input, expectedFilters, expectedDate);
+        expectDateAndTwoSuramesWithoutComma(input, expectedFilters, expectedDate);
     }
 
-    private void expectDateAndTwoNames(String input, EmployeeNameFilter[] expectedNames, LocalDate expectedDate) {
+    private void expectDateAndTwoSuramesWithoutComma(String input, EmployeeNameFilter[] expectedNames, LocalDate expectedDate) {
 
         PersonFilter personFilter = new PersonFilter(input);
         assertThat(personFilter.getDateOfBirth()).isEqualTo(expectedDate);

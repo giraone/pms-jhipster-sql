@@ -10,7 +10,11 @@ CREATE TABLE public.employee_name
     CONSTRAINT fk_employee_name_to_owner FOREIGN KEY (owner_id)
         REFERENCES public.employee (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_employee_name_to_company FOREIGN KEY (company_id)
+        REFERENCES public.company (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 )
 WITH (
     OIDS = FALSE
